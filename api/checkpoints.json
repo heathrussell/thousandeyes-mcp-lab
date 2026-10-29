@@ -1,0 +1,121 @@
+{
+  "rules": {
+    "pointsPerCheckpoint": 100,
+    "freeTries": 3,
+    "wrongAnswerPenalty": 10,
+    "hintCost": 25,
+    "total": 1000
+  },
+  "checkpoints": [
+    {
+      "id": "cp0",
+      "route": "setup",
+      "label": "Setup",
+      "title": "Connected",
+      "points": 100,
+      "question": "Which ThousandEyes permission must your user carry for the MCP server to work at all?",
+      "placeholder": "two words",
+      "answers": ["api access", "the api access permission", "api access permission"],
+      "hint": "The ThousandEyes access card on this page names it, and so does guardrail 1 in the Field guide."
+    },
+    {
+      "id": "cp1",
+      "route": "lab-1",
+      "label": "Lab 1",
+      "title": "Map your digital landscape",
+      "points": 100,
+      "question": "How many SaaS platforms does the discovery API return a true or false flag for?",
+      "placeholder": "a number",
+      "answers": ["5", "five"],
+      "hint": "Count the keys under saas in the JSON you fetched in Step A."
+    },
+    {
+      "id": "cp2",
+      "route": "lab-2",
+      "label": "Lab 2",
+      "title": "Map the estate",
+      "points": 100,
+      "question": "Which field in a list_tests response tells your agent there is another page to fetch?",
+      "placeholder": "field name",
+      "answers": ["hasMore", "has more", "has_more"],
+      "hint": "It sits beside total and nextCursor. The builder note at the end of Lab 2 names it."
+    },
+    {
+      "id": "cp3",
+      "route": "lab-3",
+      "label": "Lab 3",
+      "title": "Triage an alert",
+      "points": 100,
+      "question": "Which tool returns the hop-by-hop traces, as opposed to the per-agent summary?",
+      "placeholder": "tool name",
+      "answers": ["get_full_path_visualization", "get full path visualization", "get_full_path_visualisation", "full path visualization"],
+      "hint": "Two path tools sit under Tools in play for Lab 3. You want the one the guide says to call only for agents that show loss or latency."
+    },
+    {
+      "id": "cp4",
+      "route": "lab-4",
+      "label": "Lab 4",
+      "title": "Us or the internet?",
+      "points": 100,
+      "question": "Which tool answers \"is it us or the internet?\" without needing any of your own tests?",
+      "placeholder": "tool name",
+      "answers": ["search_outages", "search outages"],
+      "hint": "Internet Insights. One tool, with a catalogue group of its own."
+    },
+    {
+      "id": "cp5",
+      "route": "lab-5",
+      "label": "Lab 5",
+      "title": "Anomalies and an instant test",
+      "points": 100,
+      "question": "An instant test is billed as how many rounds of a scheduled test?",
+      "placeholder": "a number",
+      "answers": ["1", "one", "one round", "1 round", "a single round", "single round"],
+      "hint": "The warning box at the end of Lab 5 says it in one line."
+    },
+    {
+      "id": "cp6",
+      "route": "lab-6",
+      "label": "Lab 6",
+      "title": "Ship the alerting, then clean up",
+      "points": 100,
+      "question": "In the cleanup prompt, what gets deleted first: the dashboard, the alert rule, or the tests?",
+      "placeholder": "one of the three",
+      "answers": ["dashboard", "the dashboard"],
+      "hint": "Read the delete order in the third prompt of Lab 6."
+    },
+    {
+      "id": "cp7",
+      "route": "build-1",
+      "label": "Build 1",
+      "title": "The te-triage skill",
+      "points": 100,
+      "question": "How many ThousandEyes tools does te-triage pre-approve on its allowed-tools line?",
+      "placeholder": "a number",
+      "answers": ["14", "fourteen"],
+      "hint": "Count the entries on the allowed-tools line in the skill frontmatter. Every one of them only reads."
+    },
+    {
+      "id": "cp8",
+      "route": "build-2",
+      "label": "Build 2",
+      "title": "Schedule it",
+      "points": 100,
+      "question": "What must the routine's prompt explicitly reference, or the routine ignores the alert that fired it?",
+      "placeholder": "the block's name",
+      "answers": ["routine-fire-payload", "the routine-fire-payload block", "routine-fire-payload block", "routine fire payload", "fire payload", "the fire payload", "fire payload block", "the fire payload block", "fire-payload"],
+      "hint": "Option C, step 2. The troubleshooting table at the back of the Field guide has the same answer."
+    },
+    {
+      "id": "cp9",
+      "route": "build-3",
+      "label": "Build 3",
+      "title": "Headless for CI and cron",
+      "points": 100,
+      "question": "Which flag makes an unattended claude -p run deny anything not allow-listed, instead of asking?",
+      "placeholder": "the flag, with its value",
+      "answers": ["--permission-prompts none", "permission-prompts none", "--permission-prompts=none", "--permission-prompts"],
+      "hint": "It is the third flag in te-brief.sh under Pattern 1, and the bullet below the script explains what it denies."
+    }
+  ]
+}
