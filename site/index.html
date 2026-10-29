@@ -186,49 +186,75 @@
   .board .pt { font-family: var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
   .board .pt small { color: var(--dim); margin-left: 8px; font-size: 10px; letter-spacing: .1em; }
   .board li.me .nm { color: var(--fg); font-weight: 700; }
-  .summit-panel { border: var(--line) solid var(--rule); border-radius: 18px; padding: 24px 26px 20px; margin-bottom: 20px; overflow: hidden; position: relative; }
-  .summit-panel::before { content: ""; position: absolute; inset: 14px 18px auto auto; width: 5px; height: 5px; border-radius: 50%; background: var(--cisco-blue); box-shadow: -46px 23px 0 var(--magenta), -91px -2px 0 var(--orange), -151px 31px 0 var(--medium-blue), -212px 8px 0 var(--cisco-blue); opacity: .75; }
-  .summit-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; flex-wrap: wrap; position: relative; z-index: 1; }
-  .summit-head h2 { font-size: clamp(24px, 4vw, 42px); margin: 3px 0 0; letter-spacing: -.03em; }
+  .summit-dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 330px; border: var(--line) solid var(--rule); border-radius: 18px; overflow: hidden; margin-bottom: 22px; min-height: 640px; }
+  .summit-main { min-width: 0; padding: 24px 0 0; position: relative; overflow: hidden; }
+  .summit-main::before { content: ""; position: absolute; inset: 20px 24px auto auto; width: 4px; height: 4px; border-radius: 50%; background: var(--cisco-blue); box-shadow: -47px 23px 0 var(--magenta), -106px -3px 0 var(--orange), -168px 31px 0 var(--medium-blue), -228px 9px 0 var(--cisco-blue); opacity: .75; }
+  .summit-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding: 0 26px; position: relative; z-index: 3; }
+  .summit-head h2 { font-size: clamp(25px, 3.6vw, 42px); margin: 3px 0 0; letter-spacing: -.035em; line-height: 1; }
   .summit-head h2 span { color: var(--cisco-blue); }
-  .summit-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--orange); margin: 0; }
-  .summit-stat { text-align: right; font-family: var(--mono); color: var(--dim); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
-  .summit-stat b { display: block; color: var(--fg); font-size: 24px; letter-spacing: -.03em; }
-  .climb-field { height: 390px; position: relative; margin-top: 18px; border-bottom: var(--line) solid var(--rule); }
+  .summit-kicker { font-family: var(--mono); font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--orange); margin: 0; }
+  .summit-live { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+  .summit-live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 7px; animation: live-pulse 1.8s ease-out infinite; }
+  @keyframes live-pulse { 50% { opacity: .35; } }
+  .summit-top3 { margin: 20px 26px 0; display: grid; grid-template-columns: repeat(3, 1fr); border: var(--line) solid var(--rule); border-radius: 10px; position: relative; z-index: 3; }
+  .summit-place { padding: 10px 12px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px; align-items: center; border-right: var(--line) solid var(--rule); min-width: 0; }
+  .summit-place:last-child { border-right: none; }
+  .summit-place .place-rank { font-family: var(--mono); font-size: 20px; color: var(--fg); border-bottom: 2px solid var(--medium-blue); }
+  .summit-place:first-child .place-rank { border-bottom-color: var(--orange); }
+  .summit-place:nth-child(2) .place-rank { border-bottom-color: var(--magenta); }
+  .summit-place b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  .summit-place small { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+  .climb-field { height: 482px; position: relative; margin-top: -4px; }
   .mountain-line { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .mountain-line .ridge { fill: none; stroke: var(--medium-blue); stroke-width: 2.2; vector-effect: non-scaling-stroke; }
-  .mountain-line .echo { fill: none; stroke: var(--rule); stroke-width: 1; stroke-dasharray: 3 8; vector-effect: non-scaling-stroke; }
-  .mountain-line .snow { fill: none; stroke: var(--fg); stroke-width: 1.4; vector-effect: non-scaling-stroke; opacity: .8; }
-  .base-label, .peak-label { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
-  .base-label { left: 1%; bottom: 11%; }
-  .peak-label { right: 1%; top: 2%; text-align: right; color: var(--cisco-blue); max-width: 160px; }
-  .peak-label::before { content: "⚑"; display: block; color: var(--orange); font-size: 23px; line-height: 1; margin-bottom: 5px; }
-  .climber { --climber: var(--cisco-blue); position: absolute; left: var(--x); bottom: var(--y); transform: translate(-50%, 50%); z-index: 2; max-width: 132px; animation: climb-in .65s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--rank) * 55ms); }
+  .mountain-line .ridge { fill: none; stroke: var(--medium-blue); stroke-width: 1.35; vector-effect: non-scaling-stroke; }
+  .mountain-line .mesh { fill: none; stroke: rgba(2,200,255,.3); stroke-width: .7; vector-effect: non-scaling-stroke; }
+  .mountain-line .contour { fill: none; stroke: rgba(82,94,108,.65); stroke-width: .7; stroke-dasharray: 2 7; vector-effect: non-scaling-stroke; }
+  .mountain-line .trail { fill: none; stroke: var(--cisco-blue); stroke-width: 2.6; vector-effect: non-scaling-stroke; }
+  .mountain-line .trail-echo { fill: none; stroke: rgba(2,200,255,.25); stroke-width: 8; vector-effect: non-scaling-stroke; }
+  .mountain-line .node { fill: var(--midnight); stroke: var(--cisco-blue); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .base-label, .peak-label { position: absolute; z-index: 2; font-family: var(--mono); font-size: 8px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+  .base-label { left: 8%; bottom: 6%; }
+  .peak-label { left: 57%; top: 7%; color: var(--fg); padding: 7px 9px; border: 1px solid var(--orange); border-radius: 5px; max-width: 145px; line-height: 1.35; }
+  .peak-label::before { content: ""; position: absolute; width: 1px; height: 39px; background: var(--orange); left: -11px; bottom: -20px; transform: rotate(-17deg); transform-origin: bottom; }
+  .summit-stats { position: absolute; left: 24px; bottom: 20px; z-index: 3; display: flex; gap: 10px; }
+  .summit-stat { border: var(--line) solid var(--rule); border-radius: 8px; padding: 9px 11px; min-width: 98px; font-family: var(--mono); color: var(--dim); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
+  .summit-stat b { display: block; color: var(--fg); font-size: 18px; letter-spacing: -.02em; margin-bottom: 2px; }
+  .climber { --climber: var(--cisco-blue); position: absolute; left: var(--x); bottom: var(--y); transform: translate(-50%, 50%); z-index: 4; max-width: 128px; animation: climb-in .65s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--rank) * 55ms); }
   .climber:nth-of-type(3n+1) { --climber: var(--orange); }
   .climber:nth-of-type(3n+2) { --climber: var(--magenta); }
-  .climber-dot { display: block; width: 15px; height: 15px; margin: 0 auto; border: 3px solid var(--midnight); border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 1px var(--climber); }
-  .climber-tag { display: block; margin-top: 7px; padding: 5px 7px; border: 1px solid var(--climber); border-radius: 6px; background: var(--midnight); font-family: var(--mono); font-size: 10px; line-height: 1.2; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+  .climber-dot { display: block; width: 13px; height: 13px; margin: 0 auto; border: 3px solid var(--midnight); border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 1px var(--climber), 0 0 18px var(--climber); }
+  .climber-tag { display: block; margin-top: 6px; padding: 5px 7px; border: 1px solid var(--climber); border-radius: 5px; background: var(--midnight); font-family: var(--mono); font-size: 9px; line-height: 1.2; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
   .climber-tag b { color: var(--climber); margin-right: 4px; }
-  .climber.me .climber-dot { width: 19px; height: 19px; }
+  .climber.me .climber-dot { width: 18px; height: 18px; }
   .climber.me .climber-tag { border-width: 2px; font-weight: 700; }
+  .climber.summited .climber-dot { width: 21px; height: 21px; box-shadow: 0 0 0 5px rgba(255,144,0,.18), 0 0 28px var(--orange); }
   @keyframes climb-in { from { opacity: 0; transform: translate(-50%, 50%) scale(.65); } to { opacity: 1; transform: translate(-50%, 50%) scale(1); } }
-  .expedition-panel { border: var(--line) solid var(--rule); border-radius: 16px; padding: 24px 28px; }
-  .board.expedition li { grid-template-columns: 42px minmax(0, 1fr) minmax(90px, 1.2fr) auto; gap: 14px; padding: 14px 0; }
-  .board.expedition .rk { width: 30px; font-size: 13px; }
-  .board.expedition .nm small { display: block; font-family: var(--mono); color: var(--dim); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; margin-top: 3px; }
-  .altitude { height: 5px; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
-  .altitude i { display: block; height: 100%; width: var(--progress); background: var(--medium-blue); }
-  .board.expedition li:nth-child(1) .altitude i { background: var(--orange); }
-  .board.expedition li:nth-child(2) .altitude i { background: var(--magenta); }
-  .board.expedition li.me { border-left: 2px solid var(--cisco-blue); padding-left: 12px; }
-  @media (max-width: 700px) {
-    .summit-panel { padding: 20px 16px 16px; }
-    .climb-field { height: 330px; }
-    .climber { max-width: 88px; }
-    .climber-tag { font-size: 8px; padding: 4px 5px; }
-    .board.expedition li { grid-template-columns: 32px minmax(0, 1fr) auto; }
-    .board.expedition .altitude { display: none; }
-    .expedition-panel { padding: 20px 18px; }
+  .expedition-panel { border-left: var(--line) solid var(--rule); padding: 24px 22px; min-width: 0; }
+  .board.expedition li { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; }
+  .board.expedition .rk { width: 24px; font-size: 12px; }
+  .board.expedition .nm small { display: block; font-family: var(--mono); color: var(--dim); font-size: 8px; letter-spacing: .11em; text-transform: uppercase; margin-top: 3px; }
+  .board.expedition .pt { text-align: right; }
+  .board.expedition .pt small { display: block; margin: 2px 0 0; }
+  .altitude { display: none; }
+  .board.expedition li.me { border-left: 2px solid var(--cisco-blue); padding-left: 9px; }
+  .scorecard-panel { margin-top: 22px; }
+  @media (max-width: 980px) {
+    .summit-dashboard { grid-template-columns: 1fr; }
+    .expedition-panel { border-left: none; border-top: var(--line) solid var(--rule); }
+    .climb-field { height: 450px; }
+  }
+  @media (max-width: 620px) {
+    .summit-main { padding-top: 18px; }
+    .summit-head { padding: 0 16px; }
+    .summit-top3 { margin-inline: 16px; }
+    .summit-place { padding: 8px; grid-template-columns: 1fr; gap: 2px; }
+    .summit-place .place-rank { font-size: 16px; }
+    .climb-field { height: 360px; }
+    .climber { max-width: 82px; }
+    .climber-tag { font-size: 7px; padding: 4px; }
+    .summit-stats { left: 14px; bottom: 10px; }
+    .summit-stat { min-width: 0; }
+    .peak-label { left: auto; right: 2%; top: 8%; max-width: 112px; }
   }
   @media (prefers-reduced-motion: reduce) { .climber { animation: none; } }
   .empty { font-size: 14px; color: var(--dim); padding: 6px 0; margin: 0; }
@@ -1738,26 +1764,40 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
         <h1>Climb the <span class="hl">mountain</span></h1>
         <p class="desc" id="standings-desc"></p>
       </div>
-      <div class="summit-panel">
-        <div class="summit-head">
-          <div><p class="summit-kicker">The ThousandEyes ascent</p><h2>Peak of <span>Inflated Expectations</span></h2></div>
-          <div class="summit-stat"><b id="summit-count">0</b>climbers on the mountain</div>
+      <div class="summit-dashboard">
+        <div class="summit-main">
+          <div class="summit-head">
+            <div><p class="summit-kicker">The ThousandEyes ascent</p><h2>Peak of <span>Inflated Expectations</span></h2></div>
+            <div class="summit-live">Live ascent</div>
+          </div>
+          <div class="summit-top3" id="summit-top3"></div>
+          <div class="climb-field" id="climb-field" aria-label="Score positions on the mountain">
+            <svg class="mountain-line" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
+              <path class="contour" d="M0 564 Q178 501 320 536 T596 509 T1000 554 M0 527 Q151 459 307 492 T604 467 T1000 513 M0 490 Q184 421 337 454 T632 427 T1000 472"/>
+              <path class="ridge" d="M0 580 L105 521 L192 536 L283 442 L351 465 L421 338 L467 357 L532 78 L594 265 L651 238 L717 364 L776 333 L848 451 L914 421 L1000 525"/>
+              <path class="mesh" d="M105 521 L532 78 L192 536 M283 442 L532 78 L351 465 M421 338 L532 78 L467 357 M594 265 L532 78 L651 238 M717 364 L532 78 L776 333 M848 451 L532 78 L914 421 M105 521 L283 442 L421 338 L532 78 L594 265 L717 364 L848 451 M192 536 L351 465 L467 357 L532 78 L651 238 L776 333 L914 421 M43 554 L238 489 L386 402 L532 78 L625 301 L747 397 L956 473"/>
+              <path class="trail-echo" d="M121 542 C176 521 221 522 278 493 S389 467 336 421 S431 382 473 349 S398 307 478 269 S431 225 511 184 S486 127 532 82"/>
+              <path class="trail" d="M121 542 C176 521 221 522 278 493 S389 467 336 421 S431 382 473 349 S398 307 478 269 S431 225 511 184 S486 127 532 82"/>
+              <g>
+                <circle class="node" cx="121" cy="542" r="5"/><circle class="node" cx="218" cy="510" r="5"/>
+                <circle class="node" cx="336" cy="466" r="5"/><circle class="node" cx="336" cy="421" r="5"/>
+                <circle class="node" cx="428" cy="378" r="5"/><circle class="node" cx="473" cy="349" r="5"/>
+                <circle class="node" cx="438" cy="298" r="5"/><circle class="node" cx="478" cy="269" r="5"/>
+                <circle class="node" cx="473" cy="214" r="5"/><circle class="node" cx="511" cy="184" r="5"/>
+              </g>
+            </svg>
+            <span class="base-label">Base camp · 0 pts</span>
+            <span class="peak-label">1,000 pts<br>Peak of Inflated Expectations</span>
+            <div id="climbers"></div>
+            <div class="summit-stats">
+              <div class="summit-stat"><b id="summit-count">0</b>climbers</div>
+              <div class="summit-stat"><b id="summit-bank">0</b>checkpoints banked</div>
+            </div>
+          </div>
         </div>
-        <div class="climb-field" id="climb-field" aria-label="Score positions on the mountain">
-          <svg class="mountain-line" viewBox="0 0 1000 390" preserveAspectRatio="none" aria-hidden="true">
-            <path class="echo" d="M12 356 C150 346 210 320 295 300 S430 259 520 239 S665 194 734 151 S840 92 931 40"/>
-            <path class="ridge" d="M12 356 C150 346 210 320 295 300 S430 259 520 239 S665 194 734 151 S840 92 931 40 L975 104 L1000 78"/>
-            <path class="snow" d="M871 83 L900 101 L931 40 L953 85 L975 104"/>
-          </svg>
-          <span class="base-label">Base camp · 0 pts</span>
-          <span class="peak-label">1,000 pts<br>Peak of Inflated Expectations</span>
-          <div id="climbers"></div>
-        </div>
+        <div class="expedition-panel"><div class="panel-head"><p class="eyebrow accent" id="board-title">Full standings</p><span class="eyebrow" id="board-refresh"></span></div><ol class="board expedition" id="board-full"></ol><p class="empty" id="board-full-note"></p></div>
       </div>
-      <div class="two-up">
-        <div class="panel"><p class="eyebrow accent">Your expedition card</p><div id="scorecard"></div></div>
-        <div class="expedition-panel"><div class="panel-head"><p class="eyebrow accent" id="board-title">Expedition log</p><span class="eyebrow" id="board-refresh"></span></div><ol class="board expedition" id="board-full"></ol><p class="empty" id="board-full-note"></p></div>
-      </div>
+      <div class="panel scorecard-panel"><p class="eyebrow accent">Your expedition card</p><div id="scorecard"></div></div>
     </div>
   </section>
 
@@ -2127,21 +2167,29 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
     let timer = 0;
     const maxPoints = CP.reduce((sum, cp) => sum + cp.points, 0);
     function paintMountain(players, current) {
-      const field = $('#climbers'), count = $('#summit-count');
+      const field = $('#climbers'), count = $('#summit-count'), bank = $('#summit-bank'), top = $('#summit-top3');
       if (count) count.textContent = players.length;
+      if (bank) bank.textContent = players.reduce((sum, q) => sum + (q.solvedCount | 0), 0);
+      if (top) top.innerHTML = players.length ? players.slice(0, 3).map((q, i) =>
+        '<div class="summit-place"><span class="place-rank">' + (i + 1) + '</span><span><b>' + esc(q.name) + '</b><small>' + (q.points | 0) + ' pts · ' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></div>'
+      ).join('') : '<p class="empty" style="padding:10px 12px">Waiting for the first climber.</p>';
       if (!field) return;
-      field.innerHTML = players.slice(0, 12).map((q, i) => {
+      const shown = players.slice(0, 12);
+      const route = [[12.1,9.7],[21.8,15],[33.6,22.3],[33.6,29.8],[42.8,37],[47.3,41.8],[43.8,50.3],[47.8,55.2],[47.3,64.3],[51.1,69.3],[53.2,86.3]];
+      field.innerHTML = shown.map((q, i) => {
         const points = Math.max(0, q.points | 0);
         const progress = Math.min(1, points / maxPoints);
-        const shown = players.slice(0, 12);
+        const routePosition = progress * (route.length - 1);
+        const segment = Math.min(route.length - 2, Math.floor(routePosition));
+        const along = routePosition - segment;
         const tiedBefore = shown.slice(0, i).filter(other => (other.points | 0) === points).length;
         const tiedTotal = shown.filter(other => (other.points | 0) === points).length;
         const tieOffset = tiedBefore - (tiedTotal - 1) / 2;
-        const x = Math.max(4, Math.min(94, 4 + progress * 90 + tieOffset * 5));
-        const y = Math.max(7, Math.min(91, 8 + Math.pow(progress, .88) * 82 + tieOffset * 7));
+        const x = Math.max(5, Math.min(94, route[segment][0] + (route[segment + 1][0] - route[segment][0]) * along + tieOffset * 3.8));
+        const y = Math.max(6, Math.min(91, route[segment][1] + (route[segment + 1][1] - route[segment][1]) * along + tieOffset * 2.5));
         const me = current && q.name === current.name;
         const summit = progress >= 1;
-        return '<div class="climber' + (me ? ' me' : '') + '" style="--x:' + x.toFixed(1) + '%;--y:' + y.toFixed(1) + '%;--rank:' + i + '" title="' + esc(q.name) + ': ' + points + ' points">' +
+        return '<div class="climber' + (me ? ' me' : '') + (summit ? ' summited' : '') + '" style="--x:' + x.toFixed(1) + '%;--y:' + y.toFixed(1) + '%;--rank:' + i + '" title="' + esc(q.name) + ': ' + points + ' points">' +
           '<span class="climber-dot"></span><span class="climber-tag"><b>' + (summit ? 'SUMMIT' : '#' + (i + 1)) + '</b>' + esc(q.name) + '</span></div>';
       }).join('');
     }
