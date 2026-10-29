@@ -190,20 +190,21 @@
   @keyframes trail-draw { to { stroke-dashoffset: 0; } }
   .trail-nodes circle { fill: var(--midnight); stroke: rgba(2,200,255,.7); stroke-width: 2.5; }
   .trail-nodes circle.reached { fill: var(--cisco-blue); stroke: var(--white); filter: drop-shadow(0 0 6px rgba(2,200,255,.9)); }
-  .cp-label { position: absolute; left: var(--x); top: var(--y); transform: translate(18px, -50%); font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--fg); white-space: nowrap; z-index: 3; pointer-events: none; }
-  .cp-label.left { transform: translate(calc(-100% - 18px), -50%); text-align: right; }
+  .cp-label { position: absolute; left: var(--x); top: var(--y); transform: translate(34px, -50%); font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--fg); white-space: nowrap; z-index: 3; pointer-events: none; }
+  .cp-label.left { transform: translate(calc(-100% - 34px), -50%); text-align: right; }
   .cp-label small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .12em; margin-top: 2px; }
   .summit-label { position: absolute; left: 54.2%; top: 14.5%; z-index: 4; border: 1px solid var(--orange); border-radius: 6px; padding: 9px 13px; background: rgba(7,24,45,.82); font-family: var(--mono); text-transform: uppercase; }
   .summit-label b { display: block; font-size: 11.5px; letter-spacing: .16em; color: var(--fg); line-height: 1.45; white-space: nowrap; }
   .summit-label small { display: block; font-size: 9px; letter-spacing: .14em; color: var(--muted); margin-top: 4px; }
   .climber { --climber: var(--medium-blue); position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; transition: left 2.2s cubic-bezier(.3,.7,.2,1), top 2.2s cubic-bezier(.3,.7,.2,1); }
   .climber.r1 { --climber: var(--orange); } .climber.r2 { --climber: var(--magenta); } .climber.r3 { --climber: var(--cisco-blue); }
-  .climber-dot { position: absolute; left: calc(-8px + var(--dx, 0px)); top: -8px; width: 16px; height: 16px; border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 3px rgba(7,24,45,.95), 0 0 0 4px var(--climber), 0 0 18px var(--climber); }
+  .climber-dot { position: absolute; left: calc(-8px + var(--dx, 0px)); top: calc(-8px + var(--dy, 0px)); width: 16px; height: 16px; border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 3px rgba(7,24,45,.95), 0 0 0 4px var(--climber), 0 0 18px var(--climber); }
+  .climber.r4:not(.me) .climber-dot { width: 10px; height: 10px; left: calc(-5px + var(--dx, 0px)); top: calc(-5px + var(--dy, 0px)); box-shadow: 0 0 0 2px rgba(7,24,45,.95), 0 0 10px var(--climber); }
   .climber.me .climber-dot { box-shadow: 0 0 0 3px rgba(7,24,45,.95), 0 0 0 5px var(--white), 0 0 22px var(--white); }
   .climber.r1 .climber-dot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--orange); animation: lead-ping 2s ease-out infinite; }
   @keyframes lead-ping { from { transform: scale(.7); opacity: 1; } to { transform: scale(2.4); opacity: 0; } }
-  .climber-plate { position: absolute; left: calc(20px + var(--dx, 0px)); top: calc(-22px + var(--stack, 0) * 50px); display: flex; align-items: center; gap: 11px; padding: 7px 12px 7px 10px; border: 1px solid var(--climber); border-radius: 7px; background: rgba(7,24,45,.9); white-space: nowrap; }
-  .climber.left .climber-plate { left: auto; right: calc(20px - var(--dx, 0px)); }
+  .climber-plate { position: absolute; left: 24px; top: calc(-22px + var(--stack, 0) * 50px); display: flex; align-items: center; gap: 11px; padding: 7px 12px 7px 10px; border: 1px solid var(--climber); border-radius: 7px; background: rgba(7,24,45,.9); white-space: nowrap; }
+  .climber.left .climber-plate { left: auto; right: 24px; }
   .climber.me .climber-plate { border-width: 2px; border-color: var(--white); }
   .climber-plate .cr { font-family: var(--mono); font-size: 19px; font-weight: 700; color: var(--fg); min-width: 14px; text-align: center; }
   .climber-plate b { display: block; font-size: 13px; font-weight: 700; color: var(--fg); line-height: 1.2; }
@@ -269,9 +270,9 @@
     .ascent-legend { gap: 12px; font-size: 8.5px; padding: 8px 12px; }
     .ascent { overflow-x: clip; }
     .ascent-art { width: 175%; margin-left: -37.5%; }
-    .climber-dot { width: 11px; height: 11px; left: calc(-5.5px + var(--dx, 0px)); top: -5.5px; }
-    .climber-plate { left: calc(14px + var(--dx, 0px)); top: calc(-14px + var(--stack, 0) * 30px); }
-    .climber.left .climber-plate { right: calc(14px - var(--dx, 0px)); }
+    .climber-dot, .climber.r4:not(.me) .climber-dot { width: 9px; height: 9px; left: calc(-4.5px + var(--dx, 0px) * .6); top: calc(-4.5px + var(--dy, 0px) * .6); }
+    .climber-plate { left: 16px; top: calc(-14px + var(--stack, 0) * 30px); }
+    .climber.left .climber-plate { right: 16px; }
   }
   @media (prefers-reduced-motion: reduce) { .climber, .podium-place .pbar i { transition: none; } .trail-done { animation: none; stroke-dashoffset: 0; } .climber.r1 .climber-dot::after, .live-pill::before { animation: none; } }
   .empty { font-size: 14px; color: var(--dim); padding: 6px 0; margin: 0; }
@@ -1117,7 +1118,7 @@
     const maxPoints = CP.reduce((sum, cp) => sum + cp.points, 0) || 1000;
     const ROUTE = [[29.3,87.9],[42,82],[54.7,75.4],[45.9,68.8],[57.6,63],[48.8,56.4],[58.6,50.6],[51.8,44.7],[56.1,38.9],[52.6,33.4],[51.4,28.4]];
     const SUMMIT_M = 8848;
-    const metres = pts => (Math.round(Math.max(0, pts) / maxPoints * SUMMIT_M / 10) * 10).toLocaleString('en-AU') + ' m';
+    const metres = pts => Math.round(Math.max(0, pts) / maxPoints * SUMMIT_M).toLocaleString('en-AU') + ' m';
     const onRoute = pts => {
       const r = Math.min(1, Math.max(0, pts / maxPoints)) * (ROUTE.length - 1);
       const s = Math.min(ROUTE.length - 2, Math.floor(r)), f = r - s;
@@ -1154,10 +1155,12 @@
       });
       $$('#cp-labels .cp-label').forEach(l => { l.hidden = occupied.has(+l.dataset.i); });
       if (!layer) return;
-      const shown = players.slice(0, 40), stacks = {}, seen = new Set();
+      const shown = players.slice(0, 150), crowd = {}, plates = {}, seen = new Set();
       shown.forEach((q, i) => {
-        const pts = Math.max(0, q.points | 0), k = (stacks[pts] = (stacks[pts] || 0) + 1) - 1;
+        const pts = Math.max(0, q.points | 0), k = (crowd[pts] = (crowd[pts] || 0) + 1) - 1;
         const at = onRoute(pts), me = !!(current && q.name === current.name), named = i < 5 || me;
+        const stack = named ? (plates[pts] = (plates[pts] || 0) + 1) - 1 : 0;
+        const ang = k * 2.39996, rad = 7.5 * Math.sqrt(k);
         let el = climbers.get(q.name);
         if (!el) {
           el = document.createElement('div');
@@ -1165,8 +1168,8 @@
           layer.appendChild(el); climbers.set(q.name, el);
         }
         el.className = 'climber r' + Math.min(i + 1, 4) + (me ? ' me' : '') + (at.x < ROUTE[ROUTE.length - 1][0] ? ' left' : '');
-        el.style.zIndex = String(100 - i);
-        el.style.setProperty('--dx', (k * 12) + 'px'); el.style.setProperty('--stack', named ? String(k) : '0');
+        el.style.zIndex = String(me ? 400 : 300 - i);
+        el.style.setProperty('--dx', (Math.cos(ang) * rad).toFixed(1) + 'px'); el.style.setProperty('--dy', (Math.sin(ang) * rad).toFixed(1) + 'px'); el.style.setProperty('--stack', String(stack));
         el.title = q.name + ': ' + pts + ' points, ' + metres(pts);
         el.innerHTML = '<span class="climber-dot"></span>' + (named ? '<span class="climber-plate"><span class="cr">' + (i + 1) + '</span><span><b>' + esc(q.name) + '</b><small>' + pts + ' pts · ' + metres(pts) + '</small></span></span>' : '');
         seen.add(q.name);
