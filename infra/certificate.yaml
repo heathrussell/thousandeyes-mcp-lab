@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ACM certificate for the ThousandEyes MCP Lab custom domain. Deploy this stack in us-east-1 (CloudFront only accepts certificates from that region). DNS validation via Route 53.
+
+Parameters:
+  DomainName:
+    Type: String
+    Description: The site domain, e.g. lab.example.com
+  HostedZoneId:
+    Type: String
+    Description: Route 53 hosted zone ID that serves DomainName (validation records are written there automatically)
+
+Resources:
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+
+Outputs:
+  CertificateArn:
+    Description: Pass this as CERT_ARN to scripts/deploy.sh
+    Value: !Ref Certificate
