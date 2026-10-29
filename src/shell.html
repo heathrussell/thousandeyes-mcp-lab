@@ -1,0 +1,1072 @@
+<title>ThousandEyes MCP Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: a hash-routed single page. Fixed glass top bar; full-bleed hero with a canvas map of agents and paths;
+     1120px content column; every container outlined at 1.25pt, never filled. Cisco dark template, by choice single-theme. */
+  :root {
+    --midnight: #07182D; --white: #FFFFFF; --cisco-blue: #02C8FF; --medium-blue: #0A60FF;
+    --magenta: #FF007F; --orange: #FF9000; --light-grey: #D6D6D6; --mb30: #B4B9C0; --mb70: #525E6C;
+    --green: #45991F; --red: #EB4651;
+    --bg: var(--midnight); --fg: var(--white); --muted: var(--light-grey); --dim: var(--mb30); --rule: var(--mb70); --accent: var(--cisco-blue);
+    --line: 1.25pt; --radius: 12px;
+    --c-setup: var(--cisco-blue); --c-labs: var(--magenta); --c-builds: var(--orange); --c-field: var(--medium-blue); --c-score: var(--green);
+    --spine: var(--cisco-blue);
+    --sans: 'CiscoSansTT', 'Cisco Sans', 'CiscoSans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .view { animation: none !important; } .status-dot.live { animation: none !important; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; padding-top: 64px; overflow-x: hidden; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 60; }
+  a { color: inherit; }
+  [id] { scroll-margin-top: 84px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+  .wrap.narrow { max-width: 920px; }
+  button, input { font-family: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ── COLOUR SYSTEM: a colour per chapter group, used for stripes, outlines, tags and markers (never text) ── */
+  [data-group="setup"], .g-setup { --spine: var(--c-setup); }
+  [data-group="labs"], .g-labs { --spine: var(--c-labs); }
+  [data-group="builds"], .g-builds { --spine: var(--c-builds); }
+  [data-group="field"], .g-field { --spine: var(--c-field); }
+  [data-group="score"], .g-score { --spine: var(--c-score); }
+  .colorbar { display: flex; height: 4px; width: 100%; }
+  .colorbar i { flex: 1; display: block; }
+  .colorbar i:nth-child(1) { background: var(--cisco-blue); } .colorbar i:nth-child(2) { background: var(--medium-blue); } .colorbar i:nth-child(3) { background: var(--magenta); } .colorbar i:nth-child(4) { background: var(--orange); }
+  .spine { display: block; width: 56px; height: 4px; border-radius: 2px; background: var(--spine); margin-bottom: 14px; }
+  .spine.multi { background: none; display: flex; gap: 3px; }
+  .spine.multi i { flex: 1; display: block; border-radius: 2px; }
+  .spine.multi i:nth-child(1) { background: var(--cisco-blue); } .spine.multi i:nth-child(2) { background: var(--medium-blue); } .spine.multi i:nth-child(3) { background: var(--magenta); } .spine.multi i:nth-child(4) { background: var(--orange); }
+
+  /* ── TOP BAR ── */
+  .topbar { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; height: 64px; z-index: 50; padding-top: 3px; background: rgba(7,24,45,.84); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: var(--line) solid var(--rule); }
+  .topbar .colorbar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .topbar-in { height: 100%; display: flex; align-items: center; gap: 18px; max-width: 1280px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+  .mark { width: 36px; height: 36px; border: var(--line) solid var(--accent); border-radius: 9px; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 12px; letter-spacing: .06em; color: var(--accent); }
+  .brand-name { font-weight: 700; font-size: 15px; line-height: 1.1; }
+  .brand-sub { font-family: var(--mono); font-size: 9.5px; letter-spacing: .26em; color: var(--dim); text-transform: uppercase; margin-top: 3px; }
+  .nav { display: flex; gap: 2px; flex: 1; justify-content: center; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { flex-shrink: 0; font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 7px 12px; border-radius: 100px; border: var(--line) solid transparent; transition: color .15s, border-color .15s; }
+  .nav a:hover { color: var(--fg); }
+  .nav a.active { color: var(--fg); border-color: var(--rule); }
+  .nav a.active[data-nav="setup"] { border-color: var(--c-setup); } .nav a.active[data-nav="labs"] { border-color: var(--c-labs); } .nav a.active[data-nav="builds"] { border-color: var(--c-builds); } .nav a.active[data-nav="field"] { border-color: var(--c-field); } .nav a.active[data-nav="standings"] { border-color: var(--c-score); } .nav a.active[data-nav="home"] { border-color: var(--cisco-blue); }
+  .pass { flex-shrink: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; padding: 8px 14px; border-radius: 100px; border: var(--line) solid var(--accent); color: var(--fg); text-decoration: none; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+  .pass b { color: var(--accent); font-weight: 700; }
+  @media (max-width: 900px) { .brand-text { display: none; } .nav { justify-content: flex-start; } .pass { max-width: 150px; } }
+
+  /* ── VIEWS ── */
+  .view { animation: fade .35s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ── HERO ── */
+  .hero { position: relative; overflow: hidden; background: var(--bg); }
+  .hero .colorbar { position: absolute; left: 0; right: 0; bottom: 0; }
+  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero-fade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, var(--bg) 0%, rgba(7,24,45,.88) 34%, rgba(7,24,45,.42) 66%, rgba(7,24,45,.22) 100%), linear-gradient(180deg, rgba(7,24,45,.35) 0%, rgba(7,24,45,0) 28%, rgba(7,24,45,.92) 100%); }
+  .hero-inner { position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .85fr); gap: 48px; align-items: center; padding-block: 84px 72px; }
+  .hero h1 { font-size: clamp(42px, 6.4vw, 84px); font-weight: 800; line-height: .98; letter-spacing: -.03em; margin: 18px 0 22px; text-wrap: balance; max-width: 13ch; }
+  .grad { background: linear-gradient(92deg, #FFFFFF 0%, #02C8FF 42%, #0A60FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+  .lede { font-size: 19px; line-height: 1.55; color: var(--muted); max-width: 56ch; margin: 0 0 14px; }
+  .lede-b { font-size: 16px; color: var(--muted); margin: 0 0 26px; }
+  .lede-b strong, .lede strong { color: var(--fg); }
+  .textlink { font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; transition: border-color .15s; }
+  .textlink:hover { border-color: var(--accent); }
+  .linkbtn { font: inherit; font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; color: var(--fg); background: none; border: none; border-bottom: 1px solid var(--rule); padding: 0 0 2px; cursor: pointer; }
+  .linkbtn:hover { border-color: var(--accent); }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 22px; align-items: center; }
+  .hero-meta { margin: 34px 0 0; font-size: 14px; color: var(--muted); }
+  .hero-meta b { color: var(--accent); font-weight: 600; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--dim); margin: 0; }
+  .eyebrow.accent { color: var(--accent); }
+  @media (max-width: 860px) { .hero-inner { grid-template-columns: 1fr; padding-block: 52px 44px; gap: 32px; } .hero h1 { max-width: none; } .hero-fade { background: linear-gradient(180deg, rgba(7,24,45,.75) 0%, rgba(7,24,45,.6) 50%, rgba(7,24,45,.95) 100%); } }
+
+  /* ── CHECK-IN CARD ── */
+  .checkin { border: var(--line) solid var(--medium-blue); border-radius: 16px; padding: 26px 26px 24px; position: relative; background: rgba(7,24,45,.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); min-width: 0; }
+  .checkin .eyebrow { margin-bottom: 10px; }
+  .checkin p { font-size: 14.5px; color: var(--muted); margin: 0 0 16px; }
+  .field label, .lbl { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+  .input { width: 100%; background: transparent; border: var(--line) solid var(--rule); border-radius: 10px; color: var(--fg); font: inherit; font-size: 15px; padding: 12px 14px; outline: none; transition: border-color .15s; min-width: 0; }
+  .input::placeholder { color: var(--mb70); }
+  .input:focus { border-color: var(--accent); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 700; font-size: 14.5px; padding: 12px 18px; border-radius: 10px; border: var(--line) solid var(--accent); background: var(--accent); color: var(--midnight); cursor: pointer; transition: transform .12s, box-shadow .15s; white-space: nowrap; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(2,200,255,.22); }
+  .btn:disabled { opacity: .6; cursor: progress; transform: none; box-shadow: none; }
+  .btn.ghost { background: transparent; color: var(--fg); border-color: var(--rule); }
+  .btn.ghost:hover { border-color: var(--accent); box-shadow: none; }
+  .btn.block { width: 100%; margin-top: 14px; }
+  .status-dot { position: absolute; top: 24px; right: 24px; width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+  .status-dot.live { background: var(--green); box-shadow: 0 0 0 4px rgba(69,153,31,.22); animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(69,153,31,.18); } 50% { box-shadow: 0 0 0 7px rgba(69,153,31,.06); } }
+  .who { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .who b { font-size: 22px; letter-spacing: -.01em; overflow-wrap: anywhere; }
+  .who span { font-family: var(--mono); font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .msg { margin: 10px 0 0; font-size: 14px; color: var(--muted); min-height: 1.3em; }
+  .msg.bad { color: var(--red); }
+  .msg.ok { color: var(--green); }
+
+  /* ── BANDS & SECTION HEADS ── */
+  .band { border-top: var(--line) solid var(--rule); padding-block: 72px; }
+  .band:first-child { border-top: none; }
+  .sect { font-size: clamp(30px, 4vw, 50px); font-weight: 800; letter-spacing: -.025em; line-height: 1.04; margin: 12px 0 10px; text-wrap: balance; }
+  .sect .hl, .page-head h1 .hl { color: var(--accent); }
+  .sect-desc { font-size: 17px; color: var(--muted); max-width: 62ch; margin: 0 0 30px; }
+  .sect-desc strong { color: var(--fg); }
+  .stats { display: flex; gap: 44px; flex-wrap: wrap; margin: 6px 0 34px; }
+  .stat b { display: block; font-family: var(--mono); font-size: 30px; font-weight: 700; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat b::after { content: ""; display: block; width: 28px; height: 3px; border-radius: 2px; margin-top: 10px; background: var(--cisco-blue); }
+  .stat:nth-child(2) b::after { background: var(--magenta); } .stat:nth-child(3) b::after { background: var(--orange); } .stat:nth-child(4) b::after { background: var(--medium-blue); }
+  .stat span { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--dim); margin-top: 8px; }
+
+  /* ── STEPS (how it runs) ── */
+  .how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .how > div { border: var(--line) solid var(--rule); border-top: 3px solid var(--cisco-blue); border-radius: 16px; padding: 22px 22px 20px; min-width: 0; }
+  .how > div:nth-child(2) { border-top-color: var(--magenta); } .how > div:nth-child(3) { border-top-color: var(--orange); }
+  .how h3 { font-size: 20px; margin: 10px 0 8px; font-weight: 700; letter-spacing: -.01em; }
+  .how p { margin: 0; font-size: 14.5px; color: var(--muted); }
+  .how p a { color: var(--accent); text-decoration: none; }
+  .how p a:hover { text-decoration: underline; }
+  @media (max-width: 760px) { .how { grid-template-columns: 1fr; } }
+
+  /* ── CHAPTER CARDS ── */
+  .chapters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .chapter { display: flex; flex-direction: column; border: var(--line) solid var(--rule); border-top: 3px solid var(--spine); border-radius: 16px; text-decoration: none; color: inherit; overflow: hidden; transition: border-color .15s, transform .15s, box-shadow .15s; min-width: 0; }
+  .chapter:hover { border-color: var(--spine); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .chapter .tag { border-color: var(--spine); }
+  .chapter .ch-num::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--spine); margin-right: 8px; vertical-align: 1px; }
+  .ch-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 18px; border-bottom: var(--line) solid var(--rule); }
+  .ch-num { font-family: var(--mono); font-size: 10.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--dim); }
+  .tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; padding: 3px 9px; border-radius: 100px; border: var(--line) solid var(--accent); color: var(--fg); white-space: nowrap; }
+  .tag.blue { border-color: var(--medium-blue); } .tag.pink { border-color: var(--magenta); } .tag.orange { border-color: var(--orange); }
+  .tag.green { border-color: var(--green); color: var(--green); } .tag.red { border-color: var(--red); color: var(--red); }
+  .ch-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .ch-title { font-size: 19px; font-weight: 700; line-height: 1.2; margin: 0; letter-spacing: -.01em; }
+  .ch-sub { font-size: 14px; color: var(--muted); margin: 0; flex: 1; }
+  .ch-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; margin-top: 10px; }
+  .ch-foot .pts { color: var(--fg); }
+  .chapter.done .ch-foot .pts { color: var(--green); }
+  .chapter.done { --spine: var(--green); border-color: rgba(69,153,31,.6); }
+  @media (max-width: 900px) { .chapters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .chapters { grid-template-columns: 1fr; } }
+
+  /* ── PANELS, RULES, BOARD ── */
+  .two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 820px) { .two-up { grid-template-columns: 1fr; } }
+  .panel { border: var(--line) solid var(--rule); border-radius: 16px; padding: 26px 28px; min-width: 0; }
+  .panel .eyebrow { margin-bottom: 14px; }
+  .panel .spine { margin-bottom: 12px; }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .panel-head a { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--muted); text-decoration: none; }
+  .panel-head a:hover { color: var(--fg); }
+  .rules { list-style: none; margin: 0; padding: 0; }
+  .rules li { font-size: 15px; color: var(--muted); padding: 10px 0; border-bottom: 1px solid rgba(82,94,108,.5); }
+  .rules li:last-child { border-bottom: none; }
+  .rules li strong { color: var(--fg); }
+  .rules li::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 10px; vertical-align: 1px; background: var(--cisco-blue); }
+  .rules li:nth-child(2)::before { background: var(--medium-blue); } .rules li:nth-child(3)::before { background: var(--orange); } .rules li:nth-child(4)::before { background: var(--magenta); } .rules li:nth-child(5)::before { background: var(--red); }
+  .rules li.warn strong { color: var(--fg); border-bottom: 2px solid var(--magenta); }
+  .board { list-style: none; margin: 0; padding: 0; }
+  .board li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(82,94,108,.5); font-size: 15px; }
+  .board li:last-child { border-bottom: none; }
+  .board .rk { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .board li:nth-child(1) .rk { color: var(--fg); border-bottom: 2px solid var(--orange); } .board li:nth-child(2) .rk { border-bottom: 2px solid var(--magenta); } .board li:nth-child(3) .rk { border-bottom: 2px solid var(--medium-blue); }
+  .board li .rk { width: 20px; text-align: center; padding-bottom: 1px; }
+  .board .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .board .pt { font-family: var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
+  .board .pt small { color: var(--dim); margin-left: 8px; font-size: 10px; letter-spacing: .1em; }
+  .board li.me .nm { color: var(--fg); font-weight: 700; }
+  .empty { font-size: 14px; color: var(--dim); padding: 6px 0; margin: 0; }
+
+  /* ── CONTENT PAGES ── */
+  .page { padding-block: 60px 80px; }
+  .page-head { margin-bottom: 36px; }
+  .page-head h1 { font-size: clamp(34px, 4.6vw, 56px); font-weight: 800; letter-spacing: -.03em; line-height: 1.02; margin: 12px 0 12px; text-wrap: balance; }
+  .page-head .desc { font-size: 17px; color: var(--muted); max-width: 66ch; margin: 0; }
+  .page-head .desc strong { color: var(--fg); }
+  .page-head .meta-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 18px; }
+  .content { max-width: 900px; min-width: 0; }
+  .content > *:first-child { margin-top: 0; }
+  .os-switch { display: inline-flex; gap: 4px; }
+  .os-switch button { font: inherit; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 6px 12px; border-radius: 100px; border: var(--line) solid var(--rule); background: transparent; color: var(--dim); cursor: pointer; }
+  .os-switch button.active { color: var(--fg); border-color: var(--accent); }
+  .os-switch-label { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); margin-right: 6px; }
+
+  /* ported guide classes, restyled */
+  .content .section-break { margin: 56px 0 0; padding: 32px 0 20px; border-top: var(--line) solid var(--rule); }
+  .content .section-break::before { content: ""; display: block; width: 56px; height: 4px; border-radius: 2px; background: var(--spine); margin-bottom: 14px; }
+  #sec-07 { --spine: var(--c-field); } #sec-08 { --spine: var(--magenta); } #sec-09 { --spine: var(--orange); }
+  .content .section-number { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .3em; text-transform: uppercase; margin-bottom: 8px; }
+  .content .section-title { font-size: clamp(26px, 3.4vw, 36px); font-weight: 800; line-height: 1.08; letter-spacing: -.025em; color: var(--fg); }
+  .content .section-title .hl-te, .content .section-title .hl-blue, .content .section-title .hl-purple, .content .section-title .hl-green { color: var(--accent); }
+  .content .section-desc { margin-top: 12px; font-size: 16.5px; color: var(--muted); max-width: 66ch; }
+  .content .card { background: transparent; border: var(--line) solid var(--rule); border-top: 3px solid var(--spine); border-radius: var(--radius); padding: 24px 28px; margin: 22px 0; }
+  .content .card.accent-te, .content .card.accent-blue { border-left: 3px solid var(--accent); }
+  .content .card.accent-purple { border-left: 3px solid var(--medium-blue); }
+  .content .card h3 { font-size: 16px; font-weight: 700; margin: 0 0 10px; display: flex; align-items: center; gap: 10px; color: var(--fg); }
+  .content .card h3 .icon { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; border: var(--line) solid var(--rule); }
+  .content .icon-te, .content .icon-blue { border-color: var(--accent) !important; }
+  .content .icon-info { border-color: var(--medium-blue) !important; }
+  .content .card p { color: var(--muted); font-size: 15px; line-height: 1.7; margin: 0 0 8px; }
+  .content .card p:last-child { margin-bottom: 0; }
+  .content pre, .content code { font-family: var(--mono); }
+  .content pre { background: transparent; border: var(--line) solid var(--rule); border-radius: var(--radius); padding: 18px 22px; overflow-x: auto; font-size: 13px; line-height: 1.65; margin: 12px 0; color: var(--muted); }
+  .content pre.wrap { white-space: pre-wrap; word-break: break-word; }
+  .content .pre-label { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: .2em; text-transform: uppercase; margin: 14px 0 6px; display: block; }
+  .content .str { color: var(--muted); } .content .key { color: var(--accent); } .content .val { color: var(--fg); } .content .cmt { color: var(--dim); font-style: italic; } .content .cmd { color: var(--fg); font-weight: 700; } .content .num { color: var(--accent); }
+  .content .os-tabs { margin: 20px 0; }
+  .content .os-tab-row { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .content .os-tab { padding: 7px 18px; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; cursor: pointer; border: var(--line) solid var(--rule); border-radius: 100px; background: transparent; color: var(--dim); user-select: none; }
+  .content .os-tab.active { color: var(--fg); border-color: var(--accent); }
+  .content .os-panel { display: none; border: var(--line) solid var(--rule); border-radius: var(--radius); padding: 20px 24px; }
+  .content .os-panel.active { display: block; }
+  .content .os-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 100px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; margin-bottom: 10px; color: var(--fg); }
+  .content .badge-win { border: var(--line) solid var(--accent); } .content .badge-mac { border: var(--line) solid var(--medium-blue); }
+  .content .steps { counter-reset: step; list-style: none; margin: 22px 0; padding: 0; }
+  .content .steps li { display: flex; gap: 18px; margin-bottom: 26px; counter-increment: step; align-items: flex-start; padding: 0; }
+  .content .steps li::before { content: counter(step); position: static; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--spine); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11.5px; font-weight: 700; color: var(--fg); margin-top: 2px; }
+  .content .step-content { flex: 1; min-width: 0; }
+  .content .step-title { font-weight: 700; font-size: 16.5px; margin-bottom: 5px; color: var(--fg); }
+  .content .step-desc { color: var(--muted); font-size: 15px; }
+  .content .step-desc strong { color: var(--fg); }
+  .content .usecase-body p { color: var(--muted); font-size: 15.5px; margin: 0 0 14px; }
+  .content .usecase-body p strong, .content p strong, .content li strong, .content td strong { color: var(--fg); }
+  .content .prompt-block { background: transparent; border: var(--line) solid var(--accent); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 14px 18px; margin: 10px 0; font-family: var(--mono); font-size: 13.5px; color: var(--fg); line-height: 1.6; }
+  .content .info-box { border: var(--line) solid var(--medium-blue); border-left: 3px solid var(--medium-blue); border-radius: var(--radius); padding: 14px 18px; font-size: 15px; color: var(--muted); margin: 16px 0; display: flex; gap: 12px; }
+  .content .warn-box { border: var(--line) solid var(--orange); border-left: 3px solid var(--orange); border-radius: var(--radius); padding: 14px 18px; font-size: 15px; color: var(--muted); margin: 16px 0; display: flex; gap: 12px; }
+  .content .tip-box { border: var(--line) solid var(--accent); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 14px 18px; font-size: 15px; color: var(--muted); margin: 16px 0; display: flex; gap: 12px; }
+  .content .info-box strong, .content .warn-box strong, .content .tip-box strong { color: var(--fg); }
+  .content .info-box > div, .content .warn-box > div, .content .tip-box > div { min-width: 0; }
+  .content .ib-icon { flex-shrink: 0; font-size: 15px; line-height: 1.7; }
+  .content .req-grid, .content .outcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+  .content .req-item { border: var(--line) solid var(--rule); border-radius: var(--radius); padding: 14px 18px; min-width: 0; }
+  .content .req-label { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--dim); margin-bottom: 3px; text-transform: uppercase; }
+  .content .req-val { font-weight: 600; font-size: 15px; color: var(--fg); }
+  .content .outcome { border: var(--line) solid var(--rule); border-top: 3px solid var(--cisco-blue); border-radius: var(--radius); padding: 18px 20px; min-width: 0; }
+  .content .outcome:nth-child(2) { border-top-color: var(--magenta); } .content .outcome:nth-child(3) { border-top-color: var(--orange); } .content .outcome:nth-child(4) { border-top-color: var(--medium-blue); }
+  .content .outcome .o-num { font-family: var(--mono); font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+  .content .outcome .o-title { font-weight: 700; font-size: 16px; color: var(--fg); margin-bottom: 6px; }
+  .content .outcome p { font-size: 14px; margin: 0; color: var(--muted); }
+  .content .table-wrap { overflow-x: auto; margin: 16px 0; }
+  .content .comp-table { width: 100%; border-collapse: collapse; margin: 0; font-size: 14px; }
+  .content .comp-table th { padding: 10px 14px; text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .15em; color: var(--dim); text-transform: uppercase; border: var(--line) solid var(--rule); font-weight: 600; }
+  .content .comp-table td { padding: 10px 14px; border: var(--line) solid var(--rule); color: var(--muted); vertical-align: top; }
+  .content .comp-table td code { color: var(--accent); }
+  .content .rw { display: inline-block; font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: .1em; padding: 1px 7px; border-radius: 100px; border: var(--line) solid; white-space: nowrap; }
+  .content .rw-r { color: var(--green); border-color: var(--green); } .content .rw-w { color: var(--red); border-color: var(--red); } .content .rw-u { color: var(--fg); border-color: var(--orange); }
+  .content .core-tag { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; padding: 2px 10px; border-radius: 100px; margin-left: 10px; vertical-align: middle; color: var(--fg); border: var(--line) solid; }
+  .content .core-yes { border-color: var(--accent); } .content .core-ext { border-color: var(--magenta); }
+  .content h2 { font-size: 24px; font-weight: 700; margin: 40px 0 12px; letter-spacing: -.015em; border-left: 3px solid var(--spine); padding-left: 14px; line-height: 1.25; }
+  .content h3 { font-size: 17px; font-weight: 700; margin: 24px 0 8px; }
+  .content p { margin: 0 0 12px; color: var(--muted); font-size: 15.5px; }
+  .content em { color: var(--fg); }
+  .content p code, .content li code, .content td code, .content .step-desc code, .content .info-box code, .content .warn-box code, .content .tip-box code, .content .outcome code, .content .req-val code { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+  .content ul, .content ol:not(.steps) { padding-left: 0; list-style: none; margin: 10px 0; }
+  .content ul li, .content ol:not(.steps) li { color: var(--muted); font-size: 15.5px; padding: 4px 0 4px 22px; position: relative; }
+  .content ul li::before { content: '→'; position: absolute; left: 0; color: var(--dim); font-family: var(--mono); font-size: 12px; top: 5px; }
+  .content .xref { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(2,200,255,.4); text-underline-offset: 3px; }
+  .content .xref:hover { text-decoration-color: var(--accent); }
+  .content a.ref { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
+  .content pre, .content .prompt-block { position: relative; padding-right: 76px; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; border-radius: 100px; border: var(--line) solid var(--rule); background: var(--bg); color: var(--dim); cursor: pointer; opacity: 0; transition: opacity .15s, color .15s, border-color .15s; }
+  .content pre:hover .copy-btn, .content .prompt-block:hover .copy-btn, .copy-btn:focus, .copy-btn.done { opacity: 1; }
+  .copy-btn:hover, .copy-btn.done { color: var(--fg); border-color: var(--accent); }
+  @media (hover: none) { .copy-btn { opacity: 1; } }
+  .content .client-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 20px 0 14px; }
+  .content .client-card { text-align: left; background: transparent; border: var(--line) solid var(--rule); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; color: var(--fg); font-family: var(--sans); display: flex; flex-direction: column; gap: 3px; transition: border-color .15s; min-width: 0; }
+  .content .client-card:hover { border-color: var(--muted); }
+  .content .client-card.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .content .client-card:nth-child(2).active { border-color: var(--magenta); box-shadow: inset 0 0 0 1px var(--magenta); } .content .client-card:nth-child(3).active { border-color: var(--orange); box-shadow: inset 0 0 0 1px var(--orange); } .content .client-card:nth-child(4).active { border-color: var(--medium-blue); box-shadow: inset 0 0 0 1px var(--medium-blue); }
+  .content .client-card:nth-child(5).active { border-color: var(--magenta); box-shadow: inset 0 0 0 1px var(--magenta); } .content .client-card:nth-child(6).active { border-color: var(--orange); box-shadow: inset 0 0 0 1px var(--orange); } .content .client-card:nth-child(7).active { border-color: var(--medium-blue); box-shadow: inset 0 0 0 1px var(--medium-blue); }
+  .content .client-name { font-weight: 700; font-size: 14.5px; }
+  .content .client-sub { font-size: 12px; color: var(--muted); }
+  .content .client-auth { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin-top: 4px; }
+  .content .client-card.active .client-auth { color: var(--accent); }
+  .content .client-panel { display: none; border: var(--line) solid var(--rule); border-radius: var(--radius); padding: 20px 24px; min-width: 0; }
+  .content .client-panel.active { display: block; }
+  .content .client-panel-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; padding-bottom: 12px; margin-bottom: 8px; border-bottom: var(--line) solid var(--rule); }
+  .content .client-panel-title { font-size: 19px; font-weight: 700; color: var(--accent); }
+  .content .client-panel-meta { font-size: 13.5px; color: var(--muted); }
+  @media (max-width: 760px) { .content .client-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .content .req-grid, .content .outcome-grid { grid-template-columns: 1fr; } }
+
+  /* ── CHECKPOINT ── */
+  .cp { margin-top: 52px; border: var(--line) solid var(--spine); border-top: 3px solid var(--spine); border-radius: 16px; padding: 26px 28px; position: relative; }
+  .cp .eyebrow { margin-bottom: 10px; }
+  .cp .q { font-size: 19px; font-weight: 600; line-height: 1.4; margin: 0 0 16px; text-wrap: balance; color: var(--fg); }
+  .cp-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 0; }
+  .cp-row .input { flex: 1; min-width: 220px; }
+  .cp-meta { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin-top: 12px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; color: var(--dim); }
+  .cp-meta button { font: inherit; background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+  .cp .hint { margin-top: 12px; font-size: 14.5px; color: var(--fg); border-left: 2px solid var(--orange); padding-left: 12px; }
+  .cp.solved { --spine: var(--green); }
+  .cp .banked { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .cp .banked b { font-family: var(--mono); color: var(--green); font-size: 18px; }
+  .cp .banked .msg { margin: 0; }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 40px; padding-top: 22px; border-top: var(--line) solid var(--rule); }
+  .pager a { text-decoration: none; color: var(--fg); font-weight: 600; font-size: 15px; display: flex; flex-direction: column; gap: 2px; max-width: 48%; }
+  .pager a small { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); font-weight: 400; }
+  .pager a.next { text-align: right; align-items: flex-end; margin-left: auto; }
+  .pager a:hover { color: var(--accent); }
+  .pager { border-top-color: var(--spine); }
+
+  /* ── TOOL DIRECTORY ── */
+  .dir-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 18px 0 6px; }
+  .dir-controls .input { max-width: 320px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+  .chip { font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding: 7px 14px; border-radius: 100px; border: var(--line) solid var(--rule); background: transparent; color: var(--dim); cursor: pointer; transition: color .15s, border-color .15s; text-decoration: none; display: inline-block; }
+  .chip:hover { color: var(--fg); }
+  .chip.active { color: var(--fg); border-color: var(--accent); }
+  .dir-group { margin: 22px 0; }
+  .dir-group h4 { font-family: var(--mono); font-size: 10.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--dim); margin: 0 0 10px; font-weight: 600; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tool { font-family: var(--mono); font-size: 12.5px; padding: 7px 12px; border-radius: 8px; border: var(--line) solid var(--rule); color: var(--fg); display: inline-flex; align-items: center; gap: 8px; }
+  .tool::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dim); flex-shrink: 0; }
+  .tool.r::before { background: var(--green); } .tool.w::before { background: var(--red); } .tool.u::before { background: var(--orange); }
+  .tool.r { border-color: rgba(69,153,31,.7); } .tool.w { border-color: rgba(235,70,81,.7); } .tool.u { border-color: var(--orange); }
+  .tool small { color: var(--dim); margin-left: 8px; font-size: 9.5px; letter-spacing: .1em; }
+  .dir-note { font-size: 13.5px; color: var(--dim); margin: 8px 0 0; }
+
+  /* ── ASK ── */
+  .ask-box { border: var(--line) solid var(--medium-blue); border-radius: 16px; padding: 22px; }
+  .ask-box .input { font-size: 17px; padding: 16px 18px; }
+  .result { border: var(--line) solid var(--rule); border-left: 3px solid var(--spine); border-radius: 12px; padding: 16px 18px; margin-top: 12px; text-decoration: none; color: inherit; display: block; transition: border-color .15s; }
+  .result:hover { border-color: var(--spine); }
+  .result .r-route { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); }
+  .result h4 { margin: 4px 0 4px; font-size: 16px; }
+  .result p { margin: 0; font-size: 14px; color: var(--muted); }
+  .answer { border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; margin: 20px 0; white-space: pre-wrap; font-size: 15.5px; color: var(--fg); }
+  .answer-label { margin-bottom: 8px; }
+
+  /* ── SCORECARD ── */
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 18px; }
+  .score-tile { border: var(--line) solid var(--rule); border-left: 3px solid var(--spine); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+  .score-tile.done { --spine: var(--green); border-color: rgba(69,153,31,.7); }
+  .score-tile .st-l { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+  .score-tile .st-t { font-size: 14px; font-weight: 600; margin: 3px 0; line-height: 1.3; }
+  .score-tile .st-s { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .score-tile.done .st-s { color: var(--green); }
+  .score-total { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
+  .score-total b { font-family: var(--mono); font-size: 34px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .score-total span { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+  .code-line { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+  .code-line code { font-family: var(--mono); font-size: 16px; letter-spacing: .08em; border: var(--line) solid var(--rule); border-radius: 8px; padding: 8px 12px; color: var(--fg); }
+  @media (max-width: 560px) { .score-grid { grid-template-columns: 1fr; } }
+  .kv { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .kv .input { font-family: var(--mono); font-size: 14px; }
+  .out { font-family: var(--mono); font-size: 13px; color: var(--muted); word-break: break-all; margin-top: 12px; min-height: 1.4em; }
+  .out b { color: var(--fg); }
+  .bank-list { list-style: none; margin: 0; padding: 0; }
+  .bank-list li { padding: 10px 0; border-bottom: 1px solid rgba(82,94,108,.5); font-size: 14.5px; color: var(--muted); }
+  .bank-list li b { color: var(--fg); display: block; }
+  .bank-list li span { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+
+  /* ── FOOTER, FAB ── */
+  .fab { border-color: var(--magenta); }
+  .fab { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 45; font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; padding: 12px 18px; border-radius: 100px; border: var(--line) solid var(--accent); background: var(--bg); color: var(--fg); text-decoration: none; display: inline-flex; gap: 8px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); transition: border-color .15s; }
+  .fab:hover { border-color: var(--fg); }
+  .fab svg { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; }
+  @media (max-width: 560px) { .fab { padding: 13px; border-radius: 50%; } .fab span { display: none; } .fab svg { width: 18px; height: 18px; } }
+  .site-foot { padding-block: 36px 110px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--dim); text-align: center; line-height: 1.9; }
+  .site-foot a { color: var(--muted); text-decoration: none; }
+  .site-foot a:hover { color: var(--fg); }
+</style>
+
+<header class="topbar">
+  <div class="colorbar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="topbar-in">
+    <a class="brand" href="#home" aria-label="ThousandEyes MCP Lab home">
+      <span class="mark">TE</span>
+      <span class="brand-text"><span class="brand-name">ThousandEyes MCP Lab</span><br><span class="brand-sub">AI Builders · Hands-on</span></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Site">
+      <a href="#home" data-nav="home">Overview</a>
+      <a href="#setup" data-nav="setup">Setup</a>
+      <a href="#labs" data-nav="labs">Labs</a>
+      <a href="#builds" data-nav="builds">Builds</a>
+      <a href="#field" data-nav="field">Field guide</a>
+      <a href="#standings" data-nav="standings">Scoreboard</a>
+    </nav>
+    <a class="pass" id="pass" href="#home">Check in</a>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ═══ HOME ═══ -->
+  <section class="view" id="view-home">
+    <div class="hero">
+      <canvas id="skyline" aria-hidden="true"></canvas>
+      <div class="hero-fade" aria-hidden="true"></div>
+      <div class="colorbar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="wrap hero-inner">
+        <div class="hero-copy">
+          <span class="spine multi" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <p class="eyebrow" id="hero-eyebrow">AI Builders · Hands-on lab · 80 min · 1,000 pts</p>
+          <h1>Build an agent that <span class="grad">sees the internet.</span></h1>
+          <p class="lede">Connect the AI client you already build in to live ThousandEyes data, map your own company’s digital landscape, write your triage runbook as a skill, and run it without you in the loop.</p>
+          <p class="lede-b"><strong>Bring your laptop</strong> with Claude, Cursor, GitHub Copilot, ChatGPT, Codex, Gemini CLI or Kiro. Nothing to install.</p>
+          <div class="cta-row"><a class="textlink" href="#setup">Open the setup guide →</a><a class="textlink" href="#labs">Read the chapters →</a></div>
+          <p class="hero-meta" id="hero-meta"></p>
+        </div>
+        <div class="checkin" id="checkin-card"></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="wrap">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">How it runs</p>
+        <h2 class="sect">Three steps to the <span class="hl">first checkpoint.</span></h2>
+        <div class="how">
+          <div><p class="eyebrow accent">Step 01</p><h3>Check in</h3><p>Pick a handle above. Points bank as you clear checkpoints, and the same handle picks up where you left off.</p></div>
+          <div><p class="eyebrow accent">Step 02</p><h3>Connect your client</h3><p><a href="#setup">Open the setup guide</a>, choose the AI client you build in, run the verify prompt. Five minutes, and the first 100 points.</p></div>
+          <div><p class="eyebrow accent">Step 03</p><h3>Build and bank</h3><p>Six labs and three builds, each with a checkpoint at the end. 100 points a checkpoint, 1,000 on the table.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="wrap">
+        <span class="spine" style="--spine:var(--magenta)" aria-hidden="true"></span>
+        <p class="eyebrow">The chapters</p>
+        <h2 class="sect">Ten checkpoints, <span class="hl">one agent.</span></h2>
+        <div class="stats"><div class="stat"><b>10</b><span>Checkpoints</span></div><div class="stat"><b>1,000</b><span>Points available</span></div><div class="stat"><b>54</b><span>MCP tools</span></div><div class="stat"><b>8</b><span>AI clients</span></div></div>
+        <div class="chapters" id="chapters-home"></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="wrap">
+        <span class="spine" style="--spine:var(--orange)" aria-hidden="true"></span>
+        <p class="eyebrow">// 00 · What you’ll build today</p>
+        <h2 class="sect">What you’ll <span class="hl">walk out with</span></h2>
+        <p class="sect-desc">This lab is for engineers and developers who build with AI. By the end of it you will have an agent that reads live ThousandEyes data, follows a triage runbook you wrote, and runs on a schedule without you in the loop.</p>
+        <div class="content" style="max-width:none">
+          <!--@OUTCOMES@-->
+          <!--@TIMING@-->
+          <!--@REQS@-->
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="wrap two-up">
+        <div class="panel">
+          <span class="spine" style="--spine:var(--medium-blue)" aria-hidden="true"></span>
+          <p class="eyebrow accent">House rules</p>
+          <ul class="rules">
+            <li><strong>Any order.</strong> Checkpoints are independent. Do Labs 1, 3 and 5 at minimum.</li>
+            <li><strong>Three free tries</strong> per checkpoint, then −10 points for each wrong answer.</li>
+            <li><strong>Hints cost 25 points</strong> each. They point you to the right section without giving the answer away.</li>
+            <li><strong>It’s a shared org.</strong> Prefix everything you create with your initials, and delete it in Lab 6.</li>
+            <li class="warn"><strong>Read what the tool is about to do.</strong> Your client asks before every write. That is the production pattern too.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <span class="spine" style="--spine:var(--green)" aria-hidden="true"></span>
+          <div class="panel-head"><p class="eyebrow accent">Live standings</p><a href="#standings">Full scoreboard →</a></div>
+          <ol class="board" id="board-home"></ol>
+          <p class="empty" id="board-home-note"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="wrap">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">ThousandEyes access for today</p>
+        <h2 class="sect">See a <span class="hl">proctor</span> before you start</h2>
+        <div class="content" style="max-width:none">
+          <!--@PROCTORS@-->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SETUP ═══ -->
+  <section class="view" id="view-setup" data-group="setup" hidden>
+    <div class="wrap page">
+      <div class="page-head">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">// 01 · Core · 5 min · 100 pts</p>
+        <h1>Choose your poison: <span class="hl">connect your AI client</span></h1>
+        <p class="desc">ThousandEyes publishes one hosted MCP server at <code>https://api.thousandeyes.com/mcp</code>. Any client that speaks MCP over HTTP can use it. Pick the one you build in, follow its panel, run the verify prompt, and you’re ready for the labs.</p>
+        <div class="meta-row"><div data-os-switch></div></div>
+      </div>
+      <div class="content">
+        <!--@HOW_IT_WORKS@-->
+        <!--@PROCTORS@-->
+        <!--@SETUP_BODY@-->
+        <h2 id="tool-catalogue">Tool directory</h2>
+        <p>54 tools, grouped the way you’ll use them. <span class="rw rw-r">READ</span> tools only read. <span class="rw rw-w">WRITE</span> tools create, change or delete things in your org. <span class="rw rw-u">UNITS</span> tools execute live tests and consume ThousandEyes units. Claude groups the read-only and write/delete tools separately when it asks for permission, so you can always allow reads and keep writes on ask.</p>
+        <div id="tool-dir"></div>
+        <!--@TOOL_TIP@-->
+        <div class="cp" data-cp="cp0"></div>
+        <div class="pager"><a href="#home"><small>Back</small>Overview</a><a class="next" href="#lab-1"><small>Next · Lab 1</small>Map your digital landscape →</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LABS OVERVIEW ═══ -->
+  <section class="view" id="view-labs" data-group="labs" hidden>
+    <div class="wrap page">
+      <div class="page-head">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">// 02 · Core · 30 min · 600 pts</p>
+        <h1><span class="hl">Labs</span> in your client</h1>
+        <p class="desc">Six labs, each a conversation. Every lab ends with a <strong>builder note</strong>: the tool chain and the prompt pattern you’ll lift into your agent in <a class="xref" href="#build-1">Build 1</a>. Do Labs 1, 3 and 5 at minimum.</p>
+      </div>
+      <div class="content" style="max-width:none">
+        <!--@LABS_INTRO@-->
+      </div>
+      <div class="chapters" id="chapters-labs" style="margin-top:28px"></div>
+    </div>
+  </section>
+
+  <!--@LAB_PAGES@-->
+
+  <!-- ═══ BUILDS OVERVIEW ═══ -->
+  <section class="view" id="view-builds" data-group="builds" hidden>
+    <div class="wrap page">
+      <div class="page-head">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">// 03 to 06 · Core, then extension · 300 pts</p>
+        <h1>An agent that only runs when you type <span class="hl">is a chat.</span></h1>
+        <p class="desc">Three builds turn the Lab 3 conversation into a skill, a schedule and a headless command. They are written for Claude Code because its skills, scheduled tasks and routines give the shortest path from runbook to running agent; the equivalents for Cursor, Copilot, Codex and Gemini CLI are mapped at the end of Section 03.</p>
+      </div>
+      <div class="chapters" id="chapters-builds"></div>
+    </div>
+  </section>
+
+  <!--@BUILD_PAGES@-->
+
+  <!-- ═══ FIELD GUIDE ═══ -->
+  <section class="view" id="view-field" data-group="field" hidden>
+    <div class="wrap page">
+      <div class="page-head">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">// 07 to 09 · Field guide</p>
+        <h1>Beyond MCP, guardrails, <span class="hl">capstone</span></h1>
+        <p class="desc">Where the MCP server’s edges are, ten rules that come from the labs rather than a policy template, six agents worth building, and the troubleshooting table for when something doesn’t behave as described.</p>
+        <div class="meta-row"><a class="chip" href="#field-07">07 · Beyond MCP</a><a class="chip" href="#field-08">08 · Guardrails</a><a class="chip" href="#field-09">09 · Capstone</a></div>
+      </div>
+      <div class="content">
+        <!--@FIELD_BODY@-->
+        <div class="pager"><a href="#build-3"><small>Back · Build 3</small>Headless for CI and cron</a><a class="next" href="#standings"><small>Next</small>The scoreboard →</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STANDINGS ═══ -->
+  <section class="view" id="view-standings" data-group="score" hidden>
+    <div class="wrap page">
+      <div class="page-head">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">// Scoreboard</p>
+        <h1>The <span class="hl">scoreboard</span></h1>
+        <p class="desc" id="standings-desc"></p>
+      </div>
+      <div class="two-up">
+        <div class="panel"><p class="eyebrow accent">Your scorecard</p><div id="scorecard"></div></div>
+        <div class="panel"><div class="panel-head"><p class="eyebrow accent" id="board-title">Live standings</p><span class="eyebrow" id="board-refresh"></span></div><ol class="board" id="board-full"></ol><p class="empty" id="board-full-note"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ASK ═══ -->
+  <section class="view" id="view-ask" data-group="setup" hidden>
+    <div class="wrap page narrow">
+      <div class="page-head">
+        <span class="spine multi" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <p class="eyebrow">// Front desk</p>
+        <h1>Ask the <span class="hl">guide</span></h1>
+        <p class="desc">Type what you’re stuck on. It searches every page of this lab, prompts and commands included, and takes you to the right spot.</p>
+      </div>
+      <div class="ask-box">
+        <form id="ask-form"><label class="lbl" for="ask-q">Your question</label><input class="input" id="ask-q" autocomplete="off" placeholder="e.g. how do I get a token"></form>
+        <div class="chips" id="ask-chips"></div>
+      </div>
+      <div id="ask-answer"></div>
+      <div id="ask-results"></div>
+    </div>
+  </section>
+
+  <!-- ═══ KEYMAKER (proctors) ═══ -->
+  <section class="view" id="view-keymaker" data-group="score" hidden>
+    <div class="wrap page narrow">
+      <div class="page-head">
+        <span class="spine" aria-hidden="true"></span>
+        <p class="eyebrow">// Proctors only</p>
+        <h1>Key<span class="hl">maker</span></h1>
+        <p class="desc">Two tools for the people running the room. Nothing here changes anyone’s score.</p>
+      </div>
+      <div class="two-up">
+        <div class="panel">
+          <p class="eyebrow accent">Verify a score code</p>
+          <form id="verify-form" class="kv"><input class="input" id="v-name" placeholder="Handle, exactly as shown"><input class="input" id="v-code" placeholder="Score code, e.g. 640-K7-3F9A"><button class="btn" type="submit">Verify</button></form>
+          <p class="out" id="verify-out"></p>
+        </div>
+        <div class="panel">
+          <p class="eyebrow accent">Hash an answer</p>
+          <p class="empty">Local mode checks answers against hashes baked into this page. Type a new accepted answer to get its hash for checkpoints.json.</p>
+          <form id="hash-form" class="kv"><input class="input" id="h-in" placeholder="Answer text"><button class="btn ghost" type="submit">Hash it</button></form>
+          <p class="out" id="hash-out"></p>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <p class="eyebrow accent">Checkpoint bank</p>
+        <ul class="bank-list" id="bank-list"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="colorbar" aria-hidden="true" style="margin-bottom:32px"><i></i><i></i><i></i><i></i></div>
+  THOUSANDEYES MCP LAB · AI BUILDERS EDITION · v1.0 · OCTOBER 2026<br>
+  <a href="#keymaker">Proctors</a> · <a href="#ask">Ask the guide</a> · <a href="#standings">Scoreboard</a><br>
+  ThousandEyes is a trademark of Cisco Systems, Inc. · Claude is a trademark of Anthropic, PBC. · Routines and the routine API trigger are in research preview; check the linked docs for current limits.
+</footer>
+
+<a class="fab" href="#ask" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Ask the guide</span></a>
+
+<!--@CONFIG_SCRIPT@-->
+<script>
+(function () {
+  'use strict';
+
+  /* ── configuration ── */
+  const CONFIG = Object.assign({ apiBase: '', event: { name: 'AI Builders', date: '', city: '' } }, window.TE_LAB_CONFIG || {});
+  CONFIG.apiBase = String(CONFIG.apiBase || '').replace(/\/+$/, '');
+  const BANK = /*@BANK@*/null;
+  const TOOLS = /*@TOOLS@*/[];
+  const SEARCH = /*@SEARCH@*/[];
+  const SALT = 'te-lab-2026';
+  const SALT2 = 'te-lab-score-2026';
+  const CP = BANK ? BANK.checkpoints : [];
+  const RULES = BANK ? BANK.rules : { pointsPerCheckpoint: 100, freeTries: 3, wrongAnswerPenalty: 10, hintCost: 25, total: 1000 };
+  const CP_BY_ID = {}; CP.forEach(c => { CP_BY_ID[c.id] = c; });
+  const CHAPTERS = [
+    { route: 'setup',   num: '01 · Setup',   tag: 'Start here', title: 'Choose your poison', sub: 'Connect Claude, Cursor, Copilot, ChatGPT, Codex, Gemini CLI or Kiro to the hosted ThousandEyes MCP server, then verify.', time: '5 min', cp: 'cp0', group: 'setup' },
+    { route: 'lab-1',   num: 'Lab 01', tag: 'Landscape', title: 'Map your digital landscape, then monitor it', sub: 'One API call shows what your company depends on. Your client turns it into ThousandEyes tests.', time: '', cp: 'cp1', group: 'labs' },
+    { route: 'lab-2',   num: 'Lab 02', tag: 'Inventory', title: 'Map the estate', sub: 'What does this org monitor, from where, and what alerts on it?', time: '', cp: 'cp2', group: 'labs' },
+    { route: 'lab-3',   num: 'Lab 03', tag: 'Incident', title: 'Triage an alert', sub: 'From “something is red” to a fault domain, with evidence.', time: '', cp: 'cp3', group: 'labs' },
+    { route: 'lab-4',   num: 'Lab 04', tag: 'Insights', title: 'Us or the internet?', sub: 'Internet Insights: outages in providers you depend on, independent of your tests.', time: '', cp: 'cp4', group: 'labs' },
+    { route: 'lab-5',   num: 'Lab 05', tag: 'AIOps', title: 'Anomalies and an instant test', sub: 'Find what hasn’t alerted yet, then measure on demand.', time: '', cp: 'cp5', group: 'labs' },
+    { route: 'lab-6',   num: 'Lab 06', tag: 'Writes', tagc: 'red', title: 'Ship the alerting, then clean up', sub: 'Alert rule and dashboard for your Lab 1 tests, then delete everything you created.', time: '', cp: 'cp6', group: 'labs' },
+    { route: 'build-0', num: '03 · Claude Code', tag: 'Connect', tagc: 'blue', title: 'Connect Claude Code', sub: 'Two paths in, and the permission rules you’ll use all day.', time: '10 min', cp: null, group: 'builds' },
+    { route: 'build-1', num: '04 · Build 1', tag: 'Skill', tagc: 'blue', title: 'The te-triage skill', sub: 'Lab 3 written down as a runbook that runs the same way every time, for everyone on your team.', time: '20 min', cp: 'cp7', group: 'builds' },
+    { route: 'build-2', num: '05 · Build 2', tag: 'Schedule', tagc: 'blue', title: 'Schedule it', sub: 'A local scheduled task today; a cloud routine fired by a ThousandEyes alert as the stretch goal.', time: '15 + 20 min', cp: 'cp8', group: 'builds' },
+    { route: 'build-3', num: '06 · Build 3', tag: 'Headless', tagc: 'blue', title: 'Headless for CI and cron', sub: 'claude -p, JSON out, deny by default. The same agent as a command.', time: '15 min', cp: 'cp9', group: 'builds' },
+    { route: 'field',   num: '07 to 09', tag: 'Reference', tagc: 'pink', title: 'Field guide', sub: 'API v7 and SDKs, ten production rules, six agents worth building, troubleshooting.', time: 'read', cp: null, group: 'field' },
+  ];
+  const TITLES = { home: '', setup: 'Setup', labs: 'Labs', builds: 'Builds', field: 'Field guide', standings: 'Scoreboard', ask: 'Ask the guide', keymaker: 'Keymaker' };
+  CHAPTERS.forEach(c => { TITLES[c.route] = c.title; });
+
+  /* ── utilities ── */
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const canon = s => String(s || '').toLowerCase().normalize('NFKC').replace(/[`"'“”‘’]/g, '').trim().replace(/[.!?]+$/, '').replace(/[\s_-]+/g, '');
+  async function sha256(s) {
+    if (!(window.crypto && crypto.subtle)) throw new Error('nocrypto');
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  const fmtTime = ms => { try { return new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+  const cleanName = n => { n = String(n || '').normalize('NFKC').replace(/\s+/g, ' ').trim(); return (/^[A-Za-z0-9][A-Za-z0-9 _.\-]{1,23}$/.test(n)) ? n : ''; };
+  const solvedCount = p => p ? CP.filter(c => p.solved && p.solved[c.id]).length : 0;
+  const ls = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
+
+  /* ── store: local (this browser) or live (lab API) ── */
+  const Store = (() => {
+    const KEY = 'te-lab-player-v1';
+    let player = null;
+    const listeners = new Set();
+    const emit = () => listeners.forEach(fn => { try { fn(player); } catch (e) { console.error(e); } });
+    const save = () => { if (player) ls.set(KEY, JSON.stringify(player)); emit(); };
+    const api = CONFIG.apiBase ? async (path, body) => {
+      const r = await fetch(CONFIG.apiBase + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : { method: 'GET' });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { const e = new Error(j.error || ('The lab API answered ' + r.status + '.')); e.status = r.status; throw e; }
+      return j;
+    } : null;
+    const fresh = name => ({ name, points: 0, solved: {}, tries: {}, hints: {}, createdAt: Date.now() });
+    async function verifyLocal(cp, text) {
+      const h = await sha256(canon(text) + '|' + SALT);
+      return (cp.hashes || []).includes(h);
+    }
+    return {
+      live: !!api,
+      get player() { return player; },
+      on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+      async init() {
+        try { const raw = ls.get(KEY); if (raw) player = JSON.parse(raw); } catch (e) { player = null; }
+        if (player && !cleanName(player.name)) player = null;
+        if (api && player) { try { const j = await api('/player?name=' + encodeURIComponent(player.name)); if (j && j.player) { player = j.player; save(); return; } } catch (e) { /* offline: keep the cached copy */ } }
+        emit();
+      },
+      async checkin(name) {
+        name = cleanName(name);
+        if (!name) throw new Error('Pick a handle of 2 to 24 characters: letters, numbers, spaces, dots or dashes.');
+        if (api) { const j = await api('/checkin', { name }); player = j.player; }
+        else { player = (player && player.name === name) ? player : fresh(name); }
+        save(); return player;
+      },
+      signout() { player = null; ls.del(KEY); emit(); },
+      async answer(cpId, text) {
+        if (!player) throw new Error('Check in first.');
+        const cp = CP_BY_ID[cpId]; if (!cp) throw new Error('Unknown checkpoint.');
+        if (api) { const j = await api('/answer', { name: player.name, checkpoint: cpId, answer: String(text || '') }); player = j.player; save(); return { correct: !!j.correct, player }; }
+        if (player.solved[cpId]) return { correct: true, player, already: true };
+        const ok = await verifyLocal(cp, text);
+        player.tries[cpId] = (player.tries[cpId] || 0) + 1;
+        if (ok) { player.solved[cpId] = { at: Date.now() }; player.points += cp.points; }
+        else if (player.tries[cpId] > RULES.freeTries) { player.points = Math.max(0, player.points - RULES.wrongAnswerPenalty); }
+        save(); return { correct: ok, player };
+      },
+      async hint(cpId) {
+        if (!player) throw new Error('Check in first.');
+        const cp = CP_BY_ID[cpId];
+        if (api) { const j = await api('/hint', { name: player.name, checkpoint: cpId }); player = j.player; save(); return j.hint; }
+        if (!player.hints[cpId]) { player.hints[cpId] = true; if (!player.solved[cpId]) player.points = Math.max(0, player.points - RULES.hintCost); save(); }
+        return cp.hint;
+      },
+      async leaderboard() { if (!api) return null; const j = await api('/leaderboard'); return j.players || []; },
+      async ask(question, snippets) { if (!api) return null; try { const j = await api('/ask', { question, snippets }); return j.answer || null; } catch (e) { return null; } },
+    };
+  })();
+
+  async function scoreCode(p) {
+    const mask = CP.reduce((m, cp, i) => m | (p.solved && p.solved[cp.id] ? (1 << i) : 0), 0);
+    const sig = (await sha256(p.name.toLowerCase() + '|' + p.points + '|' + mask + '|' + SALT2)).slice(0, 4).toUpperCase();
+    return p.points + '-' + mask.toString(36).toUpperCase().padStart(2, '0') + '-' + sig;
+  }
+
+  /* ── router ── */
+  const VIEWS = {};
+  $$('.view').forEach(v => { VIEWS[v.id.replace(/^view-/, '')] = v; });
+  function resolve(hash) {
+    let h = String(hash || '').replace(/^#/, ''), scroll = null;
+    if (/^field-0[789]$/.test(h)) { scroll = 'sec-' + h.slice(6); h = 'field'; }
+    if (h === 'hunt' || h === 'leaderboard') h = 'standings';
+    if (!VIEWS[h]) h = 'home';
+    return { view: h, scroll };
+  }
+  let currentView = null;
+  function render() {
+    const { view, scroll } = resolve(location.hash);
+    const changed = view !== currentView;
+    currentView = view;
+    Object.keys(VIEWS).forEach(k => { VIEWS[k].hidden = k !== view; });
+    document.title = (TITLES[view] ? TITLES[view] + ' · ' : '') + 'ThousandEyes MCP Lab';
+    const group = view.startsWith('lab-') ? 'labs' : view.startsWith('build-') ? 'builds' : view;
+    $$('#nav a').forEach(a => a.classList.toggle('active', a.dataset.nav === group));
+    if (changed) window.scrollTo({ top: 0, behavior: 'instant' });
+    if (scroll) requestAnimationFrame(() => { const el = document.getElementById(scroll); if (el) el.scrollIntoView({ block: 'start' }); });
+    if (view === 'standings') Board.start(); else Board.stop();
+    if (view === 'home' && changed) Board.refresh();
+    if (view === 'ask') setTimeout(() => { const q = $('#ask-q'); if (q && changed) q.focus(); }, 50);
+  }
+  window.addEventListener('hashchange', render);
+
+  /* ── hero canvas: agents and paths ── */
+  (function skyline() {
+    const cv = $('#skyline'); if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W = 0, H = 0, nodes = [], links = [], packets = [], pulses = [], raf = 0, running = false, last = 0;
+    const rnd = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
+    function build() {
+      const r = rnd(7); nodes = []; links = []; packets = []; pulses = [];
+      const n = W < 700 ? 18 : 34;
+      for (let i = 0; i < n; i++) { const k = r(); nodes.push({ x: (0.22 + 0.76 * r()) * W, y: (0.06 + 0.88 * r()) * H, r: 1.6 + r() * 2.2, hub: r() > 0.8, c: k < 0.6 ? '#02C8FF' : k < 0.8 ? '#FF007F' : '#FF9000' }); }
+      nodes.forEach((a, i) => {
+        nodes.map((b, j) => ({ j, d: Math.hypot(a.x - b.x, a.y - b.y) })).filter(o => o.j !== i).sort((p, q) => p.d - q.d).slice(0, a.hub ? 4 : 2)
+          .forEach(o => { if (!links.some(l => (l.a === i && l.b === o.j) || (l.a === o.j && l.b === i))) links.push({ a: i, b: o.j, bend: (r() - 0.5) * 0.6 }); });
+      });
+      for (let i = 0; i < Math.min(26, links.length); i++) {
+        const k = r();
+        packets.push({ l: Math.floor(r() * links.length), t: r(), v: 0.0015 + r() * 0.003, c: k < 0.5 ? '2,200,255' : (k < 0.78 ? '255,0,127' : '255,144,0') });
+      }
+    }
+    const ctrl = l => { const a = nodes[l.a], b = nodes[l.b]; const dx = b.x - a.x, dy = b.y - a.y; return { x: (a.x + b.x) / 2 - dy * l.bend, y: (a.y + b.y) / 2 + dx * l.bend }; };
+    const pt = (l, t) => { const a = nodes[l.a], b = nodes[l.b], c = ctrl(l), u = 1 - t; return { x: u * u * a.x + 2 * u * t * c.x + t * t * b.x, y: u * u * a.y + 2 * u * t * c.y + t * t * b.y }; };
+    function draw(dt) {
+      ctx.clearRect(0, 0, W, H);
+      ctx.lineWidth = 1;
+      links.forEach(l => { const a = nodes[l.a], b = nodes[l.b], c = ctrl(l); ctx.strokeStyle = 'rgba(10,96,255,0.42)'; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(c.x, c.y, b.x, b.y); ctx.stroke(); });
+      pulses = pulses.filter(p => p.a > 0.03);
+      pulses.forEach(p => { ctx.strokeStyle = 'rgba(' + p.c + ',' + p.a.toFixed(3) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.stroke(); p.r += 0.7 * dt; p.a *= Math.pow(0.962, dt); });
+      nodes.forEach(n => { ctx.fillStyle = n.hub ? '#FFFFFF' : n.c; ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = n.hub ? 'rgba(255,255,255,0.3)' : n.c + '55'; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 4, 0, Math.PI * 2); ctx.stroke(); });
+      packets.forEach(p => {
+        const l = links[p.l]; if (!l) return;
+        const q = pt(l, p.t), q2 = pt(l, Math.max(0, p.t - 0.06));
+        ctx.strokeStyle = 'rgba(' + p.c + ',0.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(q2.x, q2.y); ctx.lineTo(q.x, q.y); ctx.stroke(); ctx.lineWidth = 1;
+        ctx.fillStyle = 'rgb(' + p.c + ')'; ctx.beginPath(); ctx.arc(q.x, q.y, 2.1, 0, Math.PI * 2); ctx.fill();
+        p.t += p.v * dt;
+        if (p.t >= 1) { if (Math.random() < 0.4) { const n = nodes[l.b]; pulses.push({ x: n.x, y: n.y, r: 4, a: 0.55, c: p.c }); } p.t = 0; p.l = Math.floor(Math.random() * links.length); }
+      });
+    }
+    function loop(now) { if (!running) return; const dt = last ? Math.min(3, (now - last) / 16) : 1; last = now; draw(dt); raf = requestAnimationFrame(loop); }
+    function start() { if (running || reduced || W < 10) return; running = true; last = 0; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+    function resize() {
+      const rect = cv.parentElement.getBoundingClientRect();
+      if (rect.width < 10 || rect.height < 10) return;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = rect.width; H = rect.height; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      build(); draw(1);
+    }
+    if ('ResizeObserver' in window) new ResizeObserver(() => resize()).observe(cv.parentElement); else window.addEventListener('resize', resize);
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => (e.isIntersecting && !document.hidden) ? start() : stop()), { threshold: 0.02 }).observe(cv); else start();
+    document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+    resize();
+  })();
+
+  /* ── check-in card and pass ── */
+  function renderCheckin() {
+    const card = $('#checkin-card'); if (!card) return;
+    const p = Store.player, live = Store.live;
+    const dot = '<span class="status-dot' + (live ? ' live' : '') + '" title="' + (live ? 'Live scoreboard connected' : 'Scores stay on this laptop') + '"></span>';
+    if (!p) {
+      card.innerHTML = dot + '<p class="eyebrow accent">Builder check-in</p><p>Pick a handle to bank points. ' + (live ? 'Already playing? Enter the same handle to pick up where you left off.' : 'Scores stay in this browser, so use the same laptop and browser all session.') + '</p>' +
+        '<form id="checkin-form" class="field"><label for="handle">Your handle</label><input class="input" id="handle" name="handle" autocomplete="off" maxlength="24" placeholder="e.g. packetwrangler" required><button class="btn block" type="submit">Start building</button><p class="msg" id="checkin-msg"></p></form>';
+      const f = $('#checkin-form');
+      f.addEventListener('submit', async ev => { ev.preventDefault(); const btn = $('button', f), m = $('#checkin-msg'); btn.disabled = true; m.className = 'msg'; m.textContent = live ? 'Checking in…' : ''; try { await Store.checkin($('#handle').value); } catch (e) { m.className = 'msg bad'; m.textContent = e.message || 'That didn’t work.'; btn.disabled = false; } });
+    } else {
+      const next = nextChapter(p);
+      card.innerHTML = dot + '<p class="eyebrow accent">Checked in</p><div class="who"><b>' + esc(p.name) + '</b><span>' + p.points + ' pts · ' + solvedCount(p) + '/' + CP.length + '</span></div>' +
+        '<p style="margin-top:14px">' + (next ? 'Next up: <a href="#' + next.route + '" style="color:var(--fg)">' + esc(next.title) + '</a>.' : 'Every checkpoint banked. Take it to the capstone.') + '</p>' +
+        '<div class="cta-row"><a class="textlink" href="#standings">Your scorecard →</a><button class="linkbtn" id="switch-handle" type="button">Switch handle</button></div>';
+      $('#switch-handle').addEventListener('click', () => { Store.signout(); const i = $('#handle'); if (i) i.focus(); });
+    }
+  }
+  function renderPass() {
+    const el = $('#pass'); const p = Store.player;
+    if (!p) { el.textContent = 'Check in'; el.href = '#home'; }
+    else { el.innerHTML = esc(p.name) + ' · <b>' + p.points + ' pts</b>'; el.href = '#standings'; }
+  }
+  function nextChapter(p) { return CHAPTERS.find(c => c.cp && !(p.solved && p.solved[c.cp])) || null; }
+
+  /* ── chapter cards ── */
+  function chapterCard(c) {
+    const p = Store.player, done = !!(p && c.cp && p.solved && p.solved[c.cp]);
+    const cp = c.cp ? CP_BY_ID[c.cp] : null;
+    return '<a class="chapter g-' + c.group + (done ? ' done' : '') + '" href="#' + c.route + '"><div class="ch-head"><span class="ch-num">' + esc(c.num) + '</span><span class="tag ' + (c.tagc || '') + '">' + esc(c.tag) + '</span></div>' +
+      '<div class="ch-body"><h3 class="ch-title">' + esc(c.title) + '</h3><p class="ch-sub">' + esc(c.sub) + '</p><div class="ch-foot"><span class="pts">' + (cp ? (done ? 'Banked ' + cp.points + ' pts' : cp.points + ' pts') : 'No checkpoint') + '</span><span>' + esc(c.time || '') + (c.time ? ' · ' : '') + 'Open →</span></div></div></a>';
+  }
+  function renderChapters() {
+    const home = $('#chapters-home'); if (home) home.innerHTML = CHAPTERS.map(chapterCard).join('');
+    const labs = $('#chapters-labs'); if (labs) labs.innerHTML = CHAPTERS.filter(c => c.group === 'labs').map(chapterCard).join('');
+    const builds = $('#chapters-builds'); if (builds) builds.innerHTML = CHAPTERS.filter(c => c.group === 'builds').map(chapterCard).join('');
+  }
+
+  /* ── checkpoint panels ── */
+  function miniCheckin(container) {
+    const f = $('form.mini-checkin', container); if (!f) return;
+    f.addEventListener('submit', async ev => { ev.preventDefault(); const m = $('.msg', container); try { await Store.checkin($('input', f).value); } catch (e) { m.className = 'msg bad'; m.textContent = e.message; } });
+  }
+  function renderCp(container) {
+    const cpId = container.dataset.cp, cp = CP_BY_ID[cpId]; if (!cp) { container.hidden = true; return; }
+    const p = Store.player, solved = p && p.solved && p.solved[cpId];
+    container.className = 'cp' + (solved ? ' solved' : '');
+    const head = '<p class="eyebrow accent">Checkpoint · ' + esc(cp.label) + ' · ' + cp.points + ' pts</p><p class="q">' + esc(cp.question) + '</p>';
+    if (!p) {
+      container.innerHTML = head + '<form class="cp-row mini-checkin"><input class="input" placeholder="Your handle, to bank points" maxlength="24" required autocomplete="off"><button class="btn" type="submit">Check in</button></form><p class="msg">Check in once and every checkpoint on the site unlocks.</p>';
+      miniCheckin(container); return;
+    }
+    if (solved) {
+      const next = CHAPTERS.find(c => c.cp && !p.solved[c.cp]);
+      container.innerHTML = head + '<div class="banked"><b>+' + cp.points + ' banked</b><p class="msg">Solved at ' + fmtTime(solved.at) + '. ' + p.points + ' points so far.</p>' + (next ? '<a class="textlink" href="#' + next.route + '">Next open checkpoint: ' + esc(next.title) + ' →</a>' : '<a class="textlink" href="#standings">Every checkpoint banked. See the scoreboard →</a>') + '</div>';
+      return;
+    }
+    const tries = (p.tries && p.tries[cpId]) || 0, free = Math.max(0, RULES.freeTries - tries);
+    container.innerHTML = head + '<form class="cp-row"><input class="input" placeholder="' + esc(cp.placeholder || 'your answer') + '" autocomplete="off" required><button class="btn" type="submit">Check answer</button></form>' +
+      '<div class="cp-meta"><span>' + (free ? free + ' free ' + (free === 1 ? 'try' : 'tries') + ' left' : 'No free tries left: −' + RULES.wrongAnswerPenalty + ' pts per wrong answer') + '</span><button type="button" class="hint-btn">' + ((p.hints && p.hints[cpId]) ? 'Show the hint again' : 'Need a hint? −' + RULES.hintCost + ' pts') + '</button></div><p class="msg"></p><div class="hint" hidden></div>';
+    /* the store re-renders this panel on every change, so handlers re-query the container after each await */
+    const f = $('form', container);
+    const say = (text, bad) => { const m = $('.msg', container); if (m) { m.className = 'msg' + (bad ? ' bad' : ''); m.textContent = text; } };
+    const enable = () => { const b = $('form button', container); if (b) b.disabled = false; };
+    f.addEventListener('submit', async ev => {
+      ev.preventDefault(); const val = $('input', f).value; if (!val.trim()) return; $('button', f).disabled = true;
+      let res;
+      try { res = await Store.answer(cpId, val); }
+      catch (e) { say(e.message === 'nocrypto' ? 'This browser can’t verify answers (no Web Crypto). Try another browser.' : (e.message || 'That didn’t work.'), true); enable(); return; }
+      if (res.correct) return;
+      const t = (Store.player && Store.player.tries && Store.player.tries[cpId]) || 0, left = Math.max(0, RULES.freeTries - t);
+      say('Not it. ' + (left ? left + ' free ' + (left === 1 ? 'try' : 'tries') + ' left.' : 'That one cost ' + RULES.wrongAnswerPenalty + ' points.'), true);
+      enable(); const i2 = $('input', container); if (i2) i2.focus();
+    });
+    $('.hint-btn', container).addEventListener('click', async ev => {
+      ev.currentTarget.disabled = true;
+      try {
+        const h = await Store.hint(cpId);
+        const he = $('.hint', container); if (he) { he.textContent = h; he.hidden = false; }
+        const hb = $('.hint-btn', container); if (hb) { hb.textContent = 'Hint shown'; hb.disabled = true; }
+      } catch (e) { say(e.message || 'That didn’t work.', true); const hb = $('.hint-btn', container); if (hb) hb.disabled = false; }
+    });
+  }
+  function renderCps() { $$('[data-cp]').forEach(renderCp); }
+
+  /* ── standings ── */
+  const Board = (() => {
+    let timer = 0;
+    async function refresh() {
+      const full = $('#board-full'), note = $('#board-full-note'), home = $('#board-home'), homeNote = $('#board-home-note'), ref = $('#board-refresh'), title = $('#board-title');
+      const p = Store.player;
+      if (!Store.live) {
+        if (title) title.textContent = 'Room standings';
+        const row = p ? '<li class="me"><span class="rk">1</span><span class="nm">' + esc(p.name) + '</span><span class="pt">' + p.points + '<small>' + solvedCount(p) + '/' + CP.length + '</small></span></li>' : '';
+        if (full) full.innerHTML = row; if (home) home.innerHTML = row;
+        const txt = p ? 'Local mode: only your score lives on this laptop. Show your score code to a proctor for the room board.' : 'Local mode: check in and your score shows here. The room board is kept by the proctors.';
+        if (note) note.textContent = txt; if (homeNote) homeNote.textContent = p ? 'Local mode. The room board is kept by the proctors from score codes.' : 'Check in to start banking points.';
+        if (ref) ref.textContent = ''; return;
+      }
+      try {
+        const players = await Store.leaderboard();
+        const rows = (players || []).map((q, i) => '<li' + (p && q.name === p.name ? ' class="me"' : '') + '><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '</span><span class="pt">' + (q.points | 0) + '<small>' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></li>');
+        if (full) full.innerHTML = rows.join(''); if (home) home.innerHTML = rows.slice(0, 5).join('');
+        if (note) note.textContent = rows.length ? '' : 'Nobody has checked in yet.'; if (homeNote) homeNote.textContent = rows.length ? '' : 'Nobody has checked in yet. Be first.';
+        if (ref) ref.textContent = 'Updated ' + fmtTime(Date.now());
+      } catch (e) { if (note) note.textContent = 'The lab API didn’t answer. Standings will refresh when it does.'; if (ref) ref.textContent = ''; }
+    }
+    return { refresh, start() { refresh(); clearInterval(timer); timer = setInterval(refresh, 20000); }, stop() { clearInterval(timer); timer = 0; } };
+  })();
+
+  async function renderScorecard() {
+    const el = $('#scorecard'), desc = $('#standings-desc'); if (!el) return;
+    const p = Store.player;
+    if (desc) desc.textContent = Store.live ? 'Live from the lab API, refreshed every 20 seconds. Points bank the moment a checkpoint is cleared.' : 'This page is running in local mode: your points are kept in this browser and the room board is run by the proctors. Everything else works exactly the same.';
+    if (!p) { el.innerHTML = '<p class="empty">Check in on the <a href="#home" style="color:var(--fg)">Overview</a> to start a scorecard.</p>'; return; }
+    const tiles = CP.map(cp => { const s = p.solved && p.solved[cp.id]; const tries = (p.tries && p.tries[cp.id]) || 0; const hint = p.hints && p.hints[cp.id]; return '<a class="score-tile g-' + (cp.route.startsWith('lab') ? 'labs' : cp.route.startsWith('build') ? 'builds' : 'setup') + (s ? ' done' : '') + '" href="#' + cp.route + '" style="text-decoration:none;color:inherit"><div class="st-l">' + esc(cp.label) + '</div><div class="st-t">' + esc(cp.title) + '</div><div class="st-s">' + (s ? 'Banked ' + cp.points + ' · ' + fmtTime(s.at) : (tries ? tries + ' ' + (tries === 1 ? 'try' : 'tries') + ' so far' : 'Open')) + (hint ? ' · hint used' : '') + '</div></a>'; }).join('');
+    let code = ''; try { code = await scoreCode(p); } catch (e) { code = ''; }
+    el.innerHTML = '<div class="score-total"><b>' + p.points + '</b><span>points · ' + solvedCount(p) + ' of ' + CP.length + ' banked</span></div><div class="score-grid">' + tiles + '</div>' +
+      (code ? '<p class="lbl" style="margin-top:14px">Score code for the proctors</p><div class="code-line"><code id="score-code">' + esc(p.name) + ' · ' + code + '</code><button class="btn ghost" type="button" id="copy-code">Copy</button></div><p class="empty">The proctors verify it on the keymaker page. It changes every time your score does.</p>' : '');
+    const cb = $('#copy-code'); if (cb) cb.addEventListener('click', () => copyText($('#score-code').textContent, cb));
+  }
+
+  /* ── tool directory ── */
+  function renderDirectory() {
+    const root = $('#tool-dir'); if (!root || !TOOLS.length) return;
+    let kind = 'all', q = '';
+    const counts = { r: 0, w: 0, u: 0 }; TOOLS.forEach(t => { counts[t.k] = (counts[t.k] || 0) + 1; });
+    root.innerHTML = '<div class="dir-controls"><input class="input" id="dir-q" placeholder="Search ' + TOOLS.length + ' tools" autocomplete="off"><div class="chips" style="margin:0"><button type="button" class="chip active" data-k="all">All ' + TOOLS.length + '</button><button type="button" class="chip" data-k="r">Read ' + counts.r + '</button><button type="button" class="chip" data-k="w">Write ' + counts.w + '</button><button type="button" class="chip" data-k="u">Units ' + counts.u + '</button></div></div><div id="dir-list"></div>';
+    const list = $('#dir-list', root);
+    const label = { r: 'READ', w: 'WRITE', u: 'UNITS' };
+    function draw() {
+      const groups = [];
+      TOOLS.forEach(t => { if (kind !== 'all' && t.k !== kind) return; if (q && !(t.n.toLowerCase().includes(q) || t.g.toLowerCase().includes(q) || (t.d || '').toLowerCase().includes(q))) return; let g = groups.find(x => x.g === t.g); if (!g) { g = { g: t.g, items: [] }; groups.push(g); } g.items.push(t); });
+      list.innerHTML = groups.length ? groups.map(g => '<div class="dir-group"><h4>' + esc(g.g) + ' · ' + g.items.length + '</h4><div class="tools">' + g.items.map(t => '<span class="tool ' + t.k + '">' + esc(t.n) + '<small>' + label[t.k] + '</small></span>').join('') + '</div>' + (g.items.some(t => t.d) ? '<p class="dir-note">' + g.items.filter(t => t.d).map(t => esc(t.n) + ': ' + esc(t.d)).join(' · ') + '</p>' : '') + '</div>').join('') : '<p class="empty">No tool matches that.</p>';
+    }
+    $('#dir-q', root).addEventListener('input', ev => { q = ev.target.value.trim().toLowerCase(); draw(); });
+    $$('.chip', root).forEach(c => c.addEventListener('click', () => { kind = c.dataset.k; $$('.chip', root).forEach(x => x.classList.toggle('active', x === c)); draw(); }));
+    draw();
+  }
+
+  /* ── ask the guide ── */
+  const ASK_CHIPS = ['How do I get a token?', 'Which tool finds outages?', 'How do I delete my tests?', 'What does --permission-prompts none do?', 'Where does the skill file live?', 'Why are my results empty?'];
+  function tokens(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9_\-\s]/g, ' ').split(/\s+/).filter(w => w.length > 1 && !STOP.has(w)); }
+  const STOP = new Set(['the', 'a', 'an', 'to', 'of', 'in', 'on', 'for', 'and', 'or', 'is', 'it', 'do', 'i', 'my', 'how', 'what', 'which', 'where', 'why', 'does', 'can', 'with', 'this', 'that', 'be', 'are', 'me', 'at', 'as', 'by', 'from', 'you', 'your']);
+  function search(query) {
+    const ts = tokens(query); if (!ts.length) return [];
+    const scored = SEARCH.map(e => { const title = e.t.toLowerCase(), text = e.x.toLowerCase(); let s = 0; ts.forEach(w => { if (title.includes(w)) s += 4; const n = text.split(w).length - 1; s += Math.min(n, 4); }); return { e, s }; }).filter(o => o.s > 0).sort((a, b) => b.s - a.s).slice(0, 8);
+    return scored.map(o => o.e);
+  }
+  function routeLabel(r) { const c = CHAPTERS.find(x => x.route === r); return c ? c.num + ' · ' + c.title : (TITLES[r] || r); }
+  function renderAsk() {
+    const chips = $('#ask-chips'), form = $('#ask-form'), q = $('#ask-q'), res = $('#ask-results'), ans = $('#ask-answer');
+    if (!chips) return;
+    chips.innerHTML = ASK_CHIPS.map(c => '<button type="button" class="chip">' + esc(c) + '</button>').join('');
+    let seq = 0;
+    async function run(text) {
+      const my = ++seq; const hits = search(text);
+      res.innerHTML = hits.length ? hits.map(e => '<a class="result g-' + (e.r.startsWith('lab') ? 'labs' : e.r.startsWith('build') ? 'builds' : e.r.startsWith('field') ? 'field' : 'setup') + '" href="#' + esc(e.r) + '"><span class="r-route">' + esc(routeLabel(e.r)) + '</span><h4>' + esc(e.t) + '</h4><p>' + esc(e.x.slice(0, 220)) + (e.x.length > 220 ? '…' : '') + '</p></a>').join('') : (text.trim() ? '<p class="empty" style="margin-top:14px">Nothing matched. Try a tool name, a flag, or a plainer word.</p>' : '');
+      ans.innerHTML = '';
+      if (Store.live && text.trim() && hits.length) {
+        ans.innerHTML = '<p class="eyebrow accent answer-label">Front desk</p><div class="answer">Thinking…</div>';
+        const a = await Store.ask(text, hits.slice(0, 5).map(e => ({ route: e.r, title: e.t, text: e.x })));
+        if (my !== seq) return;
+        ans.innerHTML = a ? '<p class="eyebrow accent answer-label">Front desk</p><div class="answer">' + esc(a) + '</div>' : '';
+      }
+    }
+    let t = 0;
+    q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => run(q.value), 180); });
+    form.addEventListener('submit', ev => { ev.preventDefault(); clearTimeout(t); run(q.value); });
+    $$('.chip', chips).forEach(c => c.addEventListener('click', () => { q.value = c.textContent; run(q.value); q.focus(); }));
+  }
+
+  /* ── keymaker ── */
+  function renderKeymaker() {
+    const vf = $('#verify-form'), hf = $('#hash-form'), bank = $('#bank-list'); if (!vf) return;
+    vf.addEventListener('submit', async ev => {
+      ev.preventDefault(); const out = $('#verify-out'); const name = cleanName($('#v-name').value); const code = $('#v-code').value.trim().toUpperCase();
+      const m = /^(\d+)-([0-9A-Z]{1,2})-([0-9A-F]{4})$/.exec(code);
+      if (!name || !m) { out.innerHTML = '<b>Not a valid handle or code.</b> Codes look like 640-K7-3F9A.'; return; }
+      const points = parseInt(m[1], 10), mask = parseInt(m[2], 36);
+      try { const sig = (await sha256(name.toLowerCase() + '|' + points + '|' + mask + '|' + SALT2)).slice(0, 4).toUpperCase(); const solved = CP.filter((cp, i) => mask & (1 << i)).map(cp => cp.label); out.innerHTML = sig === m[3] ? '<b>Valid.</b> ' + esc(name) + ': ' + points + ' points, ' + solved.length + ' of ' + CP.length + ' banked (' + esc(solved.join(', ') || 'none') + ').' : '<b>Does not verify.</b> The handle, points or code were typed differently from the attendee’s screen.'; } catch (e) { out.textContent = 'This browser can’t compute hashes.'; }
+    });
+    hf.addEventListener('submit', async ev => { ev.preventDefault(); const out = $('#hash-out'); const v = $('#h-in').value; try { out.innerHTML = 'canonical: <b>' + esc(canon(v)) + '</b><br>hash: <b>' + await sha256(canon(v) + '|' + SALT) + '</b>'; } catch (e) { out.textContent = 'This browser can’t compute hashes.'; } });
+    bank.innerHTML = CP.map(cp => '<li><b>' + esc(cp.label) + ' · ' + esc(cp.title) + ' · ' + cp.points + ' pts</b>' + esc(cp.question) + '<br><span>Hint: ' + esc(cp.hint) + '</span></li>').join('');
+  }
+
+  /* ── copy buttons, OS tabs, client chooser ── */
+  function copyText(text, btn) {
+    const done = () => { if (btn) { const old = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done'); setTimeout(() => { btn.textContent = old; btn.classList.remove('done'); }, 1600); } };
+    const fallback = () => { try { const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } catch (e) {} };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+  }
+  function addCopyButtons() {
+    $$('.content pre, .content .prompt-block').forEach(el => {
+      if ($('.copy-btn', el)) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'copy-btn'; b.textContent = 'Copy'; b.setAttribute('aria-label', 'Copy to clipboard');
+      b.addEventListener('click', () => { const clone = el.cloneNode(true); $$('.copy-btn', clone).forEach(x => x.remove()); copyText(clone.textContent.replace(/\n{3,}/g, '\n\n').trim(), b); });
+      el.appendChild(b);
+    });
+  }
+  function switchTab(group, os) {
+    const win = document.getElementById(group + '-win'), mac = document.getElementById(group + '-mac'), box = document.getElementById(group + '-tabs');
+    if (win) { win.style.display = os === 'win' ? 'block' : 'none'; win.classList.toggle('active', os === 'win'); }
+    if (mac) { mac.style.display = os === 'mac' ? 'block' : 'none'; mac.classList.toggle('active', os === 'mac'); }
+    if (box) $$('.os-tab', box).forEach(t => { const mine = (os === 'win' && t.classList.contains('win')) || (os === 'mac' && t.classList.contains('mac')); t.classList.toggle('active', mine); t.classList.toggle('inactive', !mine); });
+  }
+  function switchAll(os) {
+    $$('.os-tabs[id$="-tabs"]').forEach(box => switchTab(box.id.replace(/-tabs$/, ''), os));
+    $$('.os-switch button').forEach(b => b.classList.toggle('active', b.dataset.os === os));
+    ls.set('te-lab-os', os);
+  }
+  function switchClient(name, silent) {
+    $$('.client-panel').forEach(p => p.classList.toggle('active', p.id === 'client-' + name));
+    $$('.client-card').forEach(c => { const on = c.dataset.client === name; c.classList.toggle('active', on); c.setAttribute('aria-selected', on ? 'true' : 'false'); });
+    if (!silent) ls.set('te-lab-client', name);
+  }
+  window.switchTab = switchTab; window.switchClient = switchClient; window.switchAll = switchAll;
+  function wireOsSwitches() {
+    $$('[data-os-switch]').forEach(el => { el.innerHTML = '<span class="os-switch-label">Commands for</span><span class="os-switch"><button type="button" data-os="win">⊞ Windows</button><button type="button" data-os="mac">⌘ macOS</button></span>'; $$('button', el).forEach(b => b.addEventListener('click', () => switchAll(b.dataset.os))); });
+    const saved = ls.get('te-lab-os'); const guess = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? 'mac' : 'win';
+    switchAll(saved || guess);
+    const client = ls.get('te-lab-client'); if (client && document.getElementById('client-' + client)) switchClient(client, true);
+  }
+
+  /* ── hero meta ── */
+  function renderMeta() {
+    const el = $('#hero-meta'); if (!el) return; const ev = CONFIG.event || {};
+    const bits = [ev.date, ev.city].filter(Boolean).map(esc);
+    el.innerHTML = '<b>' + esc(ev.name || 'AI Builders') + '</b>' + (bits.length ? ' · ' + bits.join(' · ') : ' · ThousandEyes hands-on lab') + (Store.live ? '' : ' · local mode');
+  }
+
+  /* ── render everything that depends on the player ── */
+  function renderAll() { renderCheckin(); renderPass(); renderChapters(); renderCps(); renderScorecard(); Board.refresh(); renderMeta(); }
+
+  /* ── boot ── */
+  renderDirectory(); renderAsk(); renderKeymaker(); wireOsSwitches(); addCopyButtons();
+  Store.on(() => renderAll());
+  renderAll();
+  render();
+  Store.init();
+})();
+</script>
