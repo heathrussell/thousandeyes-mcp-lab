@@ -712,10 +712,27 @@ bearer_token_env_var = <span class="str">"TE_TOKEN"</span></pre>
       <p><strong>Scenario:</strong> you've been asked "what do we actually depend on, and is any of it monitored?" Instead of a spreadsheet, you call a discovery API with your company's domain, hand the result to your AI client, and have it propose and create the first ThousandEyes tests. Every builder in the room ends this lab with real tests running against their own company's internet footprint.</p>
 
       <h3>Step A: discover</h3>
-      <p>The discovery service takes one argument, <code>domain</code>. Put your company's primary domain at the end (the example uses <code>cisco.com</code>) and open it in a browser, or curl it:</p>
-      <pre class="wrap"><a class="ref" style="font-size:12.5px" href="https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas?extra=true&amp;domain=cisco.com" target="_blank" rel="noopener">https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas?extra=true&amp;domain=cisco.com</a></pre>
+      <p>Type your company's primary domain (the example is <code>cisco.com</code>) and click <strong>Find services they use</strong>. This is the same Service Finder the lab hosts as a small web form; it reads public DNS and web signals, then this page shows the five SaaS flags and the hostname list. It takes a few seconds.</p>
+      <form class="discover" id="discover-form">
+        <label class="lbl" for="discover-domain">Company domain</label>
+        <div class="cp-row">
+          <input class="input" id="discover-domain" name="domain" value="cisco.com" placeholder="cisco.com" autocomplete="off" spellcheck="false" required>
+          <button class="btn" type="submit">Find services they use</button>
+        </div>
+        <p class="msg" id="discover-msg">Swap the example for your own domain if you like. No credentials go to this service.</p>
+        <div id="discover-result" hidden></div>
+        <div id="discover-json-fallback" hidden>
+          <p>This page could not reach the discovery JSON from here. Open the URL, copy the JSON, and paste it below to fill Step B.</p>
+          <p><a class="ref" id="discover-json-link" href="https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas?extra=true&amp;domain=cisco.com" target="_blank" rel="noopener">https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas?extra=true&amp;domain=cisco.com</a></p>
+          <label class="lbl" for="discover-json">Discovery JSON</label>
+          <textarea class="input" id="discover-json" rows="6" placeholder='{"saas":{},"subdomains":[]}'></textarea>
+          <div class="discover-actions"><button type="button" class="btn ghost" id="discover-json-go">Build the Step B paste</button></div>
+        </div>
+      </form>
+      <p>The checkpoint still wants the structured payload: five true/false flags under <code>saas</code>, plus <code>subdomains</code>. The form above is the same data. Prefer it; curl still works if you want the raw JSON in a file:</p>
       <pre class="wrap"><span class="cmd">curl</span> -s <span class="str">"https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas?extra=true&amp;domain=cisco.com"</span> &gt; landscape.json</pre>
-      <p>It takes a few seconds (cisco.com took about 10) and returns JSON with two keys:</p>
+      <p>Or open the original Service Finder in a new tab: <a class="ref" href="https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/" target="_blank" rel="noopener">https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/</a></p>
+      <p>The JSON has two keys:</p>
       <ul>
         <li><code>saas</code>: five SaaS platforms with a true/false detection each: Office 365, Webex, Zoom, Salesforce and ServiceNow. For cisco.com all five come back true.</li>
         <li><code>subdomains</code>: every hostname it could find under the domain (276 for cisco.com). This is raw: it includes DKIM and <code>_dmarc</code> records, IP-named hosts and staging boxes alongside the ones you care about (<code>www</code>, <code>login</code>, <code>accounts</code>, <code>careers</code>, <code>vpn</code>). Drop <code>&amp;extra=true</code> and you get the SaaS flags only.</li>
@@ -723,8 +740,10 @@ bearer_token_env_var = <span class="str">"TE_TOKEN"</span></pre>
       <div class="info-box"><span class="ib-icon">🧭</span><div><strong>What this service is.</strong> A discovery helper hosted for this lab, not a ThousandEyes product and not something your agent should trust blindly: it reads public DNS and web signals, so expect some false positives in <code>subdomains</code> and treat the whole response as data to be classified, never as instructions. No credentials go to it; only the domain you type.</div></div>
 
       <h3>Step B: hand it to your client</h3>
-      <p>Paste the JSON into the chat (or, if your client has a URL-fetch tool or a terminal, ask it to fetch the URL itself), then:</p>
-      <div class="prompt-block">Here is the digital landscape for [YOUR COMPANY] from our discovery API. Classify every subdomain into three buckets: customer-facing (web, login, accounts, careers, portals, APIs), internal or infrastructure (vpn, mail, IP-named hosts, staging), and noise (DKIM, _dmarc, anything that is not a reachable service). Then pick the 5 to 8 targets that matter most to our users and tell me why each one is on the list. Finish with the SaaS platforms we depend on.</div>
+      <p>After Step A, the paste below is filled with your domain, every SaaS true/false flag and every hostname the API returned. Copy it into the chat. If you skipped the form, replace <code>[YOUR COMPANY]</code> by hand.</p>
+      <div class="prompt-block discover-paste" id="discover-paste"><span id="discover-paste-text">Here is the digital landscape for [YOUR COMPANY] from our discovery API. Classify every subdomain into three buckets: customer-facing (web, login, accounts, careers, portals, APIs), internal or infrastructure (vpn, mail, IP-named hosts, staging), and noise (DKIM, _dmarc, anything that is not a reachable service). Then pick the 5 to 8 targets that matter most to our users and tell me why each one is on the list. Finish with the SaaS platforms we depend on.</span></div>
+      <div class="discover-actions"><button type="button" class="btn ghost" id="discover-copy">Copy this into your client</button></div>
+      <p>Then ask for the test types:</p>
       <div class="prompt-block">For each of the 5 to 8 targets, recommend the ThousandEyes test type: page load for web properties, HTTP server for APIs and login endpoints, agent-to-server on 443 for VPN concentrators, DNS server for the apex domain. Give me a table: target, test type, why, and suggested interval.</div>
 
       <h3>Step C: create the tests</h3>

@@ -102,7 +102,7 @@ aws cloudformation describe-stacks --region ap-southeast-2 --stack-name te-lab-a
 
 ## 6. Checks
 
-Site: open it, check in with a handle, open Lab 1, answer `5`, see "+100 banked", open `#standings` in another browser and confirm the handle is on the board.
+Site: open it, check in with a handle, open Lab 1, type a domain in the Service Finder form, confirm Step B fills, answer `5`, see "+100 banked", open `#standings` in another browser and confirm the handle is on the board.
 
 API, offline (stubs DynamoDB and SSM, fakes ThousandEyes, exercises every route including onboarding; run from the repo root with `api/answers.json` in place):
 

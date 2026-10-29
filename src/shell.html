@@ -276,6 +276,20 @@
   .content pre:hover .copy-btn, .content .prompt-block:hover .copy-btn, .copy-btn:focus, .copy-btn.done { opacity: 1; }
   .copy-btn:hover, .copy-btn.done { color: var(--fg); border-color: var(--accent); }
   @media (hover: none) { .copy-btn { opacity: 1; } }
+  .content .discover { border: var(--line) solid var(--medium-blue); border-radius: 16px; padding: 22px; margin: 16px 0 18px; }
+  .content .discover .lbl { margin-top: 0; }
+  .content .discover .cp-row { margin: 0; }
+  .content .discover .msg { min-height: 1.3em; }
+  .content .saas-flags { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+  .content .saas-flag { font-family: var(--mono); font-size: 12px; padding: 6px 10px; border-radius: 8px; border: var(--line) solid var(--rule); color: var(--fg); }
+  .content .saas-flag.on { border-color: var(--green); }
+  .content .saas-flag.off { color: var(--dim); }
+  .content .host-preview { font-family: var(--mono); font-size: 12px; line-height: 1.55; color: var(--muted); max-height: 160px; overflow: auto; border: var(--line) solid var(--rule); border-radius: 10px; padding: 10px 12px; margin: 8px 0 4px; white-space: pre-wrap; }
+  .content .prompt-block.discover-paste { white-space: pre-wrap; max-height: 28em; overflow: auto; }
+  .content .discover-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 8px 0 16px; }
+  .content .discover textarea.input { min-height: 120px; font-family: var(--mono); font-size: 12.5px; resize: vertical; margin: 0 0 10px; }
+  .content #discover-json-fallback { margin-top: 14px; padding-top: 14px; border-top: var(--line) solid var(--rule); }
+  .content #discover-result { margin-top: 14px; }
   .content .client-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 20px 0 14px; }
   .content .client-card { text-align: left; background: transparent; border: var(--line) solid var(--rule); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; color: var(--fg); font-family: var(--sans); display: flex; flex-direction: column; gap: 3px; transition: border-color .15s; min-width: 0; }
   .content .client-card:hover { border-color: var(--muted); }
@@ -1367,6 +1381,111 @@
     if (!silent) ls.set('te-lab-client', name);
   }
   window.switchTab = switchTab; window.switchClient = switchClient; window.switchAll = switchAll;
+
+  const FINDER_JSON = 'https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas';
+  const PASTE_TAIL = 'Classify every subdomain into three buckets: customer-facing (web, login, accounts, careers, portals, APIs), internal or infrastructure (vpn, mail, IP-named hosts, staging), and noise (DKIM, _dmarc, anything that is not a reachable service). Then pick the 5 to 8 targets that matter most to our users and tell me why each one is on the list. Finish with the SaaS platforms we depend on.';
+  function parseDomain(raw) {
+    let s = String(raw || '').trim().toLowerCase().normalize('NFKC');
+    s = s.replace(/^https?:\/\//, '');
+    s = s.split('/')[0].split('?')[0].split('#')[0].replace(/^\.+|\.+$/g, '');
+    if (!s || s.length > 253) return '';
+    if (!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(s)) return '';
+    return s;
+  }
+  function buildPaste(domain, saas, hosts) {
+    const flags = Object.entries(saas || {}).map(([k, v]) => k + ': ' + (v ? 'true' : 'false'));
+    const list = (hosts || []).map(h => String(h));
+    return [
+      'Here is the digital landscape for ' + domain + ' from our discovery API.',
+      '',
+      'SaaS platforms (true means detected):',
+      ...(flags.length ? flags : ['(none returned)']),
+      '',
+      'Subdomains (' + list.length + '):',
+      ...(list.length ? list : ['(none returned)']),
+      '',
+      PASTE_TAIL
+    ].join('\n');
+  }
+  function applyDiscover(domain, saas, hosts) {
+    const box = $('#discover-paste-text') || $('#discover-paste');
+    if (box) box.textContent = buildPaste(domain, saas, hosts);
+    const result = $('#discover-result');
+    if (result) {
+      const flags = Object.entries(saas || {});
+      const list = (hosts || []).map(h => String(h));
+      const preview = list.slice(0, 12);
+      const more = list.length > preview.length ? '\n+ ' + (list.length - preview.length) + ' more in the Step B paste' : '';
+      result.hidden = false;
+      result.innerHTML =
+        '<p class="lbl">SaaS flags (count these keys for the checkpoint)</p>' +
+        '<div class="saas-flags">' + (flags.length ? flags.map(([k, v]) => '<span class="saas-flag ' + (v ? 'on' : 'off') + '">' + esc(k) + ': ' + (v ? 'true' : 'false') + '</span>').join('') : '<span class="saas-flag off">none returned</span>') + '</div>' +
+        '<p class="lbl">Subdomains · ' + list.length + '</p>' +
+        '<div class="host-preview">' + (preview.length ? preview.map(esc).join('\n') + more : '(none returned)') + '</div>' +
+        '<p class="msg ok">Step B paste is filled. Copy it into your client.</p>';
+    }
+    const fb = $('#discover-json-fallback'); if (fb) fb.hidden = true;
+  }
+  function showDiscoverFallback(domain, err) {
+    const fb = $('#discover-json-fallback'); if (!fb) return;
+    fb.hidden = false;
+    const link = $('#discover-json-link');
+    const url = FINDER_JSON + '?extra=true&domain=' + encodeURIComponent(domain || 'cisco.com');
+    if (link) { link.href = url; link.textContent = url; }
+    const msg = $('#discover-msg');
+    if (msg) { msg.className = 'msg bad'; msg.textContent = (err && err.message ? err.message : 'Could not reach discovery from this page.') + ' Open the JSON URL and paste it below.'; }
+  }
+  async function fetchDiscover(domain) {
+    if (CONFIG.apiBase) {
+      const r = await fetch(CONFIG.apiBase + '/discover?domain=' + encodeURIComponent(domain));
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || ('The lab API answered ' + r.status + '.'));
+      return { domain: j.domain || domain, saas: j.saas || {}, hosts: j.subdomains || [] };
+    }
+    const r = await fetch(FINDER_JSON + '?extra=true&domain=' + encodeURIComponent(domain));
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || ('Discovery answered ' + r.status + '.'));
+    return { domain, saas: j.saas || {}, hosts: j.subdomains || [] };
+  }
+  function ingestDiscoverJson(domain, raw) {
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('That is not the discovery JSON.');
+    const saas = (data.saas && typeof data.saas === 'object' && !Array.isArray(data.saas)) ? data.saas : {};
+    const hosts = Array.isArray(data.subdomains) ? data.subdomains.filter(h => typeof h === 'string' && h.trim()).map(h => h.trim()) : [];
+    applyDiscover(domain, saas, hosts);
+  }
+  function wireDiscover() {
+    const form = $('#discover-form'); if (!form) return;
+    const input = $('#discover-domain');
+    const msg = $('#discover-msg');
+    const btn = $('button[type="submit"]', form);
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const domain = parseDomain(input && input.value);
+      if (!domain) { if (msg) { msg.className = 'msg bad'; msg.textContent = 'Pass a domain such as cisco.com (no http://).'; } return; }
+      if (input) input.value = domain;
+      if (btn) btn.disabled = true;
+      if (msg) { msg.className = 'msg'; msg.textContent = 'Looking up public DNS and web signals. This takes a few seconds.'; }
+      try {
+        const out = await fetchDiscover(domain);
+        applyDiscover(out.domain, out.saas, out.hosts);
+        if (msg) { msg.className = 'msg ok'; msg.textContent = 'Found ' + Object.keys(out.saas || {}).length + ' SaaS flags and ' + (out.hosts || []).length + ' hostnames.'; }
+      } catch (e) {
+        showDiscoverFallback(domain, e);
+      } finally { if (btn) btn.disabled = false; }
+    });
+    const go = $('#discover-json-go');
+    if (go) go.addEventListener('click', () => {
+      const domain = parseDomain((input && input.value) || '') || 'cisco.com';
+      try { ingestDiscoverJson(domain, ($('#discover-json') || {}).value || ''); if (msg) { msg.className = 'msg ok'; msg.textContent = 'Step B paste is filled from the JSON you pasted.'; } }
+      catch (e) { if (msg) { msg.className = 'msg bad'; msg.textContent = e.message || 'That JSON did not parse.'; } }
+    });
+    const copyBtn = $('#discover-copy');
+    if (copyBtn) copyBtn.addEventListener('click', () => {
+      const text = (($('#discover-paste-text') || $('#discover-paste') || {}).textContent || '').trim();
+      copyText(text, copyBtn);
+    });
+  }
   function wireOsSwitches() {
     $$('[data-os-switch]').forEach(el => { el.innerHTML = '<span class="os-switch-label">Commands for</span><span class="os-switch"><button type="button" data-os="win">⊞ Windows</button><button type="button" data-os="mac">⌘ macOS</button></span>'; $$('button', el).forEach(b => b.addEventListener('click', () => switchAll(b.dataset.os))); });
     const saved = ls.get('te-lab-os'); const guess = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? 'mac' : 'win';
@@ -1385,7 +1504,7 @@
   function renderAll() { renderCheckin(); renderPass(); renderChapters(); renderCps(); renderScorecard(); Board.refresh(); renderMeta(); }
 
   /* ── boot ── */
-  renderDirectory(); renderAsk(); renderKeymaker(); wireOsSwitches(); addCopyButtons();
+  renderDirectory(); renderAsk(); renderKeymaker(); wireOsSwitches(); addCopyButtons(); wireDiscover();
   Store.on(() => renderAll());
   renderAll();
   render();

@@ -6,6 +6,7 @@ One Lambda behind an HTTP API. Routes:
   POST /hint         {name, checkpoint}           -> {hint, player}
   GET  /player?name= -> {player}
   GET  /leaderboard  -> {players: [{name, points, solvedCount, updatedAt}]}
+  GET  /discover?domain= -> {domain, saas, subdomains}  (proxies the lab Service Finder JSON)
   POST /ask          {question, snippets}         -> {answer}   (only when ANTHROPIC_API_KEY is set)
   POST /onboard, GET /onboard, and the X-Proctor-Key gated /proctor/* routes live in onboarding.py
   (ThousandEyes account group + user creation for attendees).
@@ -22,6 +23,8 @@ import os
 import re
 import time
 import unicodedata
+import urllib.error
+import urllib.parse
 import urllib.request
 from decimal import Decimal
 
@@ -57,6 +60,9 @@ _ddb = boto3.resource("dynamodb")
 _table = _ddb.Table(TABLE) if TABLE else None
 
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.\-]{1,23}$")
+DOMAIN_RE = re.compile(r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
+DISCOVER_URL = "https://xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas"
+HOST_CAP = 2000
 
 
 def canon(s: str) -> str:
@@ -70,6 +76,16 @@ def canon(s: str) -> str:
 def clean_name(n: str) -> str:
     n = re.sub(r"\s+", " ", unicodedata.normalize("NFKC", str(n or ""))).strip()
     return n if NAME_RE.match(n) else ""
+
+
+def parse_domain(raw: str) -> str:
+    """Apex or hostname only. Strips a scheme and path so 'https://cisco.com/foo' becomes cisco.com."""
+    s = unicodedata.normalize("NFKC", str(raw or "")).strip().lower()
+    s = re.sub(r"^https?://", "", s)
+    s = s.split("/")[0].split("?")[0].split("#")[0].strip(".")
+    if not s or len(s) > 253 or not DOMAIN_RE.fullmatch(s):
+        return ""
+    return s
 
 
 def now_ms() -> int:
@@ -206,6 +222,36 @@ def r_leaderboard():
     return respond(200, {"players": rows[:100], "total": len(rows)})
 
 
+def r_discover(qs):
+    """Proxy the lab Service Finder JSON so the page can call it despite missing CORS on the finder."""
+    domain = parse_domain(qs.get("domain") or "")
+    if not domain:
+        return respond(400, {"error": "Pass a domain such as cisco.com (no http://)."})
+    url = DISCOVER_URL + "?" + urllib.parse.urlencode({"extra": "true", "domain": domain})
+    req = urllib.request.Request(
+        url,
+        method="GET",
+        headers={"Accept": "application/json", "User-Agent": "ThousandEyes-MCP-Lab/1"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        return respond(502, {"error": f"The discovery service answered {exc.code}."})
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, ValueError):
+        return respond(502, {"error": "The discovery service is unavailable. Try again in a moment."})
+    if not isinstance(data, dict):
+        return respond(502, {"error": "The discovery service returned an unexpected shape."})
+    saas_in = data.get("saas") if isinstance(data.get("saas"), dict) else {}
+    saas = {str(k).strip(): bool(v) for k, v in saas_in.items() if str(k).strip()}
+    hosts = []
+    raw_hosts = data.get("subdomains") if isinstance(data.get("subdomains"), list) else []
+    for item in raw_hosts[:HOST_CAP]:
+        if isinstance(item, str) and item.strip():
+            hosts.append(item.strip())
+    return respond(200, {"domain": domain, "saas": saas, "subdomains": hosts})
+
+
 def r_ask(body):
     if not ANTHROPIC_API_KEY:
         return respond(404, {"error": "ask is not enabled on this deployment"})
@@ -259,6 +305,8 @@ def handler(event, _context):
             return r_player(qs)
         if method == "GET" and path == "/leaderboard":
             return r_leaderboard()
+        if method == "GET" and path == "/discover":
+            return r_discover(qs)
         if method == "GET" and path in ("/", "/health"):
             health = {"status": "ready", "checkpoints": len(CP), "answers": len(ANSWERS) == len(CP), "ask": bool(ANTHROPIC_API_KEY)}
             health.update(onboarding.health_fields())

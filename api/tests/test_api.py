@@ -58,6 +58,32 @@ else:
 check("wrong answer", call("POST", "/answer", {"name": "smoke test", "checkpoint": "cp2", "answer": "nope"})[1]["correct"] is False)
 check("bad body", call("POST", "/checkin", ["not", "an", "object"])[0] == 400)
 check("unknown route", call("GET", "/nothing")[0] == 404)
+st, r = call("GET", "/discover")
+check("discover needs a domain", st == 400, r)
+st, r = call("GET", "/discover", qs={"domain": "not a domain"})
+check("discover rejects junk", st == 400, r)
+
+class FakeFinder:
+    def __init__(s, payload):
+        s._payload = json.dumps(payload).encode()
+    def read(s):
+        return s._payload
+    def __enter__(s):
+        return s
+    def __exit__(s, *a):
+        pass
+
+def fake_finder(req, timeout=None):
+    url = getattr(req, "full_url", req)
+    assert "xb2md8toek.execute-api.us-east-1.amazonaws.com/prod/saas" in url
+    assert "domain=cisco.com" in url and "extra=true" in url
+    return FakeFinder({"saas": {"Office 365": True, "Webex": True, "Zoom": True, "Salesforce": True, "Servicenow": True}, "subdomains": ["www.cisco.com", "login.cisco.com"]})
+
+_real_urlopen = app.urllib.request.urlopen
+app.urllib.request.urlopen = fake_finder
+st, r = call("GET", "/discover", qs={"domain": "https://cisco.com/foo"})
+check("discover proxies finder JSON", st == 200 and r["domain"] == "cisco.com" and len(r["saas"]) == 5 and r["subdomains"] == ["www.cisco.com", "login.cisco.com"], r)
+app.urllib.request.urlopen = _real_urlopen
 
 # ── proctor gate ──────────────────────────────────────────────────────
 

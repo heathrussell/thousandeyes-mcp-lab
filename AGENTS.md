@@ -8,7 +8,7 @@ This repo is a hands-on lab portal for AI builders (a Cisco ThousandEyes event) 
 |---|---|---|
 | `site/index.html` | The whole website, one hash-routed page (vanilla HTML/CSS/JS, no framework, no build step at runtime). **Generated** by `src/build.py`. | No. Change `src/shell.html` and rebuild. |
 | `site/config.js` | Runtime config: `apiBase` (the API URL) and the event name/date/city. Written by `scripts/deploy.sh`. | Yes, or via env vars to the deploy script. |
-| `api/app.py` | One Lambda (Python 3.12, boto3 only): `/checkin`, `/answer`, `/hint`, `/player`, `/leaderboard`, `/health`, optional `/ask`; hands `/onboard` and `/proctor/*` to `onboarding.py`. | Yes, carefully (see rules). |
+| `api/app.py` | One Lambda (Python 3.12, boto3 only): `/checkin`, `/answer`, `/hint`, `/player`, `/leaderboard`, `/discover`, `/health`, optional `/ask`; hands `/onboard` and `/proctor/*` to `onboarding.py`. | Yes, carefully (see rules). |
 | `api/onboarding.py` | Attendee onboarding into ThousandEyes: creates an account group per attendee and invites the user (v7 Administrative API), proctor config and the proctor-key gate. | Yes, carefully (see rules). |
 | `api/template.yaml` | AWS SAM: HTTP API + Lambda + DynamoDB tables (Players, Config, Onboard) + SSM policy. Parameters: `AllowedOrigin`, `AnthropicApiKey`, `AnthropicModel`, `AnswersB64`, `ProctorKey`, `TeApiBase`. | Yes. |
 | `api/tests/` | `test_api.py` (every route offline), `fakes.py` (fake ThousandEyes, DynamoDB and SSM stubs), `devserver.py` (the whole lab on localhost with no AWS). | Yes. |

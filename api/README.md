@@ -12,6 +12,7 @@ One Lambda (Python 3.12, boto3 only; `app.py` plus `onboarding.py`), three Dynam
 | `GET /player?name=` | | `{player}` |
 | `GET /leaderboard` | | `{players: [{name, points, solvedCount, updatedAt, lastSolveAt}], total}` |
 | `GET /health` | | `{status, checkpoints, answers, ask, onboarding, onboardingNeedsCode, proctor}` |
+| `GET /discover?domain=` | | `{domain, saas, subdomains}`; proxies the lab Service Finder JSON so the page can fill Lab 1 despite missing CORS on the finder |
 | `POST /ask` | `{question, snippets}` | `{answer}`; 404 unless `AnthropicApiKey` is set on the stack |
 
 Scoring, identical to the page: 100 points per checkpoint; three free tries, then −10 per wrong answer; hints −25, never twice and never after a solve; totals never go below 0. Ties on the leaderboard break on more checkpoints solved, then the earlier last solve.
