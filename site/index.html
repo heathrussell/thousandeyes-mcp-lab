@@ -404,6 +404,15 @@
   .stage { position: relative; min-width: 0; border: var(--line) solid var(--rule); border-radius: 18px; overflow: hidden; height: clamp(640px, calc(100vh - 150px), 980px); background: radial-gradient(ellipse at 58% 22%, rgba(10,96,255,.22) 0%, rgba(7,24,45,0) 42%), var(--bg); }
   .stage-canvas { position: absolute; inset: 0; }
   .stage-canvas svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .stage-canvas canvas.sparkle { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+  .stage .mk { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+  .stage .climber.hot .mk { transform: scale(1.5); }
+  .stage .climber.hot .mk circle { stroke: #FFFFFF; }
+  .mt-tip { position: absolute; z-index: 3; transform: translate(-50%, calc(-100% - 16px)); pointer-events: none; display: flex; align-items: center; gap: 10px; padding: 8px 13px 8px 10px; border: var(--line) solid var(--tip, var(--rule)); border-radius: 8px; background: rgba(7,24,45,.92); white-space: nowrap; box-shadow: 0 10px 28px rgba(0,0,0,.4); }
+  .mt-tip.below { transform: translate(-50%, 16px); }
+  .mt-tip .tip-rk { font-family: var(--mono); font-weight: 700; font-size: 14px; color: var(--fg); min-width: 18px; text-align: center; }
+  .mt-tip .tip-body b { display: block; font-size: 13px; font-weight: 600; color: var(--fg); line-height: 1.3; }
+  .mt-tip .tip-body small { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
   .ov { position: absolute; z-index: 2; }
   .ov-head { top: 30px; left: 32px; max-width: 46%; }
   .ov-head h1 { font-size: clamp(30px, 3.4vw, 50px); font-weight: 800; letter-spacing: -.03em; line-height: 1.02; margin: 10px 0 10px; text-wrap: balance; }
@@ -456,7 +465,7 @@
   .stage .summit-ring { animation: ring 2.2s ease-out infinite; transform-origin: center; transform-box: fill-box; }
   @keyframes ring { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2.2); opacity: 0; } }
   .stage .empty-stage { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: 2; padding: 12px 18px; font-size: 14px; color: var(--muted); text-align: center; border: var(--line) solid var(--rule); border-radius: 12px; background: rgba(7,24,45,.85); max-width: 34ch; }
-  @media (prefers-reduced-motion: reduce) { .stage .climber, .stage .camp-lbl { transition: none; } .stage .summit-ring, .stage .flow, .stage .tw { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .stage .climber, .stage .camp-lbl, .stage .mk { transition: none; } .stage .summit-ring, .stage .flow, .stage .tw { animation: none; } }
   @media (min-width: 1101px) and (max-width: 1300px) { .ov-legend { display: none; } }
   .standings-panel { padding: 22px 22px 20px; display: flex; flex-direction: column; min-width: 0; }
   .standings-panel .panel-head { flex-wrap: nowrap; }
@@ -2186,7 +2195,10 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
      labels are diffed by handle so they glide to their new elevation on every refresh. Labels are placed greedily around
      their marker, clear of each other, the peak card, the HTML overlays and the edges; camp labels they would cover fade.
      The viewBox is fitted to the stage so the mountain fills it at any aspect, and labels are scaled up on small stages
-     so they stay readable. Text is measured on a canvas, so nothing depends on the scoreboard being visible. */
+     so they stay readable. Text is measured on a canvas, so nothing depends on the scoreboard being visible.
+     Layers, back to front: an SVG with the sky and the mesh, a canvas where the mesh sparkles (around the pointer, in
+     ripples from a click or tap, in a burst wherever a climber banks a checkpoint, and under a slow drifting light when
+     nobody is touching it), and an SVG with the route, camps, climbers and cards. Hovering a climber shows its card. */
   const FT_PER_POINT = 10;
   const ft = p => (Math.max(0, p | 0) * FT_PER_POINT).toLocaleString('en-AU') + ' ft';
   const Mountain = (() => {
@@ -2203,9 +2215,121 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
     const SANS = getComputedStyle(document.body).fontFamily || 'Inter, system-ui, sans-serif';
     const MONO = getComputedStyle(document.querySelector('.eyebrow') || document.body).fontFamily || 'ui-monospace, monospace';
     const measure = (text, weight, size, family, spacing) => { ctx.font = weight + ' ' + size + 'px ' + family; return ctx.measureText(text).width + text.length * (spacing || 0) * size; };
-    let container = null, svg = null, L = {}, k = 1, lastRows = [], lastMe = '', camps = [], peakCard = null, labels = [], dots = [], observer = null, resizeTimer = 0;
+    let container = null, svg = null, back = null, tip = null, view = null, L = {}, k = 1, lastRows = [], lastMe = '', camps = [], peakCard = null, labels = [], dots = [], climbs = [], observer = null, resizeTimer = 0;
 
     const kFor = v => v ? Math.max(1, Math.min(2, 0.82 / v.s)) : k;
+
+    /* ── sparkle layer ── */
+    const FX = { verts: [], edges: [], w: [], energy: new Float32Array(0), phase: new Float32Array(0), ripples: [], pending: [], prev: new Map(), seeded: false,
+      ptr: null, lastPtr: 0, raf: 0, last: 0, cv: null, ctx: null, dpr: 1, on: !reduced, wired: false };
+    const sprite = (() => {
+      const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+      const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(.16, 'rgba(190,240,255,.95)'); grd.addColorStop(.42, 'rgba(2,200,255,.38)'); grd.addColorStop(1, 'rgba(2,200,255,0)');
+      g.fillStyle = grd; g.fillRect(0, 0, 64, 64); return c;
+    })();
+    const visible = () => !!(container && container.offsetParent !== null && !document.hidden);
+    function kick() { if (FX.on && !FX.raf && FX.ctx && visible()) FX.raf = requestAnimationFrame(frame); }
+    function energise(x, y, rad, amp) {
+      const V = FX.verts, E = FX.energy, n = E.length, r2 = rad * rad;
+      for (let i = 0; i < n; i++) { const dx = V[i * 2] - x, dy = V[i * 2 + 1] - y, d2 = dx * dx + dy * dy; if (d2 < r2) { const f = Math.pow(1 - Math.sqrt(d2) / rad, 1.4) * amp * FX.w[i]; if (f > E[i]) E[i] = f; } }
+    }
+    function frame(now) {
+      FX.raf = 0;
+      if (!visible() || !view || !FX.ctx) return;
+      const dt = FX.last ? Math.min(64, now - FX.last) : 16.7; FX.last = now;
+      const ctx = FX.ctx, dpr = FX.dpr, s = view.s * dpr, ox = view.vx, oy = view.vy, V = FX.verts, E = FX.energy, n = E.length;
+      const X = u => (u - ox) * s, Y = u => (u - oy) * s, zoom = Math.max(.7, Math.min(1.3, view.s));
+      ctx.clearRect(0, 0, FX.cv.width, FX.cv.height);
+      /* where the light is: the pointer, or a slow drifting light a few seconds after the pointer leaves */
+      let src = null;
+      if (FX.ptr && FX.ptr.on) src = { x: FX.ptr.x, y: FX.ptr.y, r: 155, a: 1 };
+      else {
+        const since = now - FX.lastPtr - 4000;
+        if (since > 0) { const t = now / 1000; src = { x: 690 + Math.sin(t * .21) * 300, y: 410 + Math.sin(t * .34 + 1.3) * 170, r: 170, a: .5 * Math.min(1, since / 1500) }; }
+      }
+      if (src) {
+        energise(src.x, src.y, src.r, src.a);
+        for (let tries = 0; tries < 8; tries++) { const i = (Math.random() * n) | 0, dx = V[i * 2] - src.x, dy = V[i * 2 + 1] - src.y; if (dx * dx + dy * dy < src.r * src.r * .7 && Math.random() < .45) { E[i] = Math.max(E[i], .98 * FX.w[i] * Math.max(.6, src.a)); break; } }
+        const g = ctx.createRadialGradient(X(src.x), Y(src.y), 0, X(src.x), Y(src.y), src.r * s);
+        g.addColorStop(0, 'rgba(2,200,255,' + (.14 * src.a).toFixed(3) + ')'); g.addColorStop(1, 'rgba(2,200,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(X(src.x) - src.r * s, Y(src.y) - src.r * s, src.r * s * 2, src.r * s * 2);
+      }
+      if (Math.random() < .14) { const i = (Math.random() * n) | 0; if (FX.w[i] === 1) E[i] = Math.max(E[i], .8); }
+      /* bursts queued while the scoreboard was hidden, or just now, start once the climber has glided into place */
+      if (FX.pending.length) {
+        FX.pending.forEach(p => { const c = climbs.find(x => x.id === p.id); if (c) FX.ripples.push({ x: c.pos.x, y: c.pos.y, t0: now + 850, speed: .5, max: 380, a: 1, delta: p.delta, burst: true }); });
+        FX.pending = [];
+      }
+      ctx.globalCompositeOperation = 'lighter';
+      const texts = [];
+      FX.ripples = FX.ripples.filter(rp => {
+        const age = now - rp.t0; if (age < 0) return true;
+        const rad = age * rp.speed; if (rad > rp.max && age > 1700) return false;
+        if (rad <= rp.max) {
+          const band = 36, fade = 1 - rad / rp.max;
+          for (let i = 0; i < n; i++) { const dx = V[i * 2] - rp.x, dy = V[i * 2 + 1] - rp.y, dd = Math.abs(Math.sqrt(dx * dx + dy * dy) - rad); if (dd < band) { const f = fade * rp.a * FX.w[i] * (1 - dd / band); if (f > E[i]) E[i] = f; } }
+          if (rp.burst && age < 120) energise(rp.x, rp.y, 70, 1);
+          ctx.strokeStyle = 'rgba(' + (rp.burst ? '255,255,255' : '2,200,255') + ',' + (.38 * fade).toFixed(3) + ')'; ctx.lineWidth = (rp.burst ? 2 : 1.4) * dpr;
+          ctx.beginPath(); ctx.arc(X(rp.x), Y(rp.y), rad * s, 0, Math.PI * 2); ctx.stroke();
+        }
+        if (rp.delta && age < 1700) texts.push({ x: X(rp.x), y: Y(rp.y) - (26 + age * .028) * dpr * zoom, a: Math.min(1, 2.2 * (1 - age / 1700)), t: '+' + rp.delta });
+        return true;
+      });
+      /* the mesh: lit edges, then glowing vertices with a glint on the brightest */
+      ctx.lineWidth = 1.35 * dpr;
+      const ED = FX.edges;
+      for (let e = 0; e < ED.length; e += 2) {
+        const a = ED[e], b = ED[e + 1], en = Math.min(E[a], E[b]); if (en < .05) continue;
+        ctx.strokeStyle = 'rgba(' + (en > .6 ? '200,242,255' : '2,200,255') + ',' + Math.min(1, en * .9).toFixed(3) + ')';
+        ctx.beginPath(); ctx.moveTo(X(V[a * 2]), Y(V[a * 2 + 1])); ctx.lineTo(X(V[b * 2]), Y(V[b * 2 + 1])); ctx.stroke();
+      }
+      const t = now / 1000, decay = Math.pow(.972, dt / 16.7);
+      for (let i = 0; i < n; i++) {
+        const en = E[i]; if (en < .02) { E[i] = 0; continue; }
+        const tw = .62 + .38 * Math.sin(t * 8 + FX.phase[i]), x = X(V[i * 2]), y = Y(V[i * 2 + 1]), size = (6 + 30 * en) * dpr * zoom;
+        ctx.globalAlpha = Math.min(1, en * tw); ctx.drawImage(sprite, x - size / 2, y - size / 2, size, size);
+        if (en > .55) {
+          const len = (4 + 15 * en) * dpr * zoom * tw; ctx.globalAlpha = Math.min(1, (en - .55) * 2.2) * tw;
+          ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(x - len, y); ctx.lineTo(x + len, y); ctx.moveTo(x, y - len * .7); ctx.lineTo(x, y + len * .7); ctx.stroke(); ctx.lineWidth = 1.35 * dpr;
+        }
+        E[i] = en * decay;
+      }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      if (texts.length) {
+        ctx.font = '700 ' + Math.round(15 * dpr * zoom) + 'px ' + MONO; ctx.textAlign = 'center'; ctx.fillStyle = '#02C8FF';
+        texts.forEach(tx => { ctx.globalAlpha = tx.a; ctx.fillText(tx.t, tx.x, tx.y); }); ctx.globalAlpha = 1;
+      }
+      kick();
+    }
+    /* pointer: light the mesh, ripple on a press, and show a card for the climber under the pointer */
+    function toUser(e) { const r = container.getBoundingClientRect(); return { x: view.vx + (e.clientX - r.left) / view.s, y: view.vy + (e.clientY - r.top) / view.s, px: e.clientX - r.left, py: e.clientY - r.top }; }
+    function hideTip() { if (tip) tip.hidden = true; climbs.forEach(c => c.node.classList.remove('hot')); if (container) container.style.cursor = ''; }
+    function hover(p) {
+      let best = null, bd = Math.pow(15 * k, 2);
+      climbs.forEach(c => { const dx = c.pos.x - p.x, dy = c.pos.y - p.y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = c; } });
+      climbs.forEach(c => c.node.classList.toggle('hot', c === best));
+      container.style.cursor = best ? 'pointer' : '';
+      if (!best || best.labelled) { tip.hidden = true; return; }
+      const c = best.c, color = c.rank === 1 ? 'var(--orange)' : c.rank === 2 ? 'var(--magenta)' : c.rank === 3 ? 'var(--medium-blue)' : 'var(--rule)';
+      tip.innerHTML = '<span class="tip-rk">' + c.rank + '</span><span class="tip-body"><b>' + esc(c.name) + '</b><small>' + (c.points | 0) + ' pts · ' + ft(c.points) + ' · ' + (c.solvedCount | 0) + '/' + CP.length + ' banked</small></span>';
+      tip.style.setProperty('--tip', color); tip.hidden = false;
+      const cx = (best.pos.x - view.vx) * view.s, cy = (best.pos.y - view.vy) * view.s, w = tip.offsetWidth, cw = view.r.width;
+      tip.classList.toggle('below', cy < 76);
+      tip.style.left = Math.max(w / 2 + 8, Math.min(cw - w / 2 - 8, cx)) + 'px'; tip.style.top = cy + 'px';
+    }
+    function wire() {
+      if (FX.wired || !container) return; FX.wired = true;
+      const move = e => { if (!view) return; const p = toUser(e); FX.ptr = { x: p.x, y: p.y, on: true }; FX.lastPtr = performance.now(); hover(p); kick(); };
+      container.addEventListener('pointermove', move);
+      container.addEventListener('pointerdown', e => { if (!view) return; move(e); const p = toUser(e); FX.ripples.push({ x: p.x, y: p.y, t0: performance.now(), speed: .75, max: 560, a: .95 }); kick(); });
+      const off = () => { if (FX.ptr) FX.ptr.on = false; FX.lastPtr = performance.now(); };
+      container.addEventListener('pointerleave', () => { off(); hideTip(); });
+      container.addEventListener('pointercancel', off);
+      container.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') off(); });
+      document.addEventListener('visibilitychange', kick);
+    }
+
     function pointAt(frac) {
       const f = Math.max(0, Math.min(1, frac)) * 10; const i = Math.min(9, Math.floor(f)); const u = f - i;
       const a = WAY[i], b = WAY[i + 1];
@@ -2217,7 +2341,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       if (i < 10) { const p = pointAt(frac); pts.push([p.x, p.y]); }
       return pts.map((p, j) => (j ? 'L' : 'M') + f2(p[0]) + ' ' + f2(p[1])).join('');
     }
-    function ridge(g, peak, halfBase, rows, seed, alpha, dots) {
+    function ridge(g, peak, halfBase, rows, seed, alpha, dots, weight) {
       const r = rnd(seed);
       const pts = [];
       for (let q = 0; q <= rows; q++) {
@@ -2230,14 +2354,17 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
         }
         pts.push(row);
       }
+      /* the sparkle layer gets every vertex and edge (row q holds 2q + 1 vertices, so vertex (q, j) is q * q + j) */
+      const base = FX.verts.length / 2, at = (q, j) => base + q * q + j;
+      pts.forEach(row => row.forEach(p => { FX.verts.push(p.x, p.y); FX.w.push(weight); }));
       let d = '';
       for (let q = 0; q <= rows; q++) {
         const row = pts[q];
         for (let j = 0; j < row.length; j++) {
-          if (j + 1 < row.length) d += 'M' + f2(row[j].x) + ' ' + f2(row[j].y) + 'L' + f2(row[j + 1].x) + ' ' + f2(row[j + 1].y);
+          if (j + 1 < row.length) { d += 'M' + f2(row[j].x) + ' ' + f2(row[j].y) + 'L' + f2(row[j + 1].x) + ' ' + f2(row[j + 1].y); FX.edges.push(at(q, j), at(q, j + 1)); }
           if (q > 0) {
             const up = pts[q - 1]; const m = up.length - 1; const t = m === 0 ? 0 : Math.round((j / (row.length - 1)) * m);
-            [t, Math.max(0, t - 1)].forEach(idx => { if (idx <= m && r() < 0.93) d += 'M' + f2(row[j].x) + ' ' + f2(row[j].y) + 'L' + f2(up[idx].x) + ' ' + f2(up[idx].y); });
+            [t, Math.max(0, t - 1)].forEach(idx => { if (idx <= m && r() < 0.93) { d += 'M' + f2(row[j].x) + ' ' + f2(row[j].y) + 'L' + f2(up[idx].x) + ' ' + f2(up[idx].y); FX.edges.push(at(q, j), at(q - 1, idx)); } });
           }
         }
       }
@@ -2257,8 +2384,12 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
 
     function build(c) {
       container = c; container.textContent = '';
+      back = el('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMax slice', 'aria-hidden': 'true' });
+      FX.cv = document.createElement('canvas'); FX.cv.className = 'sparkle'; FX.cv.setAttribute('aria-hidden', 'true'); FX.ctx = FX.cv.getContext('2d');
       svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMax slice', 'aria-hidden': 'true' });
-      container.appendChild(svg);
+      tip = document.createElement('div'); tip.className = 'mt-tip'; tip.hidden = true;
+      container.appendChild(back); container.appendChild(FX.cv); container.appendChild(svg); container.appendChild(tip);
+      FX.verts = []; FX.edges = []; FX.w = [];
       k = kFor(fit());
       const defs = el('defs');
       defs.innerHTML = '<linearGradient id="mt-route" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0A60FF"/><stop offset="1" stop-color="#02C8FF"/></linearGradient>' +
@@ -2266,24 +2397,25 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
         '<pattern id="mt-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#FF9000" stroke-width="1.2"/></pattern>' +
         '<radialGradient id="mt-halo"><stop offset="0" stop-color="#FF9000" stop-opacity=".28"/><stop offset=".45" stop-color="#FF9000" stop-opacity=".06"/><stop offset="1" stop-color="#FF9000" stop-opacity="0"/></radialGradient>' +
         '<linearGradient id="mt-face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A60FF" stop-opacity=".22"/><stop offset=".55" stop-color="#0A60FF" stop-opacity=".07"/><stop offset="1" stop-color="#07182D" stop-opacity="0"/></linearGradient>';
-      svg.appendChild(defs);
+      back.appendChild(defs);
       /* stars */
       const r = rnd(11); const stars = el('g');
       for (let i = 0; i < 120; i++) { const x = r() * W, y = r() * 420; stars.appendChild(el('circle', { cx: f2(x), cy: f2(y), r: r() < 0.15 ? 1.4 : 0.8, fill: '#FFFFFF', 'fill-opacity': (0.15 + r() * 0.45).toFixed(2) })); }
-      svg.appendChild(stars);
+      back.appendChild(stars);
       /* ground grid in perspective */
       const ground = el('g', { stroke: 'rgb(10,96,255)', 'stroke-opacity': .18, fill: 'none', 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' });
       for (let i = 0; i < 11; i++) { const y = BASE_Y + 6 + i * i * 2.1; ground.appendChild(el('line', { x1: 0, y1: f2(y), x2: W, y2: f2(y) })); }
       for (let i = -11; i <= 11; i++) { const x = PEAK.x + i * 68; ground.appendChild(el('line', { x1: f2(x), y1: BASE_Y + 6, x2: f2(PEAK.x + i * 230), y2: H })); }
-      svg.appendChild(ground);
+      back.appendChild(ground);
       /* back ridges, the face, the halo */
-      const back = el('g'); ridge(back, { x: 250, y: 400 }, 420, 8, 23, .22, false); ridge(back, { x: 1060, y: 360 }, 400, 8, 31, .22, false); svg.appendChild(back);
-      svg.appendChild(el('polygon', { points: PEAK.x + ',' + PEAK.y + ' ' + (PEAK.x + 560) + ',' + BASE_Y + ' ' + (PEAK.x - 560) + ',' + BASE_Y, fill: 'url(#mt-face)' }));
-      svg.appendChild(el('circle', { cx: PEAK.x, cy: PEAK.y, r: 160, fill: 'url(#mt-halo)' }));
-      const face = el('g'); ridge(face, PEAK, 560, 15, 7, .5, true); svg.appendChild(face);
+      const ridges = el('g'); ridge(ridges, { x: 250, y: 400 }, 420, 8, 23, .22, false, .45); ridge(ridges, { x: 1060, y: 360 }, 400, 8, 31, .22, false, .45); back.appendChild(ridges);
+      back.appendChild(el('polygon', { points: PEAK.x + ',' + PEAK.y + ' ' + (PEAK.x + 560) + ',' + BASE_Y + ' ' + (PEAK.x - 560) + ',' + BASE_Y, fill: 'url(#mt-face)' }));
+      back.appendChild(el('circle', { cx: PEAK.x, cy: PEAK.y, r: 160, fill: 'url(#mt-halo)' }));
+      const face = el('g'); ridge(face, PEAK, 560, 15, 7, .5, true, 1); back.appendChild(face);
+      FX.energy = new Float32Array(FX.w.length); FX.phase = new Float32Array(FX.w.length).map(() => Math.random() * 6.283);
       const rings = el('g', { fill: 'none', stroke: '#FF9000', 'vector-effect': 'non-scaling-stroke' });
       [[40, .4], [72, .24], [108, .12]].forEach(([rad, op]) => { const ci = el('circle', { cx: PEAK.x, cy: PEAK.y, r: rad, 'stroke-opacity': op, 'stroke-width': 1 }); if (!reduced) ci.innerHTML = '<animate attributeName="r" values="' + rad + ';' + (rad + 10) + ';' + rad + '" dur="5s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values="' + op + ';' + (op * 0.4) + ';' + op + '" dur="5s" repeatCount="indefinite"/>'; rings.appendChild(ci); });
-      svg.appendChild(rings);
+      back.appendChild(rings);
       /* the route: dashed all the way up, solid and glowing as far as the leader, with light flowing up it */
       const fullD = WAY.map((p, i) => (i ? 'L' : 'M') + f2(p.x) + ' ' + f2(p.y)).join('');
       svg.appendChild(el('path', { d: fullD, fill: 'none', stroke: '#02C8FF', 'stroke-opacity': .35, 'stroke-width': 1.5, 'stroke-dasharray': '5 6', 'vector-effect': 'non-scaling-stroke' }));
@@ -2331,6 +2463,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       L.markers = el('g'); L.labels = el('g');
       svg.appendChild(L.markers); svg.appendChild(L.labels);
       if (!observer && 'ResizeObserver' in window) { observer = new ResizeObserver(onResize); observer.observe(container); }
+      wire();
     }
 
     /* fit the viewBox to the stage: crop the sides around a focus point (left of the peak when overlays sit on the left) or crop the top */
@@ -2342,9 +2475,10 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       let vx = 0, vy = 0, vw = W, vh = H;
       if (r.width / r.height < W / band.h) { vh = band.h; vy = band.y0; vw = band.h * r.width / r.height; vx = Math.max(0, Math.min(W - vw, focus - vw / 2)); }
       else { vh = W * r.height / r.width; vy = Math.max(0, Math.min(H - vh, band.y0 + band.h / 2 - vh / 2)); }
-      svg.setAttribute('viewBox', f2(vx) + ' ' + f2(vy) + ' ' + f2(vw) + ' ' + f2(vh));
-      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-      return { r, s: r.width / vw, vx, vy, vw, vh, overlay };
+      [back, svg].forEach(s => { if (s) { s.setAttribute('viewBox', f2(vx) + ' ' + f2(vy) + ' ' + f2(vw) + ' ' + f2(vh)); s.setAttribute('preserveAspectRatio', 'xMidYMid meet'); } });
+      if (FX.cv) { const dpr = Math.min(2, window.devicePixelRatio || 1), cw = Math.round(r.width * dpr), ch = Math.round(r.height * dpr); FX.dpr = dpr; if (FX.cv.width !== cw || FX.cv.height !== ch) { FX.cv.width = cw; FX.cv.height = ch; } }
+      view = { r, s: r.width / vw, vx, vy, vw, vh, overlay };
+      return view;
     }
     function layout() {
       if (!svg) return;
@@ -2396,6 +2530,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
         if (!container || !svg) return;
         const nk = kFor(fit());
         if (Math.abs(nk - k) > 0.04) { build(container); render(lastRows, lastMe); } else layout();
+        kick();
       }, 80);
     }
 
@@ -2438,7 +2573,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       const d = climbedPath(top / total); L.done.setAttribute('d', d); L.flow.setAttribute('d', d);
       /* climbers on the same score fan out across the route instead of stacking */
       const groups = {}; rows.forEach((r, i) => { r.rank = i + 1; const key = r.points | 0; (groups[key] = groups[key] || []).push(r); });
-      const seenM = new Set(); labels = []; dots = [];
+      const seenM = new Set(); labels = []; dots = []; climbs = []; hideTip();
       Object.keys(groups).forEach(key => {
         const grp = groups[key]; const base = pointAt((grp[0].points | 0) / total);
         const len = Math.hypot(base.dx, base.dy) || 1; const nx = -base.dy / len, ny = base.dx / len;
@@ -2448,8 +2583,13 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
           const pos = { x: base.x + nx * spread, y: base.y + ny * spread };
           const me = !!meName && c.name === meName; const id = c.name.toLowerCase(); seenM.add(id);
           dots.push({ x0: pos.x - 9 * k, y0: pos.y - 9 * k, x1: pos.x + 9 * k, y1: pos.y + 9 * k });
-          const m = upsert(L.markers, id, pos); m.textContent = ''; m.appendChild(marker(c, me));
-          if (c.rank <= 3 || me) labels.push(Object.assign(labelCard(c, me), { pos, id }));
+          const m = upsert(L.markers, id, pos); m.textContent = ''; const mk = el('g', { class: 'mk' }); mk.appendChild(marker(c, me)); m.appendChild(mk);
+          const labelled = c.rank <= 3 || me;
+          if (labelled) labels.push(Object.assign(labelCard(c, me), { pos, id }));
+          climbs.push({ id, pos, c, me, labelled, node: m });
+          const before = FX.prev.get(id), now = c.points | 0;
+          if (FX.seeded && before != null && now >= before + 50) FX.pending.push({ id, delta: now - before });
+          FX.prev.set(id, now);
         });
         const extra = grp.length - shown.length;
         if (extra > 0) {
@@ -2472,7 +2612,10 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
         if (prev[lb.id] && prev[lb.id] !== to) { void g.getBoundingClientRect(); g.style.transform = to; }
       });
       labels.sort((a, b) => (a.rank === 1 ? -1 : b.rank === 1 ? 1 : 0) || (b.me - a.me) || (a.rank - b.rank));
+      FX.seeded = true;
       layout();
+      if (FX.ptr && FX.ptr.on && view) hover(FX.ptr);
+      kick();
     }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (container && svg) { build(container); render(lastRows, lastMe); } });
     return { build, render, get built() { return !!svg; } };
