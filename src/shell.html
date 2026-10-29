@@ -180,6 +180,51 @@
   .board .pt { font-family: var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
   .board .pt small { color: var(--dim); margin-left: 8px; font-size: 10px; letter-spacing: .1em; }
   .board li.me .nm { color: var(--fg); font-weight: 700; }
+  .summit-panel { border: var(--line) solid var(--rule); border-radius: 18px; padding: 24px 26px 20px; margin-bottom: 20px; overflow: hidden; position: relative; }
+  .summit-panel::before { content: ""; position: absolute; inset: 14px 18px auto auto; width: 5px; height: 5px; border-radius: 50%; background: var(--cisco-blue); box-shadow: -46px 23px 0 var(--magenta), -91px -2px 0 var(--orange), -151px 31px 0 var(--medium-blue), -212px 8px 0 var(--cisco-blue); opacity: .75; }
+  .summit-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; flex-wrap: wrap; position: relative; z-index: 1; }
+  .summit-head h2 { font-size: clamp(24px, 4vw, 42px); margin: 3px 0 0; letter-spacing: -.03em; }
+  .summit-head h2 span { color: var(--cisco-blue); }
+  .summit-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--orange); margin: 0; }
+  .summit-stat { text-align: right; font-family: var(--mono); color: var(--dim); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+  .summit-stat b { display: block; color: var(--fg); font-size: 24px; letter-spacing: -.03em; }
+  .climb-field { height: 390px; position: relative; margin-top: 18px; border-bottom: var(--line) solid var(--rule); }
+  .mountain-line { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .mountain-line .ridge { fill: none; stroke: var(--medium-blue); stroke-width: 2.2; vector-effect: non-scaling-stroke; }
+  .mountain-line .echo { fill: none; stroke: var(--rule); stroke-width: 1; stroke-dasharray: 3 8; vector-effect: non-scaling-stroke; }
+  .mountain-line .snow { fill: none; stroke: var(--fg); stroke-width: 1.4; vector-effect: non-scaling-stroke; opacity: .8; }
+  .base-label, .peak-label { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+  .base-label { left: 1%; bottom: 11%; }
+  .peak-label { right: 1%; top: 2%; text-align: right; color: var(--cisco-blue); max-width: 160px; }
+  .peak-label::before { content: "⚑"; display: block; color: var(--orange); font-size: 23px; line-height: 1; margin-bottom: 5px; }
+  .climber { --climber: var(--cisco-blue); position: absolute; left: var(--x); bottom: var(--y); transform: translate(-50%, 50%); z-index: 2; max-width: 132px; animation: climb-in .65s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--rank) * 55ms); }
+  .climber:nth-of-type(3n+1) { --climber: var(--orange); }
+  .climber:nth-of-type(3n+2) { --climber: var(--magenta); }
+  .climber-dot { display: block; width: 15px; height: 15px; margin: 0 auto; border: 3px solid var(--midnight); border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 1px var(--climber); }
+  .climber-tag { display: block; margin-top: 7px; padding: 5px 7px; border: 1px solid var(--climber); border-radius: 6px; background: var(--midnight); font-family: var(--mono); font-size: 10px; line-height: 1.2; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+  .climber-tag b { color: var(--climber); margin-right: 4px; }
+  .climber.me .climber-dot { width: 19px; height: 19px; }
+  .climber.me .climber-tag { border-width: 2px; font-weight: 700; }
+  @keyframes climb-in { from { opacity: 0; transform: translate(-50%, 50%) scale(.65); } to { opacity: 1; transform: translate(-50%, 50%) scale(1); } }
+  .expedition-panel { border: var(--line) solid var(--rule); border-radius: 16px; padding: 24px 28px; }
+  .board.expedition li { grid-template-columns: 42px minmax(0, 1fr) minmax(90px, 1.2fr) auto; gap: 14px; padding: 14px 0; }
+  .board.expedition .rk { width: 30px; font-size: 13px; }
+  .board.expedition .nm small { display: block; font-family: var(--mono); color: var(--dim); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; margin-top: 3px; }
+  .altitude { height: 5px; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .altitude i { display: block; height: 100%; width: var(--progress); background: var(--medium-blue); }
+  .board.expedition li:nth-child(1) .altitude i { background: var(--orange); }
+  .board.expedition li:nth-child(2) .altitude i { background: var(--magenta); }
+  .board.expedition li.me { border-left: 2px solid var(--cisco-blue); padding-left: 12px; }
+  @media (max-width: 700px) {
+    .summit-panel { padding: 20px 16px 16px; }
+    .climb-field { height: 330px; }
+    .climber { max-width: 88px; }
+    .climber-tag { font-size: 8px; padding: 4px 5px; }
+    .board.expedition li { grid-template-columns: 32px minmax(0, 1fr) auto; }
+    .board.expedition .altitude { display: none; }
+    .expedition-panel { padding: 20px 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .climber { animation: none; } }
   .empty { font-size: 14px; color: var(--dim); padding: 6px 0; margin: 0; }
 
   /* ── CONTENT PAGES ── */
@@ -626,13 +671,29 @@
     <div class="wrap page">
       <div class="page-head">
         <span class="spine" aria-hidden="true"></span>
-        <p class="eyebrow">// Scoreboard</p>
-        <h1>The <span class="hl">scoreboard</span></h1>
+        <p class="eyebrow">// Live ascent</p>
+        <h1>Climb the <span class="hl">mountain</span></h1>
         <p class="desc" id="standings-desc"></p>
       </div>
+      <div class="summit-panel">
+        <div class="summit-head">
+          <div><p class="summit-kicker">The ThousandEyes ascent</p><h2>Peak of <span>Inflated Expectations</span></h2></div>
+          <div class="summit-stat"><b id="summit-count">0</b>climbers on the mountain</div>
+        </div>
+        <div class="climb-field" id="climb-field" aria-label="Score positions on the mountain">
+          <svg class="mountain-line" viewBox="0 0 1000 390" preserveAspectRatio="none" aria-hidden="true">
+            <path class="echo" d="M12 356 C150 346 210 320 295 300 S430 259 520 239 S665 194 734 151 S840 92 931 40"/>
+            <path class="ridge" d="M12 356 C150 346 210 320 295 300 S430 259 520 239 S665 194 734 151 S840 92 931 40 L975 104 L1000 78"/>
+            <path class="snow" d="M871 83 L900 101 L931 40 L953 85 L975 104"/>
+          </svg>
+          <span class="base-label">Base camp · 0 pts</span>
+          <span class="peak-label">1,000 pts<br>Peak of Inflated Expectations</span>
+          <div id="climbers"></div>
+        </div>
+      </div>
       <div class="two-up">
-        <div class="panel"><p class="eyebrow accent">Your scorecard</p><div id="scorecard"></div></div>
-        <div class="panel"><div class="panel-head"><p class="eyebrow accent" id="board-title">Live standings</p><span class="eyebrow" id="board-refresh"></span></div><ol class="board" id="board-full"></ol><p class="empty" id="board-full-note"></p></div>
+        <div class="panel"><p class="eyebrow accent">Your expedition card</p><div id="scorecard"></div></div>
+        <div class="expedition-panel"><div class="panel-head"><p class="eyebrow accent" id="board-title">Expedition log</p><span class="eyebrow" id="board-refresh"></span></div><ol class="board expedition" id="board-full"></ol><p class="empty" id="board-full-note"></p></div>
       </div>
     </div>
   </section>
@@ -1001,13 +1062,39 @@
   /* ── standings ── */
   const Board = (() => {
     let timer = 0;
+    const maxPoints = CP.reduce((sum, cp) => sum + cp.points, 0);
+    function paintMountain(players, current) {
+      const field = $('#climbers'), count = $('#summit-count');
+      if (count) count.textContent = players.length;
+      if (!field) return;
+      field.innerHTML = players.slice(0, 12).map((q, i) => {
+        const points = Math.max(0, q.points | 0);
+        const progress = Math.min(1, points / maxPoints);
+        const x = 4 + progress * 90 + ((i % 3) - 1) * 1.2;
+        const y = 8 + Math.pow(progress, .88) * 82 + ((i % 2) ? 1.5 : -1.5);
+        const me = current && q.name === current.name;
+        const summit = progress >= 1;
+        return '<div class="climber' + (me ? ' me' : '') + '" style="--x:' + x.toFixed(1) + '%;--y:' + y.toFixed(1) + '%;--rank:' + i + '" title="' + esc(q.name) + ': ' + points + ' points">' +
+          '<span class="climber-dot"></span><span class="climber-tag"><b>' + (summit ? 'SUMMIT' : '#' + (i + 1)) + '</b>' + esc(q.name) + '</span></div>';
+      }).join('');
+    }
+    function fullRows(players, current) {
+      return players.map((q, i) => {
+        const points = Math.max(0, q.points | 0);
+        const progress = Math.min(100, Math.round(points / maxPoints * 100));
+        const stage = progress >= 100 ? 'At the summit' : progress >= 75 ? 'Final ascent' : progress >= 40 ? 'Above base camp' : 'On the trail';
+        return '<li' + (current && q.name === current.name ? ' class="me"' : '') + ' style="--progress:' + progress + '%"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '<small>' + stage + ' · ' + progress + '% climbed</small></span><span class="altitude" aria-hidden="true"><i></i></span><span class="pt">' + points + '<small>' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></li>';
+      }).join('');
+    }
     async function refresh() {
       const full = $('#board-full'), note = $('#board-full-note'), home = $('#board-home'), homeNote = $('#board-home-note'), ref = $('#board-refresh'), title = $('#board-title');
       const p = Store.player;
       if (!Store.live) {
-        if (title) title.textContent = 'Room standings';
+        if (title) title.textContent = 'Expedition log';
+        const local = p ? [{ name: p.name, points: p.points, solvedCount: solvedCount(p) }] : [];
         const row = p ? '<li class="me"><span class="rk">1</span><span class="nm">' + esc(p.name) + '</span><span class="pt">' + p.points + '<small>' + solvedCount(p) + '/' + CP.length + '</small></span></li>' : '';
-        if (full) full.innerHTML = row; if (home) home.innerHTML = row;
+        if (full) full.innerHTML = fullRows(local, p); if (home) home.innerHTML = row;
+        paintMountain(local, p);
         const txt = p ? 'Local mode: only your score lives on this laptop. Show your score code to a proctor for the room board.' : 'Local mode: check in and your score shows here. The room board is kept by the proctors.';
         if (note) note.textContent = txt; if (homeNote) homeNote.textContent = p ? 'Local mode. The room board is kept by the proctors from score codes.' : 'Check in to start banking points.';
         if (ref) ref.textContent = ''; return;
@@ -1015,7 +1102,8 @@
       try {
         const players = await Store.leaderboard();
         const rows = (players || []).map((q, i) => '<li' + (p && q.name === p.name ? ' class="me"' : '') + '><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '</span><span class="pt">' + (q.points | 0) + '<small>' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></li>');
-        if (full) full.innerHTML = rows.join(''); if (home) home.innerHTML = rows.slice(0, 5).join('');
+        if (full) full.innerHTML = fullRows(players || [], p); if (home) home.innerHTML = rows.slice(0, 5).join('');
+        paintMountain(players || [], p);
         if (note) note.textContent = rows.length ? '' : 'Nobody has checked in yet.'; if (homeNote) homeNote.textContent = rows.length ? '' : 'Nobody has checked in yet. Be first.';
         if (ref) ref.textContent = 'Updated ' + fmtTime(Date.now());
       } catch (e) { if (note) note.textContent = 'The lab API didn’t answer. Standings will refresh when it does.'; if (ref) ref.textContent = ''; }
@@ -1026,7 +1114,7 @@
   async function renderScorecard() {
     const el = $('#scorecard'), desc = $('#standings-desc'); if (!el) return;
     const p = Store.player;
-    if (desc) desc.textContent = Store.live ? 'Live from the lab API, refreshed every 20 seconds. Points bank the moment a checkpoint is cleared.' : 'This page is running in local mode: your points are kept in this browser and the room board is run by the proctors. Everything else works exactly the same.';
+    if (desc) desc.textContent = Store.live ? 'Every checkpoint takes you higher. Live positions refresh every 20 seconds, all the way to the Peak of Inflated Expectations.' : 'Every checkpoint takes you higher. In local mode your climb stays in this browser and the room board is run by the proctors.';
     if (!p) { el.innerHTML = '<p class="empty">Check in on the <a href="#home" style="color:var(--fg)">Overview</a> to start a scorecard.</p>'; return; }
     const tiles = CP.map(cp => { const s = p.solved && p.solved[cp.id]; const tries = (p.tries && p.tries[cp.id]) || 0; const hint = p.hints && p.hints[cp.id]; return '<a class="score-tile g-' + (cp.route.startsWith('lab') ? 'labs' : cp.route.startsWith('build') ? 'builds' : 'setup') + (s ? ' done' : '') + '" href="#' + cp.route + '" style="text-decoration:none;color:inherit"><div class="st-l">' + esc(cp.label) + '</div><div class="st-t">' + esc(cp.title) + '</div><div class="st-s">' + (s ? 'Banked ' + cp.points + ' · ' + fmtTime(s.at) : (tries ? tries + ' ' + (tries === 1 ? 'try' : 'tries') + ' so far' : 'Open')) + (hint ? ' · hint used' : '') + '</div></a>'; }).join('');
     let code = ''; try { code = await scoreCode(p); } catch (e) { code = ''; }
