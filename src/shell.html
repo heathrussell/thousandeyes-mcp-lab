@@ -103,7 +103,7 @@
   .eyebrow.accent { color: var(--accent); }
   @media (max-width: 860px) { .hero-inner { grid-template-columns: 1fr; padding-block: 52px 72px; gap: 32px; } .hero h1 { max-width: none; } .hero-fade { background: linear-gradient(180deg, rgba(7,24,45,.72) 0%, rgba(7,24,45,.52) 50%, rgba(7,24,45,.94) 100%); } .hero-hint-row { justify-content: center; } }
   /* the hint under the hero network; it fades once someone plays with it */
-  .hero-hint-row { position: absolute; left: 0; right: 0; bottom: 20px; display: flex; justify-content: flex-end; pointer-events: none; }
+  .hero-hint-row { position: absolute; left: 0; right: 0; bottom: 20px; display: flex; justify-content: center; pointer-events: none; }
   .hero-hint { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); white-space: nowrap; border: var(--line) solid var(--rule); border-radius: 100px; padding: 6px 14px 6px 11px; background: rgba(7,24,45,.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity .6s ease, transform .6s ease; }
   .hero-hint i { position: relative; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
   .hero-hint i::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: var(--line) solid var(--accent); animation: hint-ping 2.2s ease-out infinite; }
@@ -117,7 +117,8 @@
   .hero.intro .hero-copy > :nth-child(2) { animation-delay: .07s; } .hero.intro .hero-copy > :nth-child(3) { animation-delay: .14s; } .hero.intro .hero-copy > :nth-child(4) { animation-delay: .24s; }
   .hero.intro .hero-copy > :nth-child(5) { animation-delay: .31s; } .hero.intro .hero-copy > :nth-child(6) { animation-delay: .38s; } .hero.intro .hero-copy > :nth-child(7) { animation-delay: .45s; }
   .hero.intro .checkin { animation-delay: .3s; } .hero.intro .hero-hint { animation-delay: 1.3s; }
-  @media (prefers-reduced-motion: reduce) { .hero.intro .hero-copy > *, .hero.intro .checkin, .hero.intro .hero-hint { animation: none; } .hero-hint-row { display: none; } }
+  .hero.intro .hero-badge { animation: badge-pop .9s cubic-bezier(.2, .8, .3, 1) .75s backwards; }
+  @media (prefers-reduced-motion: reduce) { .hero.intro .hero-copy > *, .hero.intro .checkin, .hero.intro .hero-hint, .hero-badge-wrap, .hero-badge, .hero-badge.spin, .hero.intro .hero-badge { animation: none; } .hero-hint-row { display: none; } }
 
   /* ── CHECK-IN CARD ── */
   .checkin { border: var(--line) solid var(--medium-blue); border-radius: 16px; padding: 26px 26px 24px; position: relative; background: rgba(7,24,45,.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); min-width: 0; }
@@ -135,6 +136,21 @@
   .btn.block { width: 100%; margin-top: 14px; }
   .status-dot { position: absolute; top: 24px; right: 24px; width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
   .status-dot.live { background: var(--green); box-shadow: 0 0 0 4px rgba(69,153,31,.22); animation: pulse 2.4s ease-in-out infinite; }
+  .checkin .eyebrow .status-dot { position: static; display: inline-block; vertical-align: 1px; margin-left: 12px; }
+  /* the Enterprise AI Builder badge sits on the check-in card's corner like a seal: it bobs, leans in on hover, and a
+     click spins it and sends a pulse through the network. On phones it sits above the card, overlapping its edge. */
+  .checkin-wrap { position: relative; min-width: 0; }
+  .hero-badge-wrap { position: absolute; z-index: 2; top: -112px; right: -6px; width: 152px; animation: badge-bob 6s ease-in-out infinite; }
+  .hero-badge { display: block; width: 100%; height: auto; border-radius: 50%; rotate: -7deg; cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;
+    filter: drop-shadow(0 12px 22px rgba(0,0,0,.5)); transition: rotate .5s cubic-bezier(.2,.8,.2,1), scale .5s cubic-bezier(.2,.8,.2,1), filter .3s ease; }
+  .hero-badge:hover { rotate: 0deg; scale: 1.06; filter: drop-shadow(0 0 22px rgba(2,200,255,.45)) drop-shadow(0 12px 22px rgba(0,0,0,.5)); }
+  .hero-badge.spin { animation: badge-spin .9s cubic-bezier(.3,.7,.2,1); }
+  @keyframes badge-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+  @keyframes badge-spin { from { rotate: -7deg; } to { rotate: 353deg; } }
+  @keyframes badge-pop { from { opacity: 0; scale: .4; rotate: -50deg; } 70% { opacity: 1; scale: 1.08; } to { opacity: 1; scale: 1; rotate: -7deg; } }
+  @media (min-width: 1280px) { .hero-badge-wrap { right: -36px; } }
+  @media (max-width: 860px) { .hero-badge-wrap { position: relative; display: block; top: auto; right: auto; width: 100px; margin: 0 6px -34px auto; } }
+  @media (prefers-reduced-motion: reduce) { .hero-badge-wrap, .hero-badge, .hero-badge.spin { animation: none; } .hero-badge { transition: filter .3s ease; } }
   @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(69,153,31,.18); } 50% { box-shadow: 0 0 0 7px rgba(69,153,31,.06); } }
   .who { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .who b { font-size: 22px; letter-spacing: -.01em; overflow-wrap: anywhere; }
@@ -624,7 +640,10 @@
           <div class="cta-row"><a class="textlink" href="#setup">Open the setup guide →</a><a class="textlink" href="#labs">Read the chapters →</a></div>
           <p class="hero-meta" id="hero-meta"></p>
         </div>
-        <div class="checkin" id="checkin-card"></div>
+        <div class="checkin-wrap">
+          <span class="hero-badge-wrap"><img class="hero-badge" id="hero-badge" src="@BADGE_SRC@" alt="Enterprise AI Builder, Cisco Live" width="480" height="480" draggable="false"></span>
+          <div class="checkin" id="checkin-card"></div>
+        </div>
       </div>
       <div class="wrap hero-hint-row" aria-hidden="true"><span class="hero-hint" id="hero-hint"><i></i><span class="t-mouse">Drag an agent · click anywhere to send a pulse</span><span class="t-touch">Drag an agent · tap to pulse</span></span></div>
     </div>
@@ -1232,7 +1251,7 @@
       const al = Math.hypot(ax, ay), ux = al > .35 ? -ax / al : 0, uy = al > .35 ? -ay / al : -1;
       /* the check-in card and the hero copy sit over the canvas, so labels keep out from under them */
       const vr = cv.getBoundingClientRect();
-      const avoid = $$('#checkin-card, .hero-copy > h1, .hero-copy > p, .hero-copy > .cta-row').map(el => el.getBoundingClientRect())
+      const avoid = $$('#checkin-card, .hero-badge-wrap, .hero-copy > h1, .hero-copy > p, .hero-copy > .cta-row').map(el => el.getBoundingClientRect())
         .filter(r => r.width && r.height).map(r => ({ x: r.left - vr.left + r.width / 2, y: r.top - vr.top + r.height / 2, w: r.width, h: r.height }));
       /* the nearest clear spot, away from its paths first; no clear spot within reach means no name tag */
       const nb = box(name(n), 0, 0, true), gap = n.r * 1.7 + 12, dirs = [[ux, uy], [0, -1], [0, 1], [1, 0], [-1, 0]];
@@ -1353,7 +1372,7 @@
     }
     /* pointer and touch: grab an agent within reach; a quick click or tap on an agent pings, on open space it pulses */
     const local = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
-    const interactive = t => !!(t && t.closest && t.closest('a, button, input, select, textarea, label, form, .checkin, [contenteditable]'));
+    const interactive = t => !!(t && t.closest && t.closest('a, button, input, select, textarea, label, form, .checkin, .hero-badge-wrap, [contenteditable]'));
     const nodeAt = (p, rad) => { let best = null, bd = rad * rad; for (const n of nodes) { if (!shown(n)) continue; const dx = n.x - p.x, dy = n.y - p.y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = n; } } return best; };
     const used = () => { played = clock; if (hint) hint.classList.add('used'); };
     if (!reduced) {
@@ -1423,6 +1442,13 @@
     };
   })();
 
+  /* ── the Enterprise AI Builder badge: a click spins it and sends a pulse through the hero network ── */
+  (function badge() {
+    const b = $('#hero-badge'); if (!b) return;
+    b.addEventListener('click', () => { b.classList.remove('spin'); void b.offsetWidth; b.classList.add('spin'); Net.burstAt(b); });
+    b.addEventListener('animationend', e => { if (e.animationName === 'badge-spin') b.classList.remove('spin'); });
+  })();
+
   /* ── overview polish: sections rise in as they scroll into view, the stats count up, cards light their outline
      under the pointer and the chapter cards tilt toward it. Reduced motion keeps the outline light and drops the rest. ── */
   (function overview() {
@@ -1465,13 +1491,13 @@
     const p = Store.player, live = Store.live;
     const dot = '<span class="status-dot' + (live ? ' live' : '') + '" title="' + (live ? 'Live scoreboard connected' : 'Scores stay on this laptop') + '"></span>';
     if (!p) {
-      card.innerHTML = dot + '<p class="eyebrow accent">Builder check-in</p><p>Pick a handle to bank points. ' + (live ? 'Already playing? Enter the same handle to pick up where you left off.' : 'Scores stay in this browser, so use the same laptop and browser all session.') + '</p>' +
+      card.innerHTML = '<p class="eyebrow accent">Builder check-in' + dot + '</p><p>Pick a handle to bank points. ' + (live ? 'Already playing? Enter the same handle to pick up where you left off.' : 'Scores stay in this browser, so use the same laptop and browser all session.') + '</p>' +
         '<form id="checkin-form" class="field"><label for="handle">Your handle</label><input class="input" id="handle" name="handle" autocomplete="off" maxlength="24" placeholder="e.g. packetwrangler" required><button class="btn block" type="submit">Start building</button><p class="msg" id="checkin-msg"></p></form>';
       const f = $('#checkin-form');
       f.addEventListener('submit', async ev => { ev.preventDefault(); const btn = $('button', f), m = $('#checkin-msg'); btn.disabled = true; m.className = 'msg'; m.textContent = live ? 'Checking in…' : ''; try { await Store.checkin($('#handle').value); Net.burstAt($('#checkin-card')); } catch (e) { m.className = 'msg bad'; m.textContent = e.message || 'That didn’t work.'; btn.disabled = false; } });
     } else {
       const next = nextChapter(p);
-      card.innerHTML = dot + '<p class="eyebrow accent">Checked in</p><div class="who"><b>' + esc(p.name) + '</b><span>' + p.points + ' pts · ' + solvedCount(p) + '/' + CP.length + '</span></div>' +
+      card.innerHTML = '<p class="eyebrow accent">Checked in' + dot + '</p><div class="who"><b>' + esc(p.name) + '</b><span>' + p.points + ' pts · ' + solvedCount(p) + '/' + CP.length + '</span></div>' +
         '<p style="margin-top:14px">' + (next ? 'Next up: <a href="#' + next.route + '" style="color:var(--fg)">' + esc(next.title) + '</a>.' : 'Every checkpoint banked. Take it to the capstone.') + '</p>' +
         '<div class="cta-row"><a class="textlink" href="#standings">Your scorecard →</a><button class="linkbtn" id="switch-handle" type="button">Switch handle</button></div>';
       $('#switch-handle').addEventListener('click', () => { Store.signout(); const i = $('#handle'); if (i) i.focus(); });

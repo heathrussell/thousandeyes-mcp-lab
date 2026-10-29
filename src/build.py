@@ -341,11 +341,16 @@ put('FIELD_BODY', html_of(field_nodes))
 # ── brand marks (inlined so the page stays a single file) ─────────────────
 # src/brand/ai-builders.png: the AI Builders mark shown top-left (transparent PNG; replace the file and rebuild to swap it).
 # src/brand/cisco.svg (optional): the official Cisco logo SVG from the brand portal, shown before the mark if present.
+# src/brand/ai-builder-badge.webp: the Enterprise AI Builder (Cisco Live) badge on the hero check-in card, cut from the
+#   dark version of the official badge as a transparent circle (480 px; it shows at 152 px, 100 px on phones).
 import base64
 BRAND = SRC / 'brand'
 logo_png = BRAND / 'ai-builders.png'
 assert logo_png.exists(), f'missing {logo_png}'
 shell = shell.replace('@LOGO_SRC@', 'data:image/png;base64,' + base64.b64encode(logo_png.read_bytes()).decode('ascii'), 1)
+badge_webp = BRAND / 'ai-builder-badge.webp'
+assert badge_webp.exists(), f'missing {badge_webp}'
+shell = shell.replace('@BADGE_SRC@', 'data:image/webp;base64,' + base64.b64encode(badge_webp.read_bytes()).decode('ascii'), 1)
 cisco_svg = BRAND / 'cisco.svg'
 cisco_mark = ''
 if cisco_svg.exists():
@@ -365,7 +370,7 @@ shell = shell.replace('/*@TOOLS@*/[]', js(TOOLS), 1)
 shell = shell.replace('/*@SEARCH@*/[]', js(SEARCH), 1)
 if '/*@MOUNTAIN@*/' in shell:  # the artwork scoreboard on release uses src/assets/mountain.webp; this one draws its own
     shell = shell.replace('/*@MOUNTAIN@*/', 'data:image/webp;base64,' + base64.b64encode((SRC / 'assets' / 'mountain.webp').read_bytes()).decode('ascii'), 1)
-assert re.findall(r'<!--@(\w+)@-->', shell) == ['CONFIG_SCRIPT'] and '/*@' not in shell and '@LOGO_SRC@' not in shell, re.findall(r'<!--@(\w+)@-->', shell)
+assert re.findall(r'<!--@(\w+)@-->', shell) == ['CONFIG_SCRIPT'] and '/*@' not in shell and '@LOGO_SRC@' not in shell and '@BADGE_SRC@' not in shell, re.findall(r'<!--@(\w+)@-->', shell)
 
 artifact_page = shell.replace('<!--@CONFIG_SCRIPT@-->', '')
 dist_page = shell.replace('<!--@CONFIG_SCRIPT@-->', '<script src="config.js"></script>')
