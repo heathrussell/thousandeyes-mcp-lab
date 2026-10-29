@@ -9,7 +9,7 @@ search index, hashes the checkpoint answers from api/checkpoints.json, and write
   site/config.js        created only if missing; never overwritten (it holds your API URL)
   src/out/index.html    the Claude-artifact page (local-score mode, no config.js)
 """
-import hashlib, json, pathlib, re, sys, unicodedata
+import base64, hashlib, json, pathlib, re, sys, unicodedata
 from bs4 import BeautifulSoup, Comment, NavigableString, Tag
 
 SRC = pathlib.Path(__file__).resolve().parent
@@ -346,6 +346,7 @@ def js(obj):
 shell = shell.replace('/*@BANK@*/null', js(public), 1)
 shell = shell.replace('/*@TOOLS@*/[]', js(TOOLS), 1)
 shell = shell.replace('/*@SEARCH@*/[]', js(SEARCH), 1)
+shell = shell.replace('/*@MOUNTAIN@*/', 'data:image/webp;base64,' + base64.b64encode((SRC / 'assets' / 'mountain.webp').read_bytes()).decode('ascii'), 1)
 assert re.findall(r'<!--@(\w+)@-->', shell) == ['CONFIG_SCRIPT'] and '/*@' not in shell, re.findall(r'<!--@(\w+)@-->', shell)
 
 artifact_page = shell.replace('<!--@CONFIG_SCRIPT@-->', '')

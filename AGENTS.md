@@ -22,6 +22,7 @@ This repo is a hands-on lab portal for AI builders (a Cisco ThousandEyes event) 
 | `scripts/wipe-onboarding.sh` | Deletes the lab's onboarding records (ThousandEyes is untouched). | Yes. |
 | `src/shell.html` | The page source: design tokens, CSS, markup with `<!--@PLACEHOLDER@-->` slots, and the app script. | Yes. |
 | `src/build.py` | Ports the lab guide HTML into the shell, parses the tool catalogue, builds the search index, hashes answers, writes `site/index.html` and `src/out/index.html`. | Yes. |
+| `src/assets/mountain.webp` | Scoreboard artwork, embedded into the page as a data URI by the build. | Yes, then rebuild. |
 | `src/guide/*.html` | The verified lab guide content the site is built from. | Only for content corrections. |
 
 ## How the pieces fit

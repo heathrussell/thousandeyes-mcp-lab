@@ -180,79 +180,100 @@
   .board .pt { font-family: var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
   .board .pt small { color: var(--dim); margin-left: 8px; font-size: 10px; letter-spacing: .1em; }
   .board li.me .nm { color: var(--fg); font-weight: 700; }
-  .summit-dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 330px; border: var(--line) solid var(--rule); border-radius: 18px; overflow: hidden; margin-bottom: 22px; min-height: 720px; }
-  .summit-main { min-width: 0; padding: 24px 0 0; position: relative; overflow: hidden; }
-  .summit-main::before { content: ""; position: absolute; inset: 20px 24px auto auto; width: 4px; height: 4px; border-radius: 50%; background: var(--cisco-blue); box-shadow: -47px 23px 0 var(--magenta), -106px -3px 0 var(--orange), -168px 31px 0 var(--medium-blue), -228px 9px 0 var(--cisco-blue); opacity: .75; }
-  .summit-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding: 0 26px; position: relative; z-index: 3; }
-  .summit-head h2 { font-size: clamp(25px, 3.6vw, 42px); margin: 3px 0 0; letter-spacing: -.035em; line-height: 1; }
-  .summit-head h2 span { color: var(--cisco-blue); }
-  .summit-kicker { font-family: var(--mono); font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--orange); margin: 0; }
-  .summit-live { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
-  .summit-live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 7px; animation: live-pulse 1.8s ease-out infinite; }
+  /* ── ASCENT (scoreboard) ── */
+  .ascent { position: relative; max-width: 1480px; margin: 0 auto; height: clamp(680px, 56vw, 860px); overflow: hidden; }
+  .ascent-art { position: absolute; left: 50%; bottom: 0; height: 100%; aspect-ratio: 3 / 2; transform: translateX(-50%); }
+  .ascent-art img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; -webkit-mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); mask-composite: intersect; }
+  .ascent-trail { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .trail-base { fill: none; stroke: rgba(2,200,255,.4); stroke-width: 2; stroke-dasharray: 5 7; stroke-linejoin: round; }
+  .trail-done { fill: none; stroke: var(--cisco-blue); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 5px rgba(2,200,255,.95)) drop-shadow(0 0 14px rgba(2,200,255,.5)); animation: trail-draw 2.4s cubic-bezier(.3,.7,.2,1) .2s forwards; }
+  @keyframes trail-draw { to { stroke-dashoffset: 0; } }
+  .trail-nodes circle { fill: var(--midnight); stroke: rgba(2,200,255,.7); stroke-width: 2.5; }
+  .trail-nodes circle.reached { fill: var(--cisco-blue); stroke: var(--white); filter: drop-shadow(0 0 6px rgba(2,200,255,.9)); }
+  .cp-label { position: absolute; left: var(--x); top: var(--y); transform: translate(18px, -50%); font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--fg); white-space: nowrap; z-index: 3; pointer-events: none; }
+  .cp-label.left { transform: translate(calc(-100% - 18px), -50%); text-align: right; }
+  .cp-label small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .12em; margin-top: 2px; }
+  .summit-label { position: absolute; left: 54.2%; top: 14.5%; z-index: 4; border: 1px solid var(--orange); border-radius: 6px; padding: 9px 13px; background: rgba(7,24,45,.82); font-family: var(--mono); text-transform: uppercase; }
+  .summit-label b { display: block; font-size: 11.5px; letter-spacing: .16em; color: var(--fg); line-height: 1.45; white-space: nowrap; }
+  .summit-label small { display: block; font-size: 9px; letter-spacing: .14em; color: var(--muted); margin-top: 4px; }
+  .climber { --climber: var(--medium-blue); position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; transition: left 2.2s cubic-bezier(.3,.7,.2,1), top 2.2s cubic-bezier(.3,.7,.2,1); }
+  .climber.r1 { --climber: var(--orange); } .climber.r2 { --climber: var(--magenta); } .climber.r3 { --climber: var(--cisco-blue); }
+  .climber-dot { position: absolute; left: calc(-8px + var(--dx, 0px)); top: -8px; width: 16px; height: 16px; border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 3px rgba(7,24,45,.95), 0 0 0 4px var(--climber), 0 0 18px var(--climber); }
+  .climber.me .climber-dot { box-shadow: 0 0 0 3px rgba(7,24,45,.95), 0 0 0 5px var(--white), 0 0 22px var(--white); }
+  .climber.r1 .climber-dot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--orange); animation: lead-ping 2s ease-out infinite; }
+  @keyframes lead-ping { from { transform: scale(.7); opacity: 1; } to { transform: scale(2.4); opacity: 0; } }
+  .climber-plate { position: absolute; left: calc(20px + var(--dx, 0px)); top: calc(-22px + var(--stack, 0) * 50px); display: flex; align-items: center; gap: 11px; padding: 7px 12px 7px 10px; border: 1px solid var(--climber); border-radius: 7px; background: rgba(7,24,45,.9); white-space: nowrap; }
+  .climber.left .climber-plate { left: auto; right: calc(20px - var(--dx, 0px)); }
+  .climber.me .climber-plate { border-width: 2px; border-color: var(--white); }
+  .climber-plate .cr { font-family: var(--mono); font-size: 19px; font-weight: 700; color: var(--fg); min-width: 14px; text-align: center; }
+  .climber-plate b { display: block; font-size: 13px; font-weight: 700; color: var(--fg); line-height: 1.2; }
+  .climber-plate small { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  .ascent-label { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  .ascent-label.accent { color: var(--cisco-blue); }
+  .ascent-hud { position: absolute; left: 36px; top: 40px; width: 360px; z-index: 6; }
+  .live-pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--fg); margin: 0; }
+  .live-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: live-pulse 1.8s ease-in-out infinite; }
   @keyframes live-pulse { 50% { opacity: .35; } }
-  .summit-top3 { margin: 20px 26px 0; display: grid; grid-template-columns: repeat(3, 1fr); border: var(--line) solid var(--rule); border-radius: 10px; position: relative; z-index: 3; }
-  .summit-place { padding: 10px 12px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px; align-items: center; border-right: var(--line) solid var(--rule); min-width: 0; }
-  .summit-place:last-child { border-right: none; }
-  .summit-place .place-rank { font-family: var(--mono); font-size: 20px; color: var(--fg); border-bottom: 2px solid var(--medium-blue); }
-  .summit-place:first-child .place-rank { border-bottom-color: var(--orange); }
-  .summit-place:nth-child(2) .place-rank { border-bottom-color: var(--magenta); }
-  .summit-place b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-  .summit-place small { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
-  .climb-field { height: 510px; position: relative; margin-top: -2px; }
-  .mountain-line { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .mountain-line .ridge { fill: none; stroke: var(--medium-blue); stroke-width: 1.35; vector-effect: non-scaling-stroke; }
-  .mountain-line .mesh { fill: none; stroke: rgba(2,200,255,.34); stroke-width: .7; vector-effect: non-scaling-stroke; }
-  .mountain-line .mesh-bright { fill: none; stroke: rgba(255,255,255,.5); stroke-width: .65; vector-effect: non-scaling-stroke; }
-  .mountain-line .range { fill: none; stroke: rgba(82,94,108,.42); stroke-width: .8; vector-effect: non-scaling-stroke; }
-  .mountain-line .contour { fill: none; stroke: rgba(82,94,108,.58); stroke-width: .7; stroke-dasharray: 2 7; vector-effect: non-scaling-stroke; }
-  .mountain-line .trail { fill: none; stroke: var(--cisco-blue); stroke-width: 2.6; vector-effect: non-scaling-stroke; }
-  .mountain-line .trail-echo { fill: none; stroke: rgba(2,200,255,.25); stroke-width: 8; vector-effect: non-scaling-stroke; }
-  .mountain-line .node { fill: var(--midnight); stroke: var(--cisco-blue); stroke-width: 2; vector-effect: non-scaling-stroke; }
-  .base-label, .peak-label { position: absolute; z-index: 2; font-family: var(--mono); font-size: 8px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
-  .base-label { left: 10%; bottom: 6%; }
-  .peak-label { left: 57%; top: 4%; color: var(--fg); padding: 7px 9px; border: 1px solid var(--orange); border-radius: 5px; max-width: 150px; line-height: 1.35; }
-  .peak-label::before { content: ""; position: absolute; width: 1px; height: 39px; background: var(--orange); left: -11px; bottom: -20px; transform: rotate(-17deg); transform-origin: bottom; }
-  .summit-stats { display: flex; gap: 10px; padding: 0 26px 20px; position: relative; z-index: 3; }
-  .summit-stat { border: var(--line) solid var(--rule); border-radius: 8px; padding: 9px 11px; min-width: 98px; font-family: var(--mono); color: var(--dim); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
-  .summit-stat b { display: block; color: var(--fg); font-size: 18px; letter-spacing: -.02em; margin-bottom: 2px; }
-  .climber { --climber: var(--cisco-blue); position: absolute; left: var(--x); bottom: var(--y); transform: translate(-50%, 50%); z-index: 4; max-width: 128px; animation: climb-in .65s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--rank) * 55ms); }
-  .climber:nth-of-type(3n+1) { --climber: var(--orange); }
-  .climber:nth-of-type(3n+2) { --climber: var(--magenta); }
-  .climber-dot { display: block; width: 13px; height: 13px; margin: 0 auto; border: 3px solid var(--midnight); border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 1px var(--climber), 0 0 18px var(--climber); }
-  .climber-tag { display: block; margin-top: 6px; padding: 5px 7px; border: 1px solid var(--climber); border-radius: 5px; background: var(--midnight); font-family: var(--mono); font-size: 9px; line-height: 1.2; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
-  .climber-tag b { color: var(--climber); margin-right: 4px; }
-  .climber.me .climber-dot { width: 18px; height: 18px; }
-  .climber.me .climber-tag { border-width: 2px; font-weight: 700; }
-  .climber.summited .climber-dot { width: 21px; height: 21px; box-shadow: 0 0 0 5px rgba(255,144,0,.18), 0 0 28px var(--orange); }
-  @keyframes climb-in { from { opacity: 0; transform: translate(-50%, 50%) scale(.65); } to { opacity: 1; transform: translate(-50%, 50%) scale(1); } }
-  .expedition-panel { border-left: var(--line) solid var(--rule); padding: 24px 22px; min-width: 0; }
-  .board.expedition li { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; }
-  .board.expedition .rk { width: 24px; font-size: 12px; }
-  .board.expedition .nm small { display: block; font-family: var(--mono); color: var(--dim); font-size: 8px; letter-spacing: .11em; text-transform: uppercase; margin-top: 3px; }
-  .board.expedition .pt { text-align: right; }
-  .board.expedition .pt small { display: block; margin: 2px 0 0; }
-  .altitude { display: none; }
-  .board.expedition li.me { border-left: 2px solid var(--cisco-blue); padding-left: 9px; }
-  .scorecard-panel { margin-top: 22px; }
-  @media (max-width: 980px) {
-    .summit-dashboard { grid-template-columns: 1fr; }
-    .expedition-panel { border-left: none; border-top: var(--line) solid var(--rule); }
-    .climb-field { height: 500px; }
+  .ascent-hud h1 { font-size: clamp(38px, 3.6vw, 52px); font-weight: 800; letter-spacing: -.03em; line-height: 1.02; margin: 12px 0 12px; }
+  .ascent-hud .desc { font-size: 15px; color: var(--muted); margin: 0 0 22px; max-width: 34ch; }
+  .podium { border: var(--line) solid var(--rule); border-radius: 12px; padding: 14px 16px 16px; background: rgba(7,24,45,.8); }
+  .podium .ascent-label { margin-bottom: 12px; color: var(--cisco-blue); }
+  #summit-top3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  #summit-top3 .empty { grid-column: 1 / -1; }
+  .podium-place { min-width: 0; }
+  .podium-place .pr { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--fg); line-height: 1; }
+  .podium-place b { display: block; font-size: 13px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .podium-place small { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; color: var(--muted); margin-top: 2px; }
+  .podium-place .pbar { display: block; height: 3px; border-radius: 2px; background: rgba(82,94,108,.5); margin-top: 9px; overflow: hidden; }
+  .podium-place .pbar i { display: block; height: 100%; background: var(--medium-blue); transition: width 1.6s ease; }
+  .podium-place.p1 .pbar i { background: var(--orange); } .podium-place.p2 .pbar i { background: var(--magenta); } .podium-place.p3 .pbar i { background: var(--cisco-blue); }
+  .ascent-board { position: absolute; right: 36px; top: 40px; bottom: 36px; width: 370px; z-index: 6; display: flex; flex-direction: column; border: var(--line) solid var(--rule); border-radius: 14px; padding: 18px 18px 14px; background: rgba(7,24,45,.86); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .ab-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+  .ab-cols, .ab-list li { display: grid; grid-template-columns: 34px minmax(0, 1fr) 76px 54px; gap: 8px; align-items: center; }
+  .ab-cols { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); padding: 0 6px 9px; border-bottom: 1px solid rgba(82,94,108,.6); }
+  .ab-cols span:nth-child(n+3) { text-align: right; }
+  .ab-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 0; }
+  .ab-list li { padding: 9px 6px; border-bottom: 1px solid rgba(82,94,108,.35); font-size: 14px; }
+  .ab-list .rk { font-family: var(--mono); font-size: 13px; color: var(--fg); text-align: center; width: 24px; padding-bottom: 2px; }
+  .ab-list li:nth-child(1) .rk { border-bottom: 2px solid var(--orange); } .ab-list li:nth-child(2) .rk { border-bottom: 2px solid var(--magenta); } .ab-list li:nth-child(3) .rk { border-bottom: 2px solid var(--cisco-blue); }
+  .ab-list li:nth-child(-n+3) .nm { font-weight: 700; }
+  .ab-list .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); }
+  .ab-list .el { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .ab-list .pt { font-family: var(--mono); font-size: 14px; color: var(--cisco-blue); text-align: right; font-variant-numeric: tabular-nums; }
+  .ab-list li.me { border-left: 2px solid var(--white); }
+  .ascent-board .empty { padding: 12px 6px 0; }
+  .ascent-status { position: absolute; left: 36px; bottom: 36px; z-index: 6; border: var(--line) solid var(--rule); border-radius: 12px; padding: 14px 18px; background: rgba(7,24,45,.8); }
+  .as-row { display: flex; gap: 26px; margin-top: 10px; }
+  .as-row b { display: block; font-family: var(--mono); font-size: 24px; color: var(--fg); line-height: 1.1; }
+  .as-row span { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .ascent-legend { position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%); z-index: 6; display: flex; gap: 20px; border: var(--line) solid var(--rule); border-radius: 100px; padding: 9px 18px; background: rgba(7,24,45,.8); font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .ascent-legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; }
+  .lg-you::before { border: 2px solid var(--white); }
+  .lg-cp::before { border: 2px solid var(--cisco-blue); }
+  .lg-lead::before { background: var(--orange); }
+  .scorecard-wrap { padding-block: 28px 80px; }
+  @media (max-width: 1180px) {
+    .ascent { height: auto; overflow: visible; padding: 36px 20px 0; display: flex; flex-direction: column; gap: 18px; }
+    .ascent-hud, .ascent-board, .ascent-status, .ascent-legend { position: static; width: auto; transform: none; }
+    .ascent-hud { order: 1; max-width: 560px; }
+    .ascent-art { order: 2; position: relative; left: auto; transform: none; width: 100%; height: auto; }
+    .ascent-legend { order: 3; align-self: center; }
+    .ascent-board { order: 4; max-height: 520px; }
+    .ascent-status { order: 5; align-self: flex-start; }
   }
-  @media (max-width: 620px) {
-    .summit-main { padding-top: 18px; }
-    .summit-head { padding: 0 16px; }
-    .summit-top3 { margin-inline: 16px; }
-    .summit-place { padding: 8px; grid-template-columns: 1fr; gap: 2px; }
-    .summit-place .place-rank { font-size: 16px; }
-    .climb-field { height: 390px; }
-    .climber { max-width: 82px; }
-    .climber-tag { font-size: 7px; padding: 4px; }
-    .summit-stats { padding-inline: 14px; }
-    .summit-stat { min-width: 0; }
-    .peak-label { left: auto; right: 2%; top: 8%; max-width: 112px; }
+  @media (max-width: 640px) {
+    .climber:not(.r1):not(.r2):not(.r3):not(.me) .climber-plate, .cp-label { display: none; }
+    .climber-plate { padding: 4px 7px; gap: 6px; } .climber-plate .cr { font-size: 13px; } .climber-plate b { font-size: 11px; } .climber-plate small { display: none; }
+    .summit-label { padding: 5px 8px; } .summit-label b { font-size: 8.5px; } .summit-label small { display: none; }
+    .ab-cols, .ab-list li { grid-template-columns: 30px minmax(0, 1fr) 70px 46px; }
+    .ascent-legend { gap: 12px; font-size: 8.5px; padding: 8px 12px; }
+    .ascent { overflow-x: clip; }
+    .ascent-art { width: 175%; margin-left: -37.5%; }
+    .climber-dot { width: 11px; height: 11px; left: calc(-5.5px + var(--dx, 0px)); top: -5.5px; }
+    .climber-plate { left: calc(14px + var(--dx, 0px)); top: calc(-14px + var(--stack, 0) * 30px); }
+    .climber.left .climber-plate { right: calc(14px - var(--dx, 0px)); }
   }
-  @media (prefers-reduced-motion: reduce) { .climber { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .climber, .podium-place .pbar i { transition: none; } .trail-done { animation: none; stroke-dashoffset: 0; } .climber.r1 .climber-dot::after, .live-pill::before { animation: none; } }
   .empty { font-size: 14px; color: var(--dim); padding: 6px 0; margin: 0; }
 
   /* ── CONTENT PAGES ── */
@@ -696,50 +717,37 @@
 
   <!-- ═══ STANDINGS ═══ -->
   <section class="view" id="view-standings" data-group="score" hidden>
-    <div class="wrap page">
-      <div class="page-head">
-        <span class="spine" aria-hidden="true"></span>
-        <p class="eyebrow">// Live ascent</p>
+    <div class="ascent">
+      <div class="ascent-art" id="ascent-art" role="img" aria-label="Live positions on the Mountain of Productivity">
+        <img src="/*@MOUNTAIN@*/" alt="" decoding="async">
+        <svg class="ascent-trail" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true">
+          <polyline id="trail-base" class="trail-base" points=""/>
+          <polyline id="trail-done" class="trail-done" points="" pathLength="1"/>
+          <g id="trail-nodes" class="trail-nodes"></g>
+        </svg>
+        <div id="cp-labels"></div>
+        <div class="summit-label"><b>Mountain of<br>Productivity</b><small>1,000 pts · 8,848 m</small></div>
+        <div id="climbers"></div>
+      </div>
+      <div class="ascent-hud">
+        <p class="live-pill">Live ascent</p>
         <h1>Climb the <span class="hl">mountain</span></h1>
         <p class="desc" id="standings-desc"></p>
+        <div class="podium"><p class="ascent-label">Top 3</p><div id="summit-top3"></div></div>
       </div>
-      <div class="summit-dashboard">
-        <div class="summit-main">
-          <div class="summit-head">
-            <div><p class="summit-kicker">The ThousandEyes ascent</p><h2>Mountain of <span>Productivity</span></h2></div>
-            <div class="summit-live">Live ascent</div>
-          </div>
-          <div class="summit-top3" id="summit-top3"></div>
-          <div class="climb-field" id="climb-field" aria-label="Score positions on the mountain">
-            <svg class="mountain-line" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
-              <path class="range" d="M0 488 L72 442 L131 468 L212 394 L275 449 L338 382 L408 444 L489 366 L556 432 L630 371 L712 441 L782 389 L857 450 L929 405 L1000 468 M0 530 L91 493 L178 517 L258 462 L347 512 L430 455 L519 507 L612 451 L703 510 L804 463 L901 511 L1000 476"/>
-              <path class="contour" d="M0 564 Q178 501 320 536 T596 509 T1000 554 M0 527 Q151 459 307 492 T604 467 T1000 513 M0 490 Q184 421 337 454 T632 427 T1000 472 M25 449 Q203 386 361 424 T671 394 T980 435"/>
-              <path class="ridge" d="M0 584 L73 545 L142 559 L213 500 L272 521 L337 437 L389 455 L443 345 L478 365 L520 42 L564 245 L607 223 L661 333 L713 305 L777 407 L831 377 L899 486 L947 461 L1000 522"/>
-              <path class="mesh" d="M73 545 L520 42 L142 559 M213 500 L520 42 L272 521 M337 437 L520 42 L389 455 M443 345 L520 42 L478 365 M564 245 L520 42 L607 223 M661 333 L520 42 L713 305 M777 407 L520 42 L831 377 M899 486 L520 42 L947 461 M73 545 L213 500 L337 437 L443 345 L520 42 L564 245 L661 333 L777 407 L899 486 M142 559 L272 521 L389 455 L478 365 L520 42 L607 223 L713 305 L831 377 L947 461 M21 572 L177 529 L303 478 L416 400 L520 42 L587 281 L687 368 L806 438 L981 497"/>
-              <path class="mesh-bright" d="M177 529 L142 559 L213 500 L272 521 L337 437 L389 455 L443 345 L478 365 L520 42 L564 245 L607 223 L661 333 L713 305 L777 407 L831 377 M213 500 L389 455 L337 437 L478 365 L443 345 L564 245 L520 42 M303 478 L443 345 L389 455 M416 400 L478 365 L443 345 M564 245 L661 333 L607 223 M661 333 L777 407 L713 305"/>
-              <path class="mesh" d="M73 545 L177 529 L142 559 M177 529 L213 500 L272 521 M213 500 L303 478 L337 437 M303 478 L389 455 L337 437 M337 437 L416 400 L443 345 M416 400 L478 365 L443 345 M564 245 L587 281 L607 223 M587 281 L661 333 L607 223 M661 333 L687 368 L713 305 M687 368 L777 407 L713 305 M777 407 L806 438 L831 377 M806 438 L899 486 L831 377"/>
-              <path class="trail-echo" d="M160 530 C213 526 232 508 260 498 S346 480 340 456 S404 431 380 402 S500 381 470 344 S562 323 530 288 S612 250 555 215 S596 159 520 48"/>
-              <path class="trail" d="M160 530 C213 526 232 508 260 498 S346 480 340 456 S404 431 380 402 S500 381 470 344 S562 323 530 288 S612 250 555 215 S596 159 520 48"/>
-              <g>
-                <circle class="node" cx="160" cy="530" r="5"/><circle class="node" cx="260" cy="498" r="5"/>
-                <circle class="node" cx="340" cy="456" r="5"/><circle class="node" cx="380" cy="402" r="5"/>
-                <circle class="node" cx="470" cy="344" r="5"/><circle class="node" cx="530" cy="288" r="5"/>
-                <circle class="node" cx="555" cy="215" r="5"/><circle class="node" cx="520" cy="48" r="5"/>
-              </g>
-            </svg>
-            <span class="base-label">Base camp · 0 pts</span>
-            <span class="peak-label">1,000 pts<br>Mountain of Productivity</span>
-            <div id="climbers"></div>
-          </div>
-          <div class="summit-stats">
-            <div class="summit-stat"><b id="summit-count">0</b>climbers</div>
-            <div class="summit-stat"><b id="summit-bank">0</b>checkpoints banked</div>
-          </div>
-        </div>
-        <div class="expedition-panel"><div class="panel-head"><p class="eyebrow accent" id="board-title">Full standings</p><span class="eyebrow" id="board-refresh"></span></div><ol class="board expedition" id="board-full"></ol><p class="empty" id="board-full-note"></p></div>
+      <aside class="ascent-board" aria-label="Full standings">
+        <div class="ab-head"><p class="ascent-label accent" id="board-title">Full standings</p><span class="ascent-label" id="board-refresh"></span></div>
+        <div class="ab-cols" aria-hidden="true"><span>Pos</span><span>Climber</span><span>Elevation</span><span>Points</span></div>
+        <ol class="ab-list" id="board-full"></ol>
+        <p class="empty" id="board-full-note"></p>
+      </aside>
+      <div class="ascent-status">
+        <p class="ascent-label accent">Expedition status</p>
+        <div class="as-row"><div><b id="summit-count">0</b><span>Climbers on the mountain</span></div><div><b id="summit-bank">0</b><span>Checkpoints reached</span></div></div>
       </div>
-      <div class="panel scorecard-panel"><p class="eyebrow accent">Your expedition card</p><div id="scorecard"></div></div>
+      <div class="ascent-legend" aria-hidden="true"><span class="lg-you">You</span><span class="lg-cp">Checkpoint</span><span class="lg-lead">Leader</span></div>
     </div>
+    <div class="wrap scorecard-wrap"><div class="panel"><p class="eyebrow accent">Your expedition card</p><div id="scorecard"></div></div></div>
   </section>
 
   <!-- ═══ ASK ═══ -->
@@ -1106,47 +1114,77 @@
   /* ── standings ── */
   const Board = (() => {
     let timer = 0;
-    const maxPoints = CP.reduce((sum, cp) => sum + cp.points, 0);
+    const maxPoints = CP.reduce((sum, cp) => sum + cp.points, 0) || 1000;
+    const ROUTE = [[29.3,87.9],[42,82],[54.7,75.4],[45.9,68.8],[57.6,63],[48.8,56.4],[58.6,50.6],[51.8,44.7],[56.1,38.9],[52.6,33.4],[51.4,28.4]];
+    const SUMMIT_M = 8848;
+    const metres = pts => (Math.round(Math.max(0, pts) / maxPoints * SUMMIT_M / 10) * 10).toLocaleString('en-AU') + ' m';
+    const onRoute = pts => {
+      const r = Math.min(1, Math.max(0, pts / maxPoints)) * (ROUTE.length - 1);
+      const s = Math.min(ROUTE.length - 2, Math.floor(r)), f = r - s;
+      return { x: ROUTE[s][0] + (ROUTE[s + 1][0] - ROUTE[s][0]) * f, y: ROUTE[s][1] + (ROUTE[s + 1][1] - ROUTE[s][1]) * f, s };
+    };
+    const svgPt = p => (p[0] * 15.36).toFixed(1) + ',' + (p[1] * 10.24).toFixed(1);
+    const climbers = new Map();
+    function drawRoute() {
+      const art = $('#ascent-art'); if (!art || art.dataset.ready) return; art.dataset.ready = '1';
+      $('#trail-base').setAttribute('points', ROUTE.map(svgPt).join(' '));
+      $('#trail-nodes').innerHTML = ROUTE.slice(0, -1).map((p, i) => '<circle data-i="' + i + '" cx="' + (p[0] * 15.36).toFixed(1) + '" cy="' + (p[1] * 10.24).toFixed(1) + '" r="' + (i ? 7 : 9) + '"/>').join('');
+      $('#cp-labels').innerHTML = ROUTE.slice(0, -1).map((p, i) => {
+        if (i % 2) return '';
+        const side = i === 0 || p[0] < (ROUTE[i - 1][0] + ROUTE[i + 1][0]) / 2 ? 'left' : 'right';
+        return '<span class="cp-label ' + side + '" data-i="' + i + '" style="--x:' + p[0] + '%;--y:' + p[1] + '%">' + (i ? 'Checkpoint ' + i : 'Base camp') + '<small>' + metres(i * maxPoints / 10) + '</small></span>';
+      }).join('');
+    }
     function paintMountain(players, current) {
-      const field = $('#climbers'), count = $('#summit-count'), bank = $('#summit-bank'), top = $('#summit-top3');
+      drawRoute();
+      const layer = $('#climbers'), count = $('#summit-count'), bank = $('#summit-bank'), top = $('#summit-top3');
       if (count) count.textContent = players.length;
       if (bank) bank.textContent = players.reduce((sum, q) => sum + (q.solvedCount | 0), 0);
       if (top) top.innerHTML = players.length ? players.slice(0, 3).map((q, i) =>
-        '<div class="summit-place"><span class="place-rank">' + (i + 1) + '</span><span><b>' + esc(q.name) + '</b><small>' + (q.points | 0) + ' pts · ' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></div>'
-      ).join('') : '<p class="empty" style="padding:10px 12px">Waiting for the first climber.</p>';
-      if (!field) return;
-      const shown = players.slice(0, 12);
-      const route = [[16,11.7],[26,17],[34,24],[38,33],[47,42.7],[53,52],[55.5,64.2],[55,72],[57,79],[55,86],[52,92]];
-      field.innerHTML = shown.map((q, i) => {
-        const points = Math.max(0, q.points | 0);
-        const progress = Math.min(1, points / maxPoints);
-        const routePosition = progress * (route.length - 1);
-        const segment = Math.min(route.length - 2, Math.floor(routePosition));
-        const along = routePosition - segment;
-        const tiedBefore = shown.slice(0, i).filter(other => (other.points | 0) === points).length;
-        const tiedTotal = shown.filter(other => (other.points | 0) === points).length;
-        const tieOffset = tiedBefore - (tiedTotal - 1) / 2;
-        const x = Math.max(5, Math.min(94, route[segment][0] + (route[segment + 1][0] - route[segment][0]) * along + tieOffset * 9));
-        const y = Math.max(6, Math.min(91, route[segment][1] + (route[segment + 1][1] - route[segment][1]) * along + tieOffset * 7));
-        const me = current && q.name === current.name;
-        const summit = progress >= 1;
-        return '<div class="climber' + (me ? ' me' : '') + (summit ? ' summited' : '') + '" style="--x:' + x.toFixed(1) + '%;--y:' + y.toFixed(1) + '%;--rank:' + i + '" title="' + esc(q.name) + ': ' + points + ' points">' +
-          '<span class="climber-dot"></span><span class="climber-tag"><b>' + (summit ? 'SUMMIT' : '#' + (i + 1)) + '</b>' + esc(q.name) + '</span></div>';
-      }).join('');
+        '<div class="podium-place p' + (i + 1) + '"><span class="pr">' + (i + 1) + '</span><b>' + esc(q.name) + '</b><small>' + (q.points | 0) + ' PTS</small><span class="pbar"><i style="width:' + Math.min(100, Math.round((q.points | 0) / maxPoints * 100)) + '%"></i></span></div>'
+      ).join('') : '<p class="empty">Waiting for the first climber.</p>';
+      const lead = players.length ? Math.max(0, players[0].points | 0) : 0;
+      const done = $('#trail-done');
+      if (done) { const at = onRoute(lead); done.setAttribute('points', ROUTE.slice(0, at.s + 1).map(svgPt).concat(svgPt([at.x, at.y])).join(' ')); }
+      $$('#trail-nodes circle').forEach(c => c.classList.toggle('reached', players.length > 0 && +c.dataset.i * maxPoints / 10 <= lead));
+      const occupied = new Set();
+      players.slice(0, 5).concat(players.filter(q => current && q.name === current.name)).forEach(q => {
+        const r = Math.max(0, q.points | 0) / maxPoints * 10, f = r - Math.floor(r);
+        if (f < .6) occupied.add(Math.floor(r)); if (f > .4) occupied.add(Math.ceil(r));
+      });
+      $$('#cp-labels .cp-label').forEach(l => { l.hidden = occupied.has(+l.dataset.i); });
+      if (!layer) return;
+      const shown = players.slice(0, 40), stacks = {}, seen = new Set();
+      shown.forEach((q, i) => {
+        const pts = Math.max(0, q.points | 0), k = (stacks[pts] = (stacks[pts] || 0) + 1) - 1;
+        const at = onRoute(pts), me = !!(current && q.name === current.name), named = i < 5 || me;
+        let el = climbers.get(q.name);
+        if (!el) {
+          el = document.createElement('div');
+          el.style.setProperty('--x', ROUTE[0][0] + '%'); el.style.setProperty('--y', ROUTE[0][1] + '%');
+          layer.appendChild(el); climbers.set(q.name, el);
+        }
+        el.className = 'climber r' + Math.min(i + 1, 4) + (me ? ' me' : '') + (at.x < ROUTE[ROUTE.length - 1][0] ? ' left' : '');
+        el.style.zIndex = String(100 - i);
+        el.style.setProperty('--dx', (k * 12) + 'px'); el.style.setProperty('--stack', named ? String(k) : '0');
+        el.title = q.name + ': ' + pts + ' points, ' + metres(pts);
+        el.innerHTML = '<span class="climber-dot"></span>' + (named ? '<span class="climber-plate"><span class="cr">' + (i + 1) + '</span><span><b>' + esc(q.name) + '</b><small>' + pts + ' pts · ' + metres(pts) + '</small></span></span>' : '');
+        seen.add(q.name);
+        requestAnimationFrame(() => requestAnimationFrame(() => { el.style.setProperty('--x', at.x.toFixed(2) + '%'); el.style.setProperty('--y', at.y.toFixed(2) + '%'); }));
+      });
+      climbers.forEach((el, n) => { if (!seen.has(n)) { el.remove(); climbers.delete(n); } });
     }
     function fullRows(players, current) {
       return players.map((q, i) => {
         const points = Math.max(0, q.points | 0);
-        const progress = Math.min(100, Math.round(points / maxPoints * 100));
-        const stage = progress >= 100 ? 'At the summit' : progress >= 75 ? 'Final ascent' : progress >= 40 ? 'Above base camp' : 'On the trail';
-        return '<li' + (current && q.name === current.name ? ' class="me"' : '') + ' style="--progress:' + progress + '%"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '<small>' + stage + ' · ' + progress + '% climbed</small></span><span class="altitude" aria-hidden="true"><i></i></span><span class="pt">' + points + '<small>' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></li>';
+        return '<li' + (current && q.name === current.name ? ' class="me"' : '') + '><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '</span><span class="el">' + metres(points) + '</span><span class="pt">' + points + '</span></li>';
       }).join('');
     }
     async function refresh() {
       const full = $('#board-full'), note = $('#board-full-note'), home = $('#board-home'), homeNote = $('#board-home-note'), ref = $('#board-refresh'), title = $('#board-title');
       const p = Store.player;
       if (!Store.live) {
-        if (title) title.textContent = 'Expedition log';
+        if (title) title.textContent = 'Full standings';
         const local = p ? [{ name: p.name, points: p.points, solvedCount: solvedCount(p) }] : [];
         const row = p ? '<li class="me"><span class="rk">1</span><span class="nm">' + esc(p.name) + '</span><span class="pt">' + p.points + '<small>' + solvedCount(p) + '/' + CP.length + '</small></span></li>' : '';
         if (full) full.innerHTML = fullRows(local, p); if (home) home.innerHTML = row;
