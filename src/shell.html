@@ -17,6 +17,7 @@
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html { scroll-behavior: smooth; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .view { animation: none !important; } .status-dot.live { animation: none !important; } }
   body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; padding-top: 64px; overflow-x: hidden; }
@@ -47,7 +48,20 @@
   .topbar .colorbar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
   .topbar-in { height: 100%; display: flex; align-items: center; gap: 18px; max-width: 1280px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
   .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
-  .mark { width: 36px; height: 36px; border: var(--line) solid var(--accent); border-radius: 9px; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 12px; letter-spacing: .06em; color: var(--accent); }
+  .ai-mark { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .cisco-mark { display: block; height: 22px; width: auto; color: var(--fg); flex-shrink: 0; margin-right: 2px; }
+  .cisco-mark svg { height: 100%; width: auto; display: block; }
+  .live-tag { display: inline-block; margin-left: 7px; font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--green); vertical-align: 1px; }
+  .live-tag::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 5px; vertical-align: 1px; box-shadow: 0 0 0 3px rgba(69,153,31,.22); }
+  .countdown { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; line-height: 1; margin-left: 4px; }
+  .cd-label { font-family: var(--mono); font-size: 8.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--dim); }
+  .cd-time { display: flex; align-items: flex-start; gap: 5px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .cd-u { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .cd-u b, .cd-sep { font-size: 17px; font-weight: 700; color: var(--fg); letter-spacing: .02em; line-height: 1; }
+  .cd-sep { color: var(--dim); font-weight: 400; }
+  .cd-u i { font-style: normal; font-size: 7.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+  .countdown.over .cd-u b { color: var(--dim); }
+  @media (max-width: 1060px) { .countdown { display: none; } }
   .brand-name { font-weight: 700; font-size: 15px; line-height: 1.1; }
   .brand-sub { font-family: var(--mono); font-size: 9.5px; letter-spacing: .26em; color: var(--dim); text-transform: uppercase; margin-top: 3px; }
   .nav { display: flex; gap: 2px; flex: 1; justify-content: center; overflow-x: auto; scrollbar-width: none; min-width: 0; }
@@ -58,7 +72,7 @@
   .nav a.active[data-nav="setup"] { border-color: var(--c-setup); } .nav a.active[data-nav="labs"] { border-color: var(--c-labs); } .nav a.active[data-nav="builds"] { border-color: var(--c-builds); } .nav a.active[data-nav="field"] { border-color: var(--c-field); } .nav a.active[data-nav="standings"] { border-color: var(--c-score); } .nav a.active[data-nav="home"] { border-color: var(--cisco-blue); }
   .pass { flex-shrink: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; padding: 8px 14px; border-radius: 100px; border: var(--line) solid var(--accent); color: var(--fg); text-decoration: none; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
   .pass b { color: var(--accent); font-weight: 700; }
-  @media (max-width: 900px) { .brand-text { display: none; } .nav { justify-content: flex-start; } .pass { max-width: 150px; } }
+  @media (max-width: 900px) { .brand-text { display: none; } .nav { justify-content: flex-start; } .pass { max-width: 150px; } .ai-mark { height: 34px; } .cisco-mark { display: none; } }
 
   /* ── VIEWS ── */
   .view { animation: fade .35s ease; }
@@ -180,101 +194,6 @@
   .board .pt { font-family: var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
   .board .pt small { color: var(--dim); margin-left: 8px; font-size: 10px; letter-spacing: .1em; }
   .board li.me .nm { color: var(--fg); font-weight: 700; }
-  /* ── ASCENT (scoreboard) ── */
-  .ascent { position: relative; max-width: 1480px; margin: 0 auto; height: clamp(680px, 56vw, 860px); overflow: hidden; }
-  .ascent-art { position: absolute; left: 50%; bottom: 0; height: 100%; aspect-ratio: 3 / 2; transform: translateX(-50%); }
-  .ascent-art img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; -webkit-mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); mask-composite: intersect; }
-  .ascent-trail { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .trail-base { fill: none; stroke: rgba(2,200,255,.4); stroke-width: 2; stroke-dasharray: 5 7; stroke-linejoin: round; }
-  .trail-done { fill: none; stroke: var(--cisco-blue); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 5px rgba(2,200,255,.95)) drop-shadow(0 0 14px rgba(2,200,255,.5)); animation: trail-draw 2.4s cubic-bezier(.3,.7,.2,1) .2s forwards; }
-  @keyframes trail-draw { to { stroke-dashoffset: 0; } }
-  .trail-nodes circle { fill: var(--midnight); stroke: rgba(2,200,255,.7); stroke-width: 2.5; }
-  .trail-nodes circle.reached { fill: var(--cisco-blue); stroke: var(--white); filter: drop-shadow(0 0 6px rgba(2,200,255,.9)); }
-  .cp-label { position: absolute; left: var(--x); top: var(--y); transform: translate(34px, -50%); font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--fg); white-space: nowrap; z-index: 3; pointer-events: none; }
-  .cp-label.left { transform: translate(calc(-100% - 34px), -50%); text-align: right; }
-  .cp-label small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .12em; margin-top: 2px; }
-  .summit-label { position: absolute; left: 54.2%; top: 14.5%; z-index: 4; border: 1px solid var(--orange); border-radius: 6px; padding: 9px 13px; background: rgba(7,24,45,.82); font-family: var(--mono); text-transform: uppercase; }
-  .summit-label b { display: block; font-size: 11.5px; letter-spacing: .16em; color: var(--fg); line-height: 1.45; white-space: nowrap; }
-  .summit-label small { display: block; font-size: 9px; letter-spacing: .14em; color: var(--muted); margin-top: 4px; }
-  .climber { --climber: var(--medium-blue); position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; transition: left 2.2s cubic-bezier(.3,.7,.2,1), top 2.2s cubic-bezier(.3,.7,.2,1); }
-  .climber.r1 { --climber: var(--orange); } .climber.r2 { --climber: var(--magenta); } .climber.r3 { --climber: var(--cisco-blue); }
-  .climber-dot { position: absolute; left: calc(-8px + var(--dx, 0px)); top: calc(-8px + var(--dy, 0px)); width: 16px; height: 16px; border-radius: 50%; background: var(--climber); box-shadow: 0 0 0 3px rgba(7,24,45,.95), 0 0 0 4px var(--climber), 0 0 18px var(--climber); }
-  .climber.r4:not(.me) .climber-dot { width: 10px; height: 10px; left: calc(-5px + var(--dx, 0px)); top: calc(-5px + var(--dy, 0px)); box-shadow: 0 0 0 2px rgba(7,24,45,.95), 0 0 10px var(--climber); }
-  .climber.me .climber-dot { box-shadow: 0 0 0 3px rgba(7,24,45,.95), 0 0 0 5px var(--white), 0 0 22px var(--white); }
-  .climber.r1 .climber-dot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--orange); animation: lead-ping 2s ease-out infinite; }
-  @keyframes lead-ping { from { transform: scale(.7); opacity: 1; } to { transform: scale(2.4); opacity: 0; } }
-  .climber-plate { position: absolute; left: 24px; top: calc(-22px + var(--stack, 0) * 50px); display: flex; align-items: center; gap: 11px; padding: 7px 12px 7px 10px; border: 1px solid var(--climber); border-radius: 7px; background: rgba(7,24,45,.9); white-space: nowrap; }
-  .climber.left .climber-plate { left: auto; right: 24px; }
-  .climber.me .climber-plate { border-width: 2px; border-color: var(--white); }
-  .climber-plate .cr { font-family: var(--mono); font-size: 19px; font-weight: 700; color: var(--fg); min-width: 14px; text-align: center; }
-  .climber-plate b { display: block; font-size: 13px; font-weight: 700; color: var(--fg); line-height: 1.2; }
-  .climber-plate small { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
-  .ascent-label { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0; }
-  .ascent-label.accent { color: var(--cisco-blue); }
-  .ascent-hud { position: absolute; left: 36px; top: 40px; width: 360px; z-index: 6; }
-  .live-pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--fg); margin: 0; }
-  .live-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: live-pulse 1.8s ease-in-out infinite; }
-  @keyframes live-pulse { 50% { opacity: .35; } }
-  .ascent-hud h1 { font-size: clamp(38px, 3.6vw, 52px); font-weight: 800; letter-spacing: -.03em; line-height: 1.02; margin: 12px 0 12px; }
-  .ascent-hud .desc { font-size: 15px; color: var(--muted); margin: 0 0 22px; max-width: 34ch; }
-  .podium { border: var(--line) solid var(--rule); border-radius: 12px; padding: 14px 16px 16px; background: rgba(7,24,45,.8); }
-  .podium .ascent-label { margin-bottom: 12px; color: var(--cisco-blue); }
-  #summit-top3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-  #summit-top3 .empty { grid-column: 1 / -1; }
-  .podium-place { min-width: 0; }
-  .podium-place .pr { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--fg); line-height: 1; }
-  .podium-place b { display: block; font-size: 13px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .podium-place small { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; color: var(--muted); margin-top: 2px; }
-  .podium-place .pbar { display: block; height: 3px; border-radius: 2px; background: rgba(82,94,108,.5); margin-top: 9px; overflow: hidden; }
-  .podium-place .pbar i { display: block; height: 100%; background: var(--medium-blue); transition: width 1.6s ease; }
-  .podium-place.p1 .pbar i { background: var(--orange); } .podium-place.p2 .pbar i { background: var(--magenta); } .podium-place.p3 .pbar i { background: var(--cisco-blue); }
-  .ascent-board { position: absolute; right: 36px; top: 40px; bottom: 36px; width: 370px; z-index: 6; display: flex; flex-direction: column; border: var(--line) solid var(--rule); border-radius: 14px; padding: 18px 18px 14px; background: rgba(7,24,45,.86); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-  .ab-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 14px; }
-  .ab-cols, .ab-list li { display: grid; grid-template-columns: 34px minmax(0, 1fr) 76px 54px; gap: 8px; align-items: center; }
-  .ab-cols { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); padding: 0 6px 9px; border-bottom: 1px solid rgba(82,94,108,.6); }
-  .ab-cols span:nth-child(n+3) { text-align: right; }
-  .ab-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 0; }
-  .ab-list li { padding: 9px 6px; border-bottom: 1px solid rgba(82,94,108,.35); font-size: 14px; }
-  .ab-list .rk { font-family: var(--mono); font-size: 13px; color: var(--fg); text-align: center; width: 24px; padding-bottom: 2px; }
-  .ab-list li:nth-child(1) .rk { border-bottom: 2px solid var(--orange); } .ab-list li:nth-child(2) .rk { border-bottom: 2px solid var(--magenta); } .ab-list li:nth-child(3) .rk { border-bottom: 2px solid var(--cisco-blue); }
-  .ab-list li:nth-child(-n+3) .nm { font-weight: 700; }
-  .ab-list .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); }
-  .ab-list .el { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
-  .ab-list .pt { font-family: var(--mono); font-size: 14px; color: var(--cisco-blue); text-align: right; font-variant-numeric: tabular-nums; }
-  .ab-list li.me { border-left: 2px solid var(--white); }
-  .ascent-board .empty { padding: 12px 6px 0; }
-  .ascent-status { position: absolute; left: 36px; bottom: 36px; z-index: 6; border: var(--line) solid var(--rule); border-radius: 12px; padding: 14px 18px; background: rgba(7,24,45,.8); }
-  .as-row { display: flex; gap: 26px; margin-top: 10px; }
-  .as-row b { display: block; font-family: var(--mono); font-size: 24px; color: var(--fg); line-height: 1.1; }
-  .as-row span { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-  .ascent-legend { position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%); z-index: 6; display: flex; gap: 20px; border: var(--line) solid var(--rule); border-radius: 100px; padding: 9px 18px; background: rgba(7,24,45,.8); font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
-  .ascent-legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; }
-  .lg-you::before { border: 2px solid var(--white); }
-  .lg-cp::before { border: 2px solid var(--cisco-blue); }
-  .lg-lead::before { background: var(--orange); }
-  .scorecard-wrap { padding-block: 28px 80px; }
-  @media (max-width: 1180px) {
-    .ascent { height: auto; overflow: visible; padding: 36px 20px 0; display: flex; flex-direction: column; gap: 18px; }
-    .ascent-hud, .ascent-board, .ascent-status, .ascent-legend { position: static; width: auto; transform: none; }
-    .ascent-hud { order: 1; max-width: 560px; }
-    .ascent-art { order: 2; position: relative; left: auto; transform: none; width: 100%; height: auto; }
-    .ascent-legend { order: 3; align-self: center; }
-    .ascent-board { order: 4; max-height: 520px; }
-    .ascent-status { order: 5; align-self: flex-start; }
-  }
-  @media (max-width: 640px) {
-    .climber:not(.r1):not(.r2):not(.r3):not(.me) .climber-plate, .cp-label { display: none; }
-    .climber-plate { padding: 4px 7px; gap: 6px; } .climber-plate .cr { font-size: 13px; } .climber-plate b { font-size: 11px; } .climber-plate small { display: none; }
-    .summit-label { padding: 5px 8px; } .summit-label b { font-size: 8.5px; } .summit-label small { display: none; }
-    .ab-cols, .ab-list li { grid-template-columns: 30px minmax(0, 1fr) 70px 46px; }
-    .ascent-legend { gap: 12px; font-size: 8.5px; padding: 8px 12px; }
-    .ascent { overflow-x: clip; }
-    .ascent-art { width: 175%; margin-left: -37.5%; }
-    .climber-dot, .climber.r4:not(.me) .climber-dot { width: 9px; height: 9px; left: calc(-4.5px + var(--dx, 0px) * .6); top: calc(-4.5px + var(--dy, 0px) * .6); }
-    .climber-plate { left: 16px; top: calc(-14px + var(--stack, 0) * 30px); }
-    .climber.left .climber-plate { right: 16px; }
-  }
-  @media (prefers-reduced-motion: reduce) { .climber, .podium-place .pbar i { transition: none; } .trail-done { animation: none; stroke-dashoffset: 0; } .climber.r1 .climber-dot::after, .live-pill::before { animation: none; } }
   .empty { font-size: 14px; color: var(--dim); padding: 6px 0; margin: 0; }
 
   /* ── CONTENT PAGES ── */
@@ -473,6 +392,99 @@
   .bank-list li b { color: var(--fg); display: block; }
   .bank-list li span { font-family: var(--mono); font-size: 11px; color: var(--dim); }
 
+  /* ── ASCENT (scoreboard): the mountain with the header, top three, expedition status and legend laid over it ── */
+  .ascent { padding-block: 36px 80px; max-width: 1440px; }
+  .ascent-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: stretch; }
+  .stage { position: relative; min-width: 0; border: var(--line) solid var(--rule); border-radius: 18px; overflow: hidden; height: clamp(640px, calc(100vh - 150px), 980px); background: radial-gradient(ellipse at 58% 22%, rgba(10,96,255,.22) 0%, rgba(7,24,45,0) 42%), var(--bg); }
+  .stage-canvas { position: absolute; inset: 0; }
+  .stage-canvas svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .ov { position: absolute; z-index: 2; }
+  .ov-head { top: 30px; left: 32px; max-width: 46%; }
+  .ov-head h1 { font-size: clamp(30px, 3.4vw, 50px); font-weight: 800; letter-spacing: -.03em; line-height: 1.02; margin: 10px 0 10px; text-wrap: balance; }
+  .ov-head .desc { font-size: 15px; color: var(--muted); margin: 0; line-height: 1.5; }
+  .ov-head .eyebrow { display: flex; align-items: center; gap: 10px; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); display: inline-block; }
+  .live-dot.live { background: var(--green); box-shadow: 0 0 0 4px rgba(69,153,31,.22); animation: pulse 2.4s ease-in-out infinite; }
+  .ov-top3 { left: 32px; top: 236px; width: min(50%, 560px); }
+  .top3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: var(--line) solid var(--rule); border-radius: 14px; padding: 14px 14px 12px; position: relative; background: rgba(7,24,45,.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .top3::before { content: "Top 3"; position: absolute; top: -8px; left: 14px; padding: 0 8px; background: var(--bg); font-family: var(--mono); font-size: 9.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--dim); }
+  .t3 { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 2px 10px; align-items: center; padding: 6px 10px 12px 0; position: relative; min-width: 0; }
+  .t3 + .t3 { border-left: 1px solid rgba(82,94,108,.5); padding-left: 12px; }
+  .t3 .rk { grid-row: 1 / span 2; font-family: var(--mono); font-size: 26px; font-weight: 700; line-height: 1; color: var(--fg); text-align: center; }
+  .t3 .nm { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .t3 .pt { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .t3 .bar { position: absolute; left: 0; right: 8px; bottom: 0; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--rank) 0%, var(--rank) 45%, transparent 100%); }
+  .t3 + .t3 .bar { left: 12px; }
+  .t3.empty-slot .nm, .t3.empty-slot .pt { color: var(--mb70); }
+  .t3[data-rank="1"] { --rank: var(--orange); } .t3[data-rank="2"] { --rank: var(--magenta); } .t3[data-rank="3"] { --rank: var(--medium-blue); }
+  .ov-expedition { left: 32px; bottom: 28px; }
+  .expedition { border: var(--line) solid var(--rule); border-radius: 16px; padding: 14px 22px 16px; display: grid; grid-template-columns: repeat(3, auto); gap: 10px 26px; align-items: center; background: rgba(7,24,45,.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .expedition .eyebrow { grid-column: 1 / -1; margin: 0; }
+  .expedition .ex { display: flex; align-items: center; gap: 10px; }
+  .expedition .ex b { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; display: block; }
+  .expedition .ex span { font-family: var(--mono); font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); max-width: 14ch; line-height: 1.35; display: block; margin-top: 4px; }
+  .expedition .ex svg { width: 24px; height: 24px; color: var(--muted); flex-shrink: 0; }
+  .ov-legend { right: 28px; bottom: 28px; }
+  .legend { border: var(--line) solid var(--rule); border-radius: 100px; padding: 10px 18px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); background: rgba(7,24,45,.82); }
+  .legend .lg-label { color: var(--dim); letter-spacing: .26em; margin-right: 2px; }
+  .legend > span { display: inline-flex; align-items: center; gap: 7px; }
+  .lg { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-sizing: border-box; }
+  .lg.you { border: 2px solid var(--accent); } .lg.camp { border: 2px solid var(--orange); } .lg.climber { background: var(--fg); } .lg.summit { border: 2px solid var(--green); background: var(--fg); }
+  .stage .mono { font-family: var(--mono); letter-spacing: .14em; text-transform: uppercase; fill: var(--dim); }
+  .stage .camp-l1 { font-size: 10px; font-weight: 500; fill: var(--muted); }
+  .stage .camp-l2 { font-size: 9px; fill: var(--dim); }
+  .stage .camp-lbl { transition: opacity .35s ease; }
+  .stage .peak-label { fill: var(--fg); font-size: 10.5px; letter-spacing: .2em; font-weight: 600; }
+  .stage .peak-sub { font-size: 9px; }
+  .stage .you-tag { font-family: var(--mono); font-size: 8.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; fill: var(--accent); }
+  .stage .flow { animation: flow 4.5s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -220; } }
+  .stage .tw { animation: tw 3.6s ease-in-out infinite; }
+  @keyframes tw { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+  .stage .climber { transition: transform .9s cubic-bezier(.2,.7,.2,1); }
+  .stage .climber text { font-family: var(--sans); fill: var(--fg); }
+  .stage .climber .lbl-name { font-size: 12.5px; font-weight: 600; }
+  .stage .climber .lbl-pts { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; fill: var(--dim); }
+  .stage .climber .lbl-rk { font-family: var(--mono); font-size: 13px; font-weight: 700; fill: var(--fg); }
+  .stage .cluster-chip { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; fill: var(--fg); }
+  .stage .summit-ring { animation: ring 2.2s ease-out infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes ring { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2.2); opacity: 0; } }
+  .stage .empty-stage { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: 2; padding: 12px 18px; font-size: 14px; color: var(--muted); text-align: center; border: var(--line) solid var(--rule); border-radius: 12px; background: rgba(7,24,45,.85); max-width: 34ch; }
+  @media (prefers-reduced-motion: reduce) { .stage .climber, .stage .camp-lbl { transition: none; } .stage .summit-ring, .stage .flow, .stage .tw { animation: none; } }
+  @media (min-width: 1101px) and (max-width: 1300px) { .ov-legend { display: none; } }
+  .standings-panel { padding: 22px 22px 20px; display: flex; flex-direction: column; min-width: 0; }
+  .standings-panel .panel-head { flex-wrap: nowrap; }
+  .standings-panel #board-refresh { font-size: 9.5px; letter-spacing: .14em; white-space: nowrap; }
+  .standings-panel .table-scroll { flex: 1; min-height: 0; max-height: calc(clamp(640px, calc(100vh - 150px), 980px) - 200px); overflow-y: auto; margin-top: 4px; scrollbar-width: thin; }
+  body.on-standings .fab { display: none; }
+  table.standings { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  table.standings th { position: sticky; top: 0; background: var(--bg); font-family: var(--mono); font-size: 9.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); text-align: left; padding: 6px 6px 8px 0; border-bottom: 1px solid var(--rule); font-weight: 600; }
+  table.standings th.num, table.standings td.num { text-align: right; }
+  table.standings td { padding: 7px 6px 7px 0; border-bottom: 1px solid rgba(82,94,108,.45); color: var(--muted); vertical-align: middle; }
+  table.standings td.pos { width: 34px; font-family: var(--mono); font-size: 12px; color: var(--dim); }
+  table.standings td.pos b { display: inline-block; min-width: 18px; text-align: center; color: var(--fg); font-size: 15px; padding-bottom: 2px; border-bottom: 2px solid var(--rank, transparent); }
+  table.standings tr[data-rank="1"] td.pos b { --rank: var(--orange); } table.standings tr[data-rank="2"] td.pos b { --rank: var(--magenta); } table.standings tr[data-rank="3"] td.pos b { --rank: var(--medium-blue); }
+  table.standings td.nm { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
+  table.standings td.nm small { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; color: var(--dim); text-transform: uppercase; }
+  table.standings td.el { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; color: var(--dim); white-space: nowrap; }
+  table.standings td.pt { font-family: var(--mono); font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  table.standings tr.me td { background: rgba(2,200,255,.06); }
+  table.standings tr.me td.nm { font-weight: 700; }
+  table.standings tr.me td:first-child { box-shadow: inset 3px 0 0 var(--accent); padding-left: 8px; }
+  .standings-panel .btn.block { margin-top: 16px; }
+  .scorecard-panel { margin-top: 24px; }
+  @media (max-width: 1100px) {
+    .ascent-grid { grid-template-columns: 1fr; }
+    .standings-panel .table-scroll { max-height: none; }
+    .stage { display: flex; flex-direction: column; gap: 14px; height: auto; min-height: 0; border: none; border-radius: 0; overflow: visible; background: none; }
+    .ov { position: static; max-width: none; width: auto; }
+    .ov-head { order: 1; } .ov-top3 { order: 2; position: relative; left: auto; top: auto; } .stage-canvas { order: 3; position: relative; aspect-ratio: 1200 / 740; border: var(--line) solid var(--rule); border-radius: 18px; overflow: hidden; background: radial-gradient(ellipse at 58% 22%, rgba(10,96,255,.22) 0%, rgba(7,24,45,0) 42%), var(--bg); } .ov-expedition { order: 4; } .ov-legend { order: 5; justify-content: center; }
+    .top3, .expedition { backdrop-filter: none; -webkit-backdrop-filter: none; background: none; }
+    .expedition { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+    .stage .empty-stage { position: static; transform: none; margin: 0 auto; }
+  }
+  @media (max-width: 640px) { .top3 { grid-template-columns: 1fr; } .t3 + .t3 { border-left: none; border-top: 1px solid rgba(82,94,108,.5); padding-left: 0; } .t3 + .t3 .bar { left: 0; } .stage-canvas { aspect-ratio: auto; height: 480px; } .ov-head h1 { font-size: 34px; } }
+
   /* ── ONBOARDING (attendee sign-up) and PROCTOR SETUP ── */
   .onboard { border: var(--line) solid var(--medium-blue); border-top: 3px solid var(--medium-blue); border-radius: 16px; padding: 26px 28px; margin: 0 0 28px; position: relative; }
   .onboard .eyebrow { margin-bottom: 10px; }
@@ -532,8 +544,8 @@
   <div class="colorbar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="topbar-in">
     <a class="brand" href="#home" aria-label="ThousandEyes MCP Lab home">
-      <span class="mark">TE</span>
-      <span class="brand-text"><span class="brand-name">ThousandEyes MCP Lab</span><br><span class="brand-sub">AI Builders · Hands-on</span></span>
+      <!--@CISCO_MARK@--><img class="ai-mark" src="@LOGO_SRC@" alt="Cisco AI Builders" width="47" height="48">
+      <span class="brand-text"><span class="brand-name">ThousandEyes MCP Lab</span><br><span class="brand-sub">Cisco AI Builders · Hands-on</span></span>
     </a>
     <nav class="nav" id="nav" aria-label="Site">
       <a href="#home" data-nav="home">Overview</a>
@@ -541,8 +553,9 @@
       <a href="#labs" data-nav="labs">Labs</a>
       <a href="#builds" data-nav="builds">Builds</a>
       <a href="#field" data-nav="field">Field guide</a>
-      <a href="#standings" data-nav="standings">Scoreboard</a>
+      <a href="#standings" data-nav="standings">Scoreboard<span class="live-tag" id="live-tag" hidden>Live</span></a>
     </nav>
+    <div class="countdown" id="countdown" hidden aria-live="off"><span class="cd-label">Event ends in</span><span class="cd-time"><span class="cd-u"><b id="cd-h">00</b><i>hrs</i></span><b class="cd-sep">:</b><span class="cd-u"><b id="cd-m">00</b><i>min</i></span><b class="cd-sep">:</b><span class="cd-u"><b id="cd-s">00</b><i>sec</i></span></span></div>
     <a class="pass" id="pass" href="#home">Check in</a>
   </div>
 </header>
@@ -718,37 +731,28 @@
 
   <!-- ═══ STANDINGS ═══ -->
   <section class="view" id="view-standings" data-group="score" hidden>
-    <div class="ascent">
-      <div class="ascent-art" id="ascent-art" role="img" aria-label="Live positions on the Mountain of Productivity">
-        <img src="/*@MOUNTAIN@*/" alt="" decoding="async">
-        <svg class="ascent-trail" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true">
-          <polyline id="trail-base" class="trail-base" points=""/>
-          <polyline id="trail-done" class="trail-done" points="" pathLength="1"/>
-          <g id="trail-nodes" class="trail-nodes"></g>
-        </svg>
-        <div id="cp-labels"></div>
-        <div class="summit-label"><b>Mountain of<br>Productivity</b><small>1,000 pts · 8,848 m</small></div>
-        <div id="climbers"></div>
+    <div class="wrap ascent">
+      <div class="ascent-grid">
+        <div class="stage" id="stage">
+          <div class="ov ov-head">
+            <p class="eyebrow"><span class="live-dot" id="ascent-dot" aria-hidden="true"></span><span id="ascent-eyebrow">Live ascent</span></p>
+            <h1>Climb the <span class="hl">mountain</span></h1>
+            <p class="desc" id="standings-desc"></p>
+          </div>
+          <div class="ov ov-top3 top3" id="top3" aria-label="Top three"></div>
+          <div class="ov ov-expedition expedition" id="expedition"></div>
+          <div class="ov ov-legend legend" aria-hidden="true"><span class="lg-label">Legend</span><span><i class="lg you"></i>You</span><span><i class="lg camp"></i>Camp</span><span><i class="lg climber"></i>Climber</span><span><i class="lg summit"></i>Summited</span></div>
+          <div class="stage-canvas" id="stage-canvas" role="img" aria-label="Climbers on the mountain, placed by points"></div>
+        </div>
+        <aside class="panel standings-panel">
+          <div class="panel-head"><p class="eyebrow accent" id="board-title">Full standings</p><span class="eyebrow" id="board-refresh"></span></div>
+          <div class="table-scroll"><table class="standings" id="board-full"><thead><tr><th>Pos</th><th>Climber</th><th class="num">Elevation</th><th class="num">Points</th></tr></thead><tbody></tbody></table></div>
+          <p class="empty" id="board-full-note"></p>
+          <button class="btn ghost block" type="button" id="export-standings">Export standings</button>
+        </aside>
       </div>
-      <div class="ascent-hud">
-        <p class="live-pill">Live ascent</p>
-        <h1>Climb the <span class="hl">mountain</span></h1>
-        <p class="desc" id="standings-desc"></p>
-        <div class="podium"><p class="ascent-label">Top 3</p><div id="summit-top3"></div></div>
-      </div>
-      <aside class="ascent-board" aria-label="Full standings">
-        <div class="ab-head"><p class="ascent-label accent" id="board-title">Full standings</p><span class="ascent-label" id="board-refresh"></span></div>
-        <div class="ab-cols" aria-hidden="true"><span>Pos</span><span>Climber</span><span>Elevation</span><span>Points</span></div>
-        <ol class="ab-list" id="board-full"></ol>
-        <p class="empty" id="board-full-note"></p>
-      </aside>
-      <div class="ascent-status">
-        <p class="ascent-label accent">Expedition status</p>
-        <div class="as-row"><div><b id="summit-count">0</b><span>Climbers on the mountain</span></div><div><b id="summit-bank">0</b><span>Checkpoints reached</span></div></div>
-      </div>
-      <div class="ascent-legend" aria-hidden="true"><span class="lg-you">You</span><span class="lg-cp">Checkpoint</span><span class="lg-lead">Leader</span></div>
+      <div class="panel scorecard-panel"><p class="eyebrow accent">Your scorecard</p><div id="scorecard"></div></div>
     </div>
-    <div class="wrap scorecard-wrap"><div class="panel"><p class="eyebrow accent">Your expedition card</p><div id="scorecard"></div></div></div>
   </section>
 
   <!-- ═══ ASK ═══ -->
@@ -969,6 +973,7 @@
     if (view === 'home' && changed) Board.refresh();
     if (view === 'ask') setTimeout(() => { const q = $('#ask-q'); if (q && changed) q.focus(); }, 50);
     if (view === 'proctor') Proctor.start(); else Proctor.stop();
+    document.body.classList.toggle('on-standings', view === 'standings');
     if ((view === 'setup' || view === 'home') && changed) Onboard.recheck();
   }
   window.addEventListener('hashchange', render);
@@ -1112,106 +1117,392 @@
   }
   function renderCps() { $$('[data-cp]').forEach(renderCp); }
 
-  /* ── standings ── */
-  const Board = (() => {
-    let timer = 0;
-    const maxPoints = CP.reduce((sum, cp) => sum + cp.points, 0) || 1000;
-    const ROUTE = [[29.3,87.9],[42,82],[54.7,75.4],[45.9,68.8],[57.6,63],[48.8,56.4],[58.6,50.6],[51.8,44.7],[56.1,38.9],[52.6,33.4],[51.4,28.4]];
-    const SUMMIT_M = 8848;
-    const metres = pts => Math.round(Math.max(0, pts) / maxPoints * SUMMIT_M).toLocaleString('en-AU') + ' m';
-    const onRoute = pts => {
-      const r = Math.min(1, Math.max(0, pts / maxPoints)) * (ROUTE.length - 1);
-      const s = Math.min(ROUTE.length - 2, Math.floor(r)), f = r - s;
-      return { x: ROUTE[s][0] + (ROUTE[s + 1][0] - ROUTE[s][0]) * f, y: ROUTE[s][1] + (ROUTE[s + 1][1] - ROUTE[s][1]) * f, s };
-    };
-    const svgPt = p => (p[0] * 15.36).toFixed(1) + ',' + (p[1] * 10.24).toFixed(1);
-    const climbers = new Map();
-    function drawRoute() {
-      const art = $('#ascent-art'); if (!art || art.dataset.ready) return; art.dataset.ready = '1';
-      $('#trail-base').setAttribute('points', ROUTE.map(svgPt).join(' '));
-      $('#trail-nodes').innerHTML = ROUTE.slice(0, -1).map((p, i) => '<circle data-i="' + i + '" cx="' + (p[0] * 15.36).toFixed(1) + '" cy="' + (p[1] * 10.24).toFixed(1) + '" r="' + (i ? 7 : 9) + '"/>').join('');
-      $('#cp-labels').innerHTML = ROUTE.slice(0, -1).map((p, i) => {
-        if (i % 2) return '';
-        const side = i === 0 || p[0] < (ROUTE[i - 1][0] + ROUTE[i + 1][0]) / 2 ? 'left' : 'right';
-        return '<span class="cp-label ' + side + '" data-i="' + i + '" style="--x:' + p[0] + '%;--y:' + p[1] + '%">' + (i ? 'Checkpoint ' + i : 'Base camp') + '<small>' + metres(i * maxPoints / 10) + '</small></span>';
-      }).join('');
+  /* ── standings: the mountain ──
+     100 points is 1,000 ft; the summit (every checkpoint banked) is 10,000 ft. Climbers sit on a zigzag route at
+     points / rules.total of the way up. The scene (mesh, route, camps, peak) is drawn once per size class; markers and
+     labels are diffed by handle so they glide to their new elevation on every refresh. Labels are placed greedily around
+     their marker, clear of each other, the peak card, the HTML overlays and the edges; camp labels they would cover fade.
+     The viewBox is fitted to the stage so the mountain fills it at any aspect, and labels are scaled up on small stages
+     so they stay readable. Text is measured on a canvas, so nothing depends on the scoreboard being visible. */
+  const FT_PER_POINT = 10;
+  const ft = p => (Math.max(0, p | 0) * FT_PER_POINT).toLocaleString('en-AU') + ' ft';
+  const Mountain = (() => {
+    const W = 1200, H = 860, PEAK = { x: 700, y: 140 }, BASE_Y = 650;
+    const XS = [420, 600, 900, 640, 910, 690, 880, 660, 800, 660, PEAK.x];
+    const WAY = XS.map((x, i) => ({ x, y: BASE_Y - (i / 10) * (BASE_Y - PEAK.y) }));
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rnd = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (name, attrs, text) => { const n = document.createElementNS(NS, name); Object.keys(attrs || {}).forEach(a => n.setAttribute(a, attrs[a])); if (text != null) n.textContent = text; return n; };
+    const f2 = n => Math.round(n * 10) / 10;
+    const hit = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+    const ctx = document.createElement('canvas').getContext('2d');
+    const SANS = getComputedStyle(document.body).fontFamily || 'Inter, system-ui, sans-serif';
+    const MONO = getComputedStyle(document.querySelector('.eyebrow') || document.body).fontFamily || 'ui-monospace, monospace';
+    const measure = (text, weight, size, family, spacing) => { ctx.font = weight + ' ' + size + 'px ' + family; return ctx.measureText(text).width + text.length * (spacing || 0) * size; };
+    let container = null, svg = null, L = {}, k = 1, lastRows = [], lastMe = '', camps = [], peakCard = null, labels = [], dots = [], observer = null, resizeTimer = 0;
+
+    const kFor = v => v ? Math.max(1, Math.min(2, 0.82 / v.s)) : k;
+    function pointAt(frac) {
+      const f = Math.max(0, Math.min(1, frac)) * 10; const i = Math.min(9, Math.floor(f)); const u = f - i;
+      const a = WAY[i], b = WAY[i + 1];
+      return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u, dx: b.x - a.x, dy: b.y - a.y };
     }
-    function paintMountain(players, current) {
-      drawRoute();
-      const layer = $('#climbers'), count = $('#summit-count'), bank = $('#summit-bank'), top = $('#summit-top3');
-      if (count) count.textContent = players.length;
-      if (bank) bank.textContent = players.reduce((sum, q) => sum + (q.solvedCount | 0), 0);
-      if (top) top.innerHTML = players.length ? players.slice(0, 3).map((q, i) =>
-        '<div class="podium-place p' + (i + 1) + '"><span class="pr">' + (i + 1) + '</span><b>' + esc(q.name) + '</b><small>' + (q.points | 0) + ' PTS</small><span class="pbar"><i style="width:' + Math.min(100, Math.round((q.points | 0) / maxPoints * 100)) + '%"></i></span></div>'
-      ).join('') : '<p class="empty">Waiting for the first climber.</p>';
-      const lead = players.length ? Math.max(0, players[0].points | 0) : 0;
-      const done = $('#trail-done');
-      if (done) { const at = onRoute(lead); done.setAttribute('points', ROUTE.slice(0, at.s + 1).map(svgPt).concat(svgPt([at.x, at.y])).join(' ')); }
-      $$('#trail-nodes circle').forEach(c => c.classList.toggle('reached', players.length > 0 && +c.dataset.i * maxPoints / 10 <= lead));
-      const occupied = new Set();
-      players.slice(0, 5).concat(players.filter(q => current && q.name === current.name)).forEach(q => {
-        const r = Math.max(0, q.points | 0) / maxPoints * 10, f = r - Math.floor(r);
-        if (f < .6) occupied.add(Math.floor(r)); if (f > .4) occupied.add(Math.ceil(r));
-      });
-      $$('#cp-labels .cp-label').forEach(l => { l.hidden = occupied.has(+l.dataset.i); });
-      if (!layer) return;
-      const shown = players.slice(0, 150), crowd = {}, plates = {}, seen = new Set();
-      shown.forEach((q, i) => {
-        const pts = Math.max(0, q.points | 0), k = (crowd[pts] = (crowd[pts] || 0) + 1) - 1;
-        const at = onRoute(pts), me = !!(current && q.name === current.name), named = i < 5 || me;
-        const stack = named ? (plates[pts] = (plates[pts] || 0) + 1) - 1 : 0;
-        const ang = k * 2.39996, rad = 7.5 * Math.sqrt(k);
-        let el = climbers.get(q.name);
-        if (!el) {
-          el = document.createElement('div');
-          el.style.setProperty('--x', ROUTE[0][0] + '%'); el.style.setProperty('--y', ROUTE[0][1] + '%');
-          layer.appendChild(el); climbers.set(q.name, el);
+    function climbedPath(frac) {
+      const f = Math.max(0, Math.min(1, frac)) * 10; const i = Math.floor(f);
+      const pts = WAY.slice(0, Math.min(10, i) + 1).map(p => [p.x, p.y]);
+      if (i < 10) { const p = pointAt(frac); pts.push([p.x, p.y]); }
+      return pts.map((p, j) => (j ? 'L' : 'M') + f2(p[0]) + ' ' + f2(p[1])).join('');
+    }
+    function ridge(g, peak, halfBase, rows, seed, alpha, dots) {
+      const r = rnd(seed);
+      const pts = [];
+      for (let q = 0; q <= rows; q++) {
+        const row = []; const n = 1 + 2 * q; const y0 = peak.y + (BASE_Y - peak.y) * (q / rows); const hw = halfBase * (q / rows);
+        for (let j = 0; j < n; j++) {
+          const u = n === 1 ? 0 : (j / (n - 1)) * 2 - 1;
+          const jitter = q === 0 ? 0 : (r() - 0.5) * (hw / n) * 1.6;
+          const ySag = q === 0 ? 0 : (r() - 0.5) * 18 + Math.abs(u) * Math.abs(u) * 10;
+          row.push({ x: peak.x + u * hw + jitter, y: Math.min(BASE_Y + 6, y0 + ySag) });
         }
-        el.className = 'climber r' + Math.min(i + 1, 4) + (me ? ' me' : '') + (at.x < ROUTE[ROUTE.length - 1][0] ? ' left' : '');
-        el.style.zIndex = String(me ? 400 : 300 - i);
-        el.style.setProperty('--dx', (Math.cos(ang) * rad).toFixed(1) + 'px'); el.style.setProperty('--dy', (Math.sin(ang) * rad).toFixed(1) + 'px'); el.style.setProperty('--stack', String(stack));
-        el.title = q.name + ': ' + pts + ' points, ' + metres(pts);
-        el.innerHTML = '<span class="climber-dot"></span>' + (named ? '<span class="climber-plate"><span class="cr">' + (i + 1) + '</span><span><b>' + esc(q.name) + '</b><small>' + pts + ' pts · ' + metres(pts) + '</small></span></span>' : '');
-        seen.add(q.name);
-        requestAnimationFrame(() => requestAnimationFrame(() => { el.style.setProperty('--x', at.x.toFixed(2) + '%'); el.style.setProperty('--y', at.y.toFixed(2) + '%'); }));
-      });
-      climbers.forEach((el, n) => { if (!seen.has(n)) { el.remove(); climbers.delete(n); } });
+        pts.push(row);
+      }
+      let d = '';
+      for (let q = 0; q <= rows; q++) {
+        const row = pts[q];
+        for (let j = 0; j < row.length; j++) {
+          if (j + 1 < row.length) d += 'M' + f2(row[j].x) + ' ' + f2(row[j].y) + 'L' + f2(row[j + 1].x) + ' ' + f2(row[j + 1].y);
+          if (q > 0) {
+            const up = pts[q - 1]; const m = up.length - 1; const t = m === 0 ? 0 : Math.round((j / (row.length - 1)) * m);
+            [t, Math.max(0, t - 1)].forEach(idx => { if (idx <= m && r() < 0.93) d += 'M' + f2(row[j].x) + ' ' + f2(row[j].y) + 'L' + f2(up[idx].x) + ' ' + f2(up[idx].y); });
+          }
+        }
+      }
+      g.appendChild(el('path', { d, fill: 'none', stroke: 'rgb(10,96,255)', 'stroke-opacity': alpha, 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' }));
+      if (dots) {
+        const dg = el('g');
+        pts.flat().forEach(p => {
+          const v = r(); if (v >= 0.16) return;
+          const white = v < 0.035;
+          const c = el('circle', { cx: f2(p.x), cy: f2(p.y), r: white ? 2 : 1.3, fill: white ? '#FFFFFF' : '#02C8FF', 'fill-opacity': white ? .9 : .7 });
+          if (white) { c.setAttribute('class', 'tw'); c.style.animationDelay = (r() * 3.6).toFixed(2) + 's'; }
+          dg.appendChild(c);
+        });
+        g.appendChild(dg);
+      }
     }
-    function fullRows(players, current) {
-      return players.map((q, i) => {
-        const points = Math.max(0, q.points | 0);
-        return '<li' + (current && q.name === current.name ? ' class="me"' : '') + '><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '</span><span class="el">' + metres(points) + '</span><span class="pt">' + points + '</span></li>';
-      }).join('');
+
+    function build(c) {
+      container = c; container.textContent = '';
+      svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMidYMax slice', 'aria-hidden': 'true' });
+      container.appendChild(svg);
+      k = kFor(fit());
+      const defs = el('defs');
+      defs.innerHTML = '<linearGradient id="mt-route" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0A60FF"/><stop offset="1" stop-color="#02C8FF"/></linearGradient>' +
+        '<filter id="mt-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+        '<pattern id="mt-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#FF9000" stroke-width="1.2"/></pattern>' +
+        '<radialGradient id="mt-halo"><stop offset="0" stop-color="#FF9000" stop-opacity=".28"/><stop offset=".45" stop-color="#FF9000" stop-opacity=".06"/><stop offset="1" stop-color="#FF9000" stop-opacity="0"/></radialGradient>' +
+        '<linearGradient id="mt-face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A60FF" stop-opacity=".22"/><stop offset=".55" stop-color="#0A60FF" stop-opacity=".07"/><stop offset="1" stop-color="#07182D" stop-opacity="0"/></linearGradient>';
+      svg.appendChild(defs);
+      /* stars */
+      const r = rnd(11); const stars = el('g');
+      for (let i = 0; i < 120; i++) { const x = r() * W, y = r() * 420; stars.appendChild(el('circle', { cx: f2(x), cy: f2(y), r: r() < 0.15 ? 1.4 : 0.8, fill: '#FFFFFF', 'fill-opacity': (0.15 + r() * 0.45).toFixed(2) })); }
+      svg.appendChild(stars);
+      /* ground grid in perspective */
+      const ground = el('g', { stroke: 'rgb(10,96,255)', 'stroke-opacity': .18, fill: 'none', 'stroke-width': 1, 'vector-effect': 'non-scaling-stroke' });
+      for (let i = 0; i < 11; i++) { const y = BASE_Y + 6 + i * i * 2.1; ground.appendChild(el('line', { x1: 0, y1: f2(y), x2: W, y2: f2(y) })); }
+      for (let i = -11; i <= 11; i++) { const x = PEAK.x + i * 68; ground.appendChild(el('line', { x1: f2(x), y1: BASE_Y + 6, x2: f2(PEAK.x + i * 230), y2: H })); }
+      svg.appendChild(ground);
+      /* back ridges, the face, the halo */
+      const back = el('g'); ridge(back, { x: 250, y: 400 }, 420, 8, 23, .22, false); ridge(back, { x: 1060, y: 360 }, 400, 8, 31, .22, false); svg.appendChild(back);
+      svg.appendChild(el('polygon', { points: PEAK.x + ',' + PEAK.y + ' ' + (PEAK.x + 560) + ',' + BASE_Y + ' ' + (PEAK.x - 560) + ',' + BASE_Y, fill: 'url(#mt-face)' }));
+      svg.appendChild(el('circle', { cx: PEAK.x, cy: PEAK.y, r: 160, fill: 'url(#mt-halo)' }));
+      const face = el('g'); ridge(face, PEAK, 560, 15, 7, .5, true); svg.appendChild(face);
+      const rings = el('g', { fill: 'none', stroke: '#FF9000', 'vector-effect': 'non-scaling-stroke' });
+      [[40, .4], [72, .24], [108, .12]].forEach(([rad, op]) => { const ci = el('circle', { cx: PEAK.x, cy: PEAK.y, r: rad, 'stroke-opacity': op, 'stroke-width': 1 }); if (!reduced) ci.innerHTML = '<animate attributeName="r" values="' + rad + ';' + (rad + 10) + ';' + rad + '" dur="5s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values="' + op + ';' + (op * 0.4) + ';' + op + '" dur="5s" repeatCount="indefinite"/>'; rings.appendChild(ci); });
+      svg.appendChild(rings);
+      /* the route: dashed all the way up, solid and glowing as far as the leader, with light flowing up it */
+      const fullD = WAY.map((p, i) => (i ? 'L' : 'M') + f2(p.x) + ' ' + f2(p.y)).join('');
+      svg.appendChild(el('path', { d: fullD, fill: 'none', stroke: '#02C8FF', 'stroke-opacity': .35, 'stroke-width': 1.5, 'stroke-dasharray': '5 6', 'vector-effect': 'non-scaling-stroke' }));
+      L.done = el('path', { d: '', fill: 'none', stroke: 'url(#mt-route)', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', filter: 'url(#mt-glow)' });
+      L.flow = el('path', { d: '', class: 'flow', fill: 'none', stroke: '#FFFFFF', 'stroke-opacity': .7, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-dasharray': '1 21' });
+      svg.appendChild(L.done); svg.appendChild(L.flow);
+      /* camps: outward two-line labels (left of left-hand turns, right of right-hand turns, base camp below) */
+      camps = [];
+      const campLayer = el('g');
+      WAY.forEach((p, i) => {
+        if (i === 10) return;
+        campLayer.appendChild(el('circle', { cx: f2(p.x), cy: f2(p.y), r: f2((i === 0 ? 7 : 5.5) * k), fill: '#07182D', stroke: '#FF9000', 'stroke-width': 1.6 }));
+        if (i === 0) campLayer.appendChild(el('circle', { cx: f2(p.x), cy: f2(p.y), r: f2(2.2 * k), fill: '#FF9000' }));
+        const l1 = i === 0 ? 'Base camp' : 'Camp ' + i, l2 = (i * 1000).toLocaleString('en-AU') + ' ft';
+        const w = Math.max(measure(l1.toUpperCase(), 500, 10, MONO, .14), measure(l2.toUpperCase(), 400, 9, MONO, .14));
+        const spot = side => {
+          const ax = side === 'below' ? p.x - 8 * k : side === 'left' ? p.x - 14 * k : p.x + 14 * k, ay = side === 'below' ? p.y + 24 * k : p.y - 2 * k;
+          const anchor = side === 'left' ? 'end' : 'start', x0 = anchor === 'end' ? ax - w * k : ax;
+          return { ax, ay, anchor, b: { x0, y0: ay - 10 * k, x1: x0 + w * k, y1: ay + 16 * k } };
+        };
+        const out = i === 0 ? 'below' : (XS[i] < PEAK.x ? 'left' : 'right');
+        const spots = i === 0 ? [spot('below')] : [spot(out), spot(out === 'left' ? 'right' : 'left')];
+        const g = el('g', { class: 'camp-lbl' });
+        const t1 = el('text', { x: 0, y: 0, class: 'mono camp-l1' }, l1), t2 = el('text', { x: 0, y: 12, class: 'mono camp-l2' }, l2);
+        g.appendChild(t1); g.appendChild(t2); campLayer.appendChild(g);
+        const c = { g, spots, place(sp) { g.setAttribute('transform', 'translate(' + f2(sp.ax) + ' ' + f2(sp.ay) + ') scale(' + k + ')'); t1.setAttribute('text-anchor', sp.anchor); t2.setAttribute('text-anchor', sp.anchor); } };
+        c.place(spots[0]); camps.push(c);
+      });
+      svg.appendChild(campLayer);
+      /* the peak: pennant, and a card sized to its text (placed in layout) */
+      const flag = el('g', { transform: 'translate(' + PEAK.x + ' ' + PEAK.y + ') scale(' + k + ')' });
+      flag.appendChild(el('line', { x1: 0, y1: 0, x2: 0, y2: -46, stroke: '#FF9000', 'stroke-width': 1.6 }));
+      flag.appendChild(el('path', { d: 'M0 -46L34 -36L0 -26Z', fill: 'url(#mt-hatch)', stroke: '#FF9000', 'stroke-width': 1.2 }));
+      flag.appendChild(el('circle', { r: 6, fill: '#07182D', stroke: '#FF9000', 'stroke-width': 1.6 }));
+      svg.appendChild(flag);
+      const t1 = 'Peak of inflated', t2 = 'expectations', t3 = ft(RULES.total || 1000) + ' · all ' + CP.length + ' banked';
+      const pw = Math.ceil(Math.max(measure(t1.toUpperCase(), 600, 10.5, MONO, .2), measure(t2.toUpperCase(), 600, 10.5, MONO, .2), measure(t3.toUpperCase(), 400, 9, MONO, .14)) + 28);
+      const card = el('g');
+      card.appendChild(el('rect', { x: 0, y: 0, width: pw, height: 56, rx: 6, fill: 'rgba(7,24,45,.88)', stroke: '#FF9000', 'stroke-width': 1.2 }));
+      card.appendChild(el('text', { x: 14, y: 21, class: 'mono peak-label' }, t1));
+      card.appendChild(el('text', { x: 14, y: 35, class: 'mono peak-label' }, t2));
+      card.appendChild(el('text', { x: 14, y: 48, class: 'mono peak-sub' }, t3));
+      svg.appendChild(card);
+      peakCard = { g: card, w: pw, h: 56 };
+      L.markers = el('g'); L.labels = el('g');
+      svg.appendChild(L.markers); svg.appendChild(L.labels);
+      if (!observer && 'ResizeObserver' in window) { observer = new ResizeObserver(onResize); observer.observe(container); }
+    }
+
+    /* fit the viewBox to the stage: crop the sides around a focus point (left of the peak when overlays sit on the left) or crop the top */
+    function fit() {
+      const r = container.getBoundingClientRect();
+      if (r.width < 10 || r.height < 10) return null;
+      const overlay = $$('.ov', container.parentElement).some(o => getComputedStyle(o).position === 'absolute');
+      const focus = overlay ? 560 : 665, band = overlay ? { y0: 30, h: 830 } : { y0: 40, h: 740 };
+      let vx = 0, vy = 0, vw = W, vh = H;
+      if (r.width / r.height < W / band.h) { vh = band.h; vy = band.y0; vw = band.h * r.width / r.height; vx = Math.max(0, Math.min(W - vw, focus - vw / 2)); }
+      else { vh = W * r.height / r.width; vy = Math.max(0, Math.min(H - vh, band.y0 + band.h / 2 - vh / 2)); }
+      svg.setAttribute('viewBox', f2(vx) + ' ' + f2(vy) + ' ' + f2(vw) + ' ' + f2(vh));
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      return { r, s: r.width / vw, vx, vy, vw, vh, overlay };
+    }
+    function layout() {
+      if (!svg) return;
+      const v = fit();
+      const edge = v ? 10 / v.s : 0;
+      const view = v ? { x0: v.vx + edge, y0: v.vy + edge, x1: v.vx + v.vw - edge, y1: v.vy + v.vh - edge } : null;
+      const inView = b => !view || (b.x0 >= view.x0 && b.x1 <= view.x1 && b.y0 >= view.y0 && b.y1 <= view.y1);
+      const obs = v && v.overlay ? $$('.ov', container.parentElement).map(o => {
+        const b = o.getBoundingClientRect(); if (b.width < 2 || getComputedStyle(o).display === 'none') return null; const pad = 8 / v.s;
+        return { x0: v.vx + (b.left - v.r.left) / v.s - pad, y0: v.vy + (b.top - v.r.top) / v.s - pad, x1: v.vx + (b.right - v.r.left) / v.s + pad, y1: v.vy + (b.bottom - v.r.top) / v.s + pad };
+      }).filter(Boolean) : [];
+      const placed = [];
+      const free = b => inView(b) && !obs.some(o => hit(b, o)) && !placed.some(o => hit(b, o));
+      /* the peak card: right of the pennant, else left, else hidden */
+      if (peakCard) {
+        const { w, h } = peakCard; let spot = null;
+        [[PEAK.x + 48 * k, PEAK.y - 62 * k], [PEAK.x - 48 * k - w * k, PEAK.y - 62 * k]].some(([x, y]) => { const b = { x0: x, y0: y, x1: x + w * k, y1: y + h * k }; if (free(b)) { spot = b; return true; } return false; });
+        peakCard.g.style.display = spot ? '' : 'none';
+        if (spot) { peakCard.g.setAttribute('transform', 'translate(' + f2(spot.x0) + ' ' + f2(spot.y0) + ') scale(' + k + ')'); placed.push(spot); }
+      }
+      placed.push({ x0: PEAK.x - 9 * k, y0: PEAK.y - 50 * k, x1: PEAK.x + 38 * k, y1: PEAK.y + 9 * k });
+      /* climber labels, leader first: above, stacked above, right, left, below; near the summit: left, below, right */
+      labels.forEach(lb => {
+        const { w, h, pos: p } = lb;
+        const A = [-w / 2, -h - 16], E = [-w / 2, -2 * h - 24], F = [-w / 2, -3 * h - 32], B = [18, -h / 2], C = [-w - 18, -h / 2], D = [-w / 2, 16];
+        const far = lb.me ? [[-w / 2, -h - 70], [70, -h / 2], [-w - 70, -h / 2], [-w / 2, 70], [40, -h - 40], [-w - 40, -h - 40], [40, 40], [-w - 40, 40]] : [];
+        const order = (p.y < PEAK.y + 60 ? [C, D, B, E] : [A, E, B, C, D, F]).concat(far);
+        const box = ([dx, dy]) => ({ dx, dy, b: { x0: p.x + dx * k, y0: p.y + dy * k, x1: p.x + (dx + w) * k, y1: p.y + (dy + h) * k } });
+        const found = order.map(box).find(o => free(o.b));
+        if (!found && lb.rank > 1 && !lb.me) { lb.inner.style.display = 'none'; return; }
+        lb.inner.style.display = '';
+        const best = found || box(order[0]);
+        lb.inner.setAttribute('transform', 'translate(' + f2(best.dx * k) + ' ' + f2(best.dy * k) + ') scale(' + k + ')');
+        const ln = lb.inner.querySelector('.lead'), mx = -best.dx, my = -best.dy;
+        const cx = Math.max(0, Math.min(w, mx)), cy = Math.max(0, Math.min(h, my)), dist = Math.hypot(mx - cx, my - cy);
+        if (dist > 14) { const t = (dist - 11) / dist; ln.setAttribute('x1', f2(cx)); ln.setAttribute('y1', f2(cy)); ln.setAttribute('x2', f2(cx + (mx - cx) * t)); ln.setAttribute('y2', f2(cy + (my - cy) * t)); ln.style.display = ''; }
+        else ln.style.display = 'none';
+        placed.push(best.b);
+      });
+      /* camp labels fade where a label, the peak card, an overlay or the edge would cut them */
+      camps.forEach(c => {
+        const ok = c.spots.find(sp => inView(sp.b) && !obs.some(o => hit(sp.b, o)) && !placed.some(o => hit(sp.b, o)) && !dots.some(o => hit(sp.b, o)));
+        c.place(ok || c.spots[0]); c.g.style.opacity = ok ? '' : '0';
+      });
+    }
+    function onResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!container || !svg) return;
+        const nk = kFor(fit());
+        if (Math.abs(nk - k) > 0.04) { build(container); render(lastRows, lastMe); } else layout();
+      }, 80);
+    }
+
+    function marker(c, me) {
+      const g = el('g', { transform: 'scale(' + k + ')' });
+      const summit = (c.points | 0) >= (RULES.total || 1000);
+      if (summit && !reduced) g.appendChild(el('circle', { r: 10, fill: 'none', stroke: '#45991F', 'stroke-width': 1.5, class: 'summit-ring' }));
+      g.appendChild(el('circle', { r: 9, fill: 'rgba(7,24,45,.55)', stroke: me ? '#02C8FF' : summit ? '#45991F' : 'rgba(255,255,255,.4)', 'stroke-width': me ? 2.2 : 1.2 }));
+      g.appendChild(el('circle', { r: 4.5, fill: '#FFFFFF' }));
+      g.appendChild(el('title', {}, c.name + ' · ' + (c.points | 0) + ' pts · ' + ft(c.points) + ' · ' + (c.solvedCount | 0) + '/' + CP.length + (me ? ' · you' : '')));
+      return g;
+    }
+    function labelCard(c, me) {
+      const color = c.rank === 1 ? '#FF9000' : c.rank === 2 ? '#FF007F' : c.rank === 3 ? '#0A60FF' : '#02C8FF';
+      const nameW = n => measure(n, 600, 12.5, SANS, 0);
+      let name = c.name; while (name.length > 4 && nameW(name) > 150) name = name.slice(0, -2) + '…';
+      const pts = (c.points | 0) + ' pts · ' + ft(c.points);
+      const youW = me ? measure('YOU', 700, 8.5, MONO, .2) + 8 : 0;
+      const w = Math.ceil(36 + Math.max(nameW(name) + youW, measure(pts.toUpperCase(), 400, 9.5, MONO, .12)) + 13), h = 40;
+      const inner = el('g');
+      inner.appendChild(el('line', { class: 'lead', stroke: color, 'stroke-opacity': .7, 'stroke-width': 1 }));
+      inner.appendChild(el('rect', { x: 0, y: 0, width: w, height: h, rx: 6, fill: 'rgba(7,24,45,.9)', stroke: color, 'stroke-width': 1.4 }));
+      inner.appendChild(el('text', { x: 18, y: 25, 'text-anchor': 'middle', class: 'lbl-rk' }, String(c.rank)));
+      inner.appendChild(el('text', { x: 36, y: 18, class: 'lbl-name' }, name));
+      if (me) inner.appendChild(el('text', { x: f2(36 + nameW(name) + 8), y: 17.5, class: 'you-tag' }, 'You'));
+      inner.appendChild(el('text', { x: 36, y: 31.5, class: 'lbl-pts' }, pts));
+      return { inner, w, h, rank: c.rank, me };
+    }
+    function upsert(layer, id, pos) {
+      let g = layer.querySelector('[data-key="' + CSS.escape(id) + '"]');
+      if (!g) { g = el('g', { class: 'climber', 'data-key': id }); layer.appendChild(g); }
+      g.style.transform = 'translate(' + f2(pos.x) + 'px,' + f2(pos.y) + 'px)';
+      return g;
+    }
+    function render(rows, meName) {
+      lastRows = rows; lastMe = meName || '';
+      if (!svg) return;
+      const total = RULES.total || 1000;
+      const top = rows.length ? Math.max.apply(null, rows.map(r => r.points | 0)) : 0;
+      const d = climbedPath(top / total); L.done.setAttribute('d', d); L.flow.setAttribute('d', d);
+      /* climbers on the same score fan out across the route instead of stacking */
+      const groups = {}; rows.forEach((r, i) => { r.rank = i + 1; const key = r.points | 0; (groups[key] = groups[key] || []).push(r); });
+      const seenM = new Set(); labels = []; dots = [];
+      Object.keys(groups).forEach(key => {
+        const grp = groups[key]; const base = pointAt((grp[0].points | 0) / total);
+        const len = Math.hypot(base.dx, base.dy) || 1; const nx = -base.dy / len, ny = base.dx / len;
+        const shown = grp.slice(0, 6);
+        shown.forEach((c, j) => {
+          const spread = (j - (shown.length - 1) / 2) * 13 * k;
+          const pos = { x: base.x + nx * spread, y: base.y + ny * spread };
+          const me = !!meName && c.name === meName; const id = c.name.toLowerCase(); seenM.add(id);
+          dots.push({ x0: pos.x - 9 * k, y0: pos.y - 9 * k, x1: pos.x + 9 * k, y1: pos.y + 9 * k });
+          const m = upsert(L.markers, id, pos); m.textContent = ''; m.appendChild(marker(c, me));
+          if (c.rank <= 3 || me) labels.push(Object.assign(labelCard(c, me), { pos, id }));
+        });
+        const extra = grp.length - shown.length;
+        if (extra > 0) {
+          const id = '+' + key; seenM.add(id); const off = ((shown.length + 1) / 2) * 13 * k + 10 * k;
+          const g = upsert(L.markers, id, { x: base.x + nx * off, y: base.y + ny * off }); g.textContent = '';
+          const s = el('g', { transform: 'scale(' + k + ')' });
+          s.appendChild(el('rect', { x: -15, y: -9, width: 30, height: 18, rx: 9, fill: 'rgba(7,24,45,.92)', stroke: 'rgba(255,255,255,.35)', 'stroke-width': 1 }));
+          s.appendChild(el('text', { x: 0, y: 3.5, 'text-anchor': 'middle', class: 'cluster-chip' }, '+' + extra));
+          g.appendChild(s);
+        }
+      });
+      Array.from(L.markers.children).forEach(n => { if (!seenM.has(n.getAttribute('data-key'))) n.remove(); });
+      /* labels are rebuilt in paint order (3, 2, 1, you on top); each starts where it was and glides to its new spot */
+      const prev = {}; Array.from(L.labels.children).forEach(n => { prev[n.getAttribute('data-key')] = n.style.transform; });
+      L.labels.textContent = '';
+      const paint = labels.slice().sort((a, b) => (a.me - b.me) || (b.rank - a.rank));
+      paint.forEach(lb => {
+        const g = el('g', { class: 'climber', 'data-key': lb.id }); const to = 'translate(' + f2(lb.pos.x) + 'px,' + f2(lb.pos.y) + 'px)';
+        g.style.transform = prev[lb.id] || to; g.appendChild(lb.inner); L.labels.appendChild(g);
+        if (prev[lb.id] && prev[lb.id] !== to) { void g.getBoundingClientRect(); g.style.transform = to; }
+      });
+      labels.sort((a, b) => (a.rank === 1 ? -1 : b.rank === 1 ? 1 : 0) || (b.me - a.me) || (a.rank - b.rank));
+      layout();
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (container && svg) { build(container); render(lastRows, lastMe); } });
+    return { build, render, get built() { return !!svg; } };
+  })();
+
+  const Board = (() => {
+    let timer = 0, lastRows = [];
+    function top3Html(rows) {
+      return [0, 1, 2].map(i => { const r = rows[i]; return '<div class="t3' + (r ? '' : ' empty-slot') + '" data-rank="' + (i + 1) + '"><span class="rk">' + (i + 1) + '</span><span class="nm">' + (r ? esc(r.name) : 'Open') + '</span><span class="pt">' + (r ? r.points + ' pts' : 'Nobody yet') + '</span><i class="bar" aria-hidden="true"></i></div>'; }).join('');
+    }
+    function expeditionHtml(rows) {
+      const reached = rows.reduce((s, r) => s + (r.solvedCount | 0), 0), summited = rows.filter(r => r.points >= RULES.total).length;
+      const ico = {
+        people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 19a4.5 4.5 0 0 1 5-4.4"/></svg>',
+        flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>',
+        peak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20 10 7l3 5 2-3 6 11Z"/></svg>',
+      };
+      return '<p class="eyebrow accent">Expedition status</p>' +
+        '<div class="ex">' + ico.people + '<div><b>' + rows.length + '</b><span>Climbers checked in</span></div></div>' +
+        '<div class="ex">' + ico.flag + '<div><b>' + reached + '</b><span>Checkpoints reached</span></div></div>' +
+        '<div class="ex">' + ico.peak + '<div><b>' + summited + '</b><span>At the summit</span></div></div>';
+    }
+    function tableHtml(rows, meName) {
+      return rows.map((r, i) => '<tr data-rank="' + (i + 1) + '"' + (meName && r.name === meName ? ' class="me"' : '') + '><td class="pos"><b>' + (i + 1) + '</b></td><td class="nm">' + esc(r.name) + (r.points >= RULES.total ? '<small>Summited</small>' : '') + '</td><td class="el num">' + ft(r.points) + '</td><td class="pt num">' + (r.points | 0) + '</td></tr>').join('');
+    }
+    function paint(rows, live) {
+      const p = Store.player, meName = p ? p.name : '';
+      lastRows = rows;
+      const top3 = $('#top3'); if (top3) top3.innerHTML = top3Html(rows);
+      const ex = $('#expedition'); if (ex) ex.innerHTML = expeditionHtml(rows);
+      const tb = $('#board-full tbody'); if (tb) tb.innerHTML = tableHtml(rows, meName);
+      const home = $('#board-home'); if (home) home.innerHTML = rows.slice(0, 5).map((q, i) => '<li' + (meName && q.name === meName ? ' class="me"' : '') + '><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '</span><span class="pt">' + (q.points | 0) + '<small>' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></li>').join('');
+      const stage = $('#stage'), canvas = $('#stage-canvas');
+      if (stage && canvas) {
+        if (!Mountain.built) Mountain.build(canvas);
+        Mountain.render(rows.map(r => Object.assign({}, r)), meName);
+        let note = $('.empty-stage', stage);
+        if (!rows.length) { if (!note) { note = document.createElement('p'); note.className = 'empty-stage'; stage.appendChild(note); } note.textContent = live ? 'Nobody has checked in yet. The first handle to bank a checkpoint leaves base camp.' : 'Check in on the Overview to put yourself on the mountain.'; }
+        else if (note) note.remove();
+      }
+      const dot = $('#ascent-dot'); if (dot) dot.classList.toggle('live', live);
+      const eyebrow = $('#ascent-eyebrow'); if (eyebrow) eyebrow.textContent = live ? 'Live ascent · ' + rows.length + (rows.length === 1 ? ' climber' : ' climbers') : 'Local ascent · this laptop only';
     }
     async function refresh() {
-      const full = $('#board-full'), note = $('#board-full-note'), home = $('#board-home'), homeNote = $('#board-home-note'), ref = $('#board-refresh'), title = $('#board-title');
+      const note = $('#board-full-note'), homeNote = $('#board-home-note'), ref = $('#board-refresh'), title = $('#board-title');
       const p = Store.player;
       if (!Store.live) {
-        if (title) title.textContent = 'Full standings';
-        const local = p ? [{ name: p.name, points: p.points, solvedCount: solvedCount(p) }] : [];
-        const row = p ? '<li class="me"><span class="rk">1</span><span class="nm">' + esc(p.name) + '</span><span class="pt">' + p.points + '<small>' + solvedCount(p) + '/' + CP.length + '</small></span></li>' : '';
-        if (full) full.innerHTML = fullRows(local, p); if (home) home.innerHTML = row;
-        paintMountain(local, p);
+        if (title) title.textContent = 'Room standings';
+        paint(p ? [{ name: p.name, points: p.points, solvedCount: solvedCount(p), updatedAt: p.updatedAt || 0, lastSolveAt: 0 }] : [], false);
         const txt = p ? 'Local mode: only your score lives on this laptop. Show your score code to a proctor for the room board.' : 'Local mode: check in and your score shows here. The room board is kept by the proctors.';
         if (note) note.textContent = txt; if (homeNote) homeNote.textContent = p ? 'Local mode. The room board is kept by the proctors from score codes.' : 'Check in to start banking points.';
         if (ref) ref.textContent = ''; return;
       }
       try {
         const players = await Store.leaderboard();
-        const rows = (players || []).map((q, i) => '<li' + (p && q.name === p.name ? ' class="me"' : '') + '><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(q.name) + '</span><span class="pt">' + (q.points | 0) + '<small>' + (q.solvedCount | 0) + '/' + CP.length + '</small></span></li>');
-        if (full) full.innerHTML = fullRows(players || [], p); if (home) home.innerHTML = rows.slice(0, 5).join('');
-        paintMountain(players || [], p);
-        if (note) note.textContent = rows.length ? '' : 'Nobody has checked in yet.'; if (homeNote) homeNote.textContent = rows.length ? '' : 'Nobody has checked in yet. Be first.';
+        paint(players || [], true);
+        if (note) note.textContent = (players || []).length ? '' : 'Nobody has checked in yet.'; if (homeNote) homeNote.textContent = (players || []).length ? '' : 'Nobody has checked in yet. Be first.';
         if (ref) ref.textContent = 'Updated ' + fmtTime(Date.now());
       } catch (e) { if (note) note.textContent = 'The lab API didn’t answer. Standings will refresh when it does.'; if (ref) ref.textContent = ''; }
     }
+    function exportCsv() {
+      const lines = [['pos', 'climber', 'points', 'elevation_ft', 'checkpoints', 'last_solve']].concat(lastRows.map((r, i) => [i + 1, r.name, r.points | 0, (r.points | 0) * FT_PER_POINT, r.solvedCount | 0, r.lastSolveAt ? new Date(r.lastSolveAt).toISOString() : '']));
+      const csv = lines.map(l => l.map(v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v)).join(',')).join('\n') + '\n';
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'te-lab-standings-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.csv'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    }
+    const ex = $('#export-standings'); if (ex) ex.addEventListener('click', exportCsv);
     return { refresh, start() { refresh(); clearInterval(timer); timer = setInterval(refresh, 20000); }, stop() { clearInterval(timer); timer = 0; } };
+  })();
+
+  /* ── event countdown in the top bar (endsAt from the proctor page or config.js) ── */
+  const Countdown = (() => {
+    let endsAt = 0, timer = 0;
+    const box = $('#countdown'), h = $('#cd-h'), m = $('#cd-m'), s = $('#cd-s');
+    const two = n => String(Math.max(0, n)).padStart(2, '0');
+    function tick() {
+      const left = Math.max(0, endsAt - Date.now()); const secs = Math.floor(left / 1000);
+      h.textContent = two(Math.min(99, Math.floor(secs / 3600))); m.textContent = two(Math.floor(secs / 60) % 60); s.textContent = two(secs % 60);
+      box.classList.toggle('over', left === 0); const label = $('.cd-label', box); if (label) label.textContent = left === 0 ? 'Event over' : 'Event ends in';
+      if (left === 0) clearInterval(timer);
+    }
+    return {
+      set(iso) {
+        const t = iso ? Date.parse(iso) : NaN; if (!box) return;
+        if (!iso || isNaN(t)) { box.hidden = true; clearInterval(timer); return; }
+        endsAt = t; box.hidden = false; clearInterval(timer); tick(); timer = setInterval(tick, 1000);
+      },
+    };
   })();
 
   async function renderScorecard() {
     const el = $('#scorecard'), desc = $('#standings-desc'); if (!el) return;
     const p = Store.player;
-    if (desc) desc.textContent = Store.live ? 'Every checkpoint takes you higher. Live positions refresh every 20 seconds, all the way to the Mountain of Productivity.' : 'Every checkpoint takes you higher. In local mode your climb stays in this browser and the room board is run by the proctors.';
+    if (desc) desc.textContent = Store.live ? 'Every checkpoint takes you higher: 100 points is 1,000 ft. Live positions refresh every 20 seconds, all the way to the Peak of Inflated Expectations.' : 'Every checkpoint takes you higher: 100 points is 1,000 ft. This copy runs in local mode, so only your own climb shows here; the room board is kept by the proctors.';
     if (!p) { el.innerHTML = '<p class="empty">Check in on the <a href="#home" style="color:var(--fg)">Overview</a> to start a scorecard.</p>'; return; }
     const tiles = CP.map(cp => { const s = p.solved && p.solved[cp.id]; const tries = (p.tries && p.tries[cp.id]) || 0; const hint = p.hints && p.hints[cp.id]; return '<a class="score-tile g-' + (cp.route.startsWith('lab') ? 'labs' : cp.route.startsWith('build') ? 'builds' : 'setup') + (s ? ' done' : '') + '" href="#' + cp.route + '" style="text-decoration:none;color:inherit"><div class="st-l">' + esc(cp.label) + '</div><div class="st-t">' + esc(cp.title) + '</div><div class="st-s">' + (s ? 'Banked ' + cp.points + ' · ' + fmtTime(s.at) : (tries ? tries + ' ' + (tries === 1 ? 'try' : 'tries') + ' so far' : 'Open')) + (hint ? ' · hint used' : '') + '</div></a>'; }).join('');
     let code = ''; try { code = await scoreCode(p); } catch (e) { code = ''; }
@@ -1376,6 +1667,9 @@
     let key = ss.get(), health = null, cfg = null, tokenSet = false, overview = null, overviewErr = null, records = [], timer = 0, signinErr = '', armed = '';
     const P = (m, p, b) => Store.proctor.call(m, p, b, key);
     const root = () => $('#proctor-root');
+    const pad2 = n => String(n).padStart(2, '0');
+    const localDT = iso => { const t = iso ? new Date(iso) : null; if (!t || isNaN(t)) return ''; return t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate()) + 'T' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()); };
+    const isoFromLocal = v => { if (!v) return ''; const t = new Date(v); if (isNaN(t)) return ''; const off = -t.getTimezoneOffset(); const sign = off >= 0 ? '+' : '-'; return v.slice(0, 16) + ':00' + sign + pad2(Math.floor(Math.abs(off) / 60)) + ':' + pad2(Math.abs(off) % 60); };
     const panel = (title, inner, color) => '<div class="panel"><span class="spine" style="--spine:' + (color || 'var(--cisco-blue)') + '" aria-hidden="true"></span><p class="eyebrow accent">' + title + '</p>' + inner + '</div>';
     const note = (text, cls) => '<div class="note-box ' + (cls || '') + '">' + text + '</div>';
 
@@ -1426,6 +1720,7 @@
         '<div><label class="lbl">Shared demo account group (live tests and alerts)</label>' + sel('sharedAid', groups, cfg.sharedAid, 'None: own sandbox only') + '<p class="empty">Membership gives them Labs 2 to 5 data. Pick a group that already has tests.</p></div>' +
         '<div><label class="lbl">Attendee role in the shared group</label>' + sel('sharedRoleId', roles, defaultShared, '') + '<p class="empty">Regular User keeps the shared group tidy; they can read everything and run instant tests.</p></div>' +
         '<div><label class="lbl">Welcome note shown after sign-up (optional)</label><textarea class="input" name="welcomeNote" maxlength="400" placeholder="e.g. Wi-Fi: AIBuilders / password on the screen">' + esc(cfg.welcomeNote) + '</textarea></div>' +
+        '<div><label class="lbl">Event ends at (drives the countdown in the top bar)</label><input class="input" name="eventEndsAt" type="datetime-local" value="' + esc(localDT(cfg.eventEndsAt)) + '"><p class="empty">Your local time. Blank hides the countdown.</p></div>' +
         '<div class="full"><label class="lbl">Enterprise Agents shared into each new group</label>' +
         (agents.length ? '<div class="agent-list">' + agents.map(a => '<label class="check"><input type="checkbox" name="agentIds" value="' + esc(a.agentId) + '"' + (cfg.agentIds.includes(String(a.agentId)) ? ' checked' : '') + '> ' + esc(a.name) + (a.location ? ' <span style="color:var(--dim)">· ' + esc(a.location) + '</span>' : '') + '</label>').join('') + '</div>'
           : '<input class="input" name="agentIdsText" value="' + esc(cfg.agentIds.join(', ')) + '" placeholder="Agent ids, comma separated (test the token to pick from a list)">') +
@@ -1492,12 +1787,12 @@
         const own = pick('ownRoleId', overview && overview.roles, 'roleId'), shared = pick('sharedRoleId', overview && overview.roles, 'roleId'), grp = pick('sharedAid', overview && overview.accountGroups, 'aid');
         const patch = { enabled: fd.get('enabled') === 'on', eventCode: String(fd.get('eventCode') || '').trim(), maxOnboardings: Number(fd.get('maxOnboardings') || 0), groupNameTemplate: String(fd.get('groupNameTemplate') || '').trim(),
           ownRoleId: own.id, ownRoleName: own.name || (own.id === cfg.ownRoleId ? cfg.ownRoleName : ''), sharedAid: grp.id, sharedAccountGroupName: grp.name || (grp.id === cfg.sharedAid ? cfg.sharedAccountGroupName : ''),
-          sharedRoleId: grp.id ? shared.id : '', sharedRoleName: grp.id ? (shared.name || (shared.id === cfg.sharedRoleId ? cfg.sharedRoleName : '')) : '', agentIds, welcomeNote: String(fd.get('welcomeNote') || '').trim(), orgName: (overview && overview.orgName) || cfg.orgName || '' };
+          sharedRoleId: grp.id ? shared.id : '', sharedRoleName: grp.id ? (shared.name || (shared.id === cfg.sharedRoleId ? cfg.sharedRoleName : '')) : '', agentIds, welcomeNote: String(fd.get('welcomeNote') || '').trim(), orgName: (overview && overview.orgName) || cfg.orgName || '', eventEndsAt: isoFromLocal(String(fd.get('eventEndsAt') || '')) };
         if (patch.enabled && !patch.ownRoleId) { msgIn(form, 'Pick the attendee role in their own group before opening sign-up.', true); return; }
         if (patch.enabled && !tokenSet) { msgIn(form, 'Save a working ThousandEyes token first; sign-up cannot open without one.', true); return; }
         await withBusy(form, async () => { try { const c = await P('PUT', '/proctor/config', patch); cfg = c.config; tokenSet = c.tokenSet; msgIn(form, 'Saved.'); } catch (e) { msgIn(form, e.message, true); } });
         const k = $('.kpis'); if (k) k.outerHTML = statusPills();
-        Onboard.recheck(true);
+        Onboard.recheck(true); Countdown.set(cfg.eventEndsAt || (CONFIG.event || {}).endsAt || '');
         return;
       }
       if (kind === 'manual') {
@@ -1690,10 +1985,14 @@
 
   /* ── boot ── */
   renderDirectory(); renderAsk(); renderKeymaker(); wireOsSwitches(); addCopyButtons(); wireDiscover();
+  const liveTag = $('#live-tag'); if (liveTag) liveTag.hidden = !Store.live;
+  const exportBtn = $('#export-standings'); if (exportBtn) exportBtn.hidden = !Store.live;
+  Countdown.set((CONFIG.event || {}).endsAt || '');
   Store.on(() => renderAll());
   renderAll();
   render();
   Store.init();
   Onboard.init();
+  if (Store.live) Store.health().then(h => { if (h && h.eventEndsAt) Countdown.set(h.eventEndsAt); });
 })();
 </script>

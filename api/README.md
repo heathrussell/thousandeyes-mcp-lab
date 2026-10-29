@@ -11,7 +11,7 @@ One Lambda (Python 3.12, boto3 only; `app.py` plus `onboarding.py`), three Dynam
 | `POST /hint` | `{name, checkpoint}` | `{hint, player}` |
 | `GET /player?name=` | | `{player}` |
 | `GET /leaderboard` | | `{players: [{name, points, solvedCount, updatedAt, lastSolveAt}], total}` |
-| `GET /health` | | `{status, checkpoints, answers, ask, onboarding, onboardingNeedsCode, proctor}` |
+| `GET /health` | | `{status, checkpoints, answers, ask, onboarding, onboardingNeedsCode, proctor, eventEndsAt}` |
 | `GET /discover?domain=` | | `{domain, saas, subdomains}`; proxies the lab Service Finder JSON so the page can fill Lab 1 despite missing CORS on the finder |
 | `POST /ask` | `{question, snippets}` | `{answer}`; 404 unless `AnthropicApiKey` is set on the stack |
 
@@ -43,7 +43,7 @@ ThousandEyes then emails the attendee an activation link (valid for 72 hours).
 
 "Key" means the `X-Proctor-Key` header must equal the `ProctorKey` stack parameter (constant-time compare). A blank `ProctorKey` disables every proctor route and, with it, onboarding.
 
-Config fields: `enabled`, `eventCode`, `groupNameTemplate` (`{name}`, `{email}`, `{company}`), `ownRoleId` and `ownRoleName`, `sharedAid` and `sharedAccountGroupName`, `sharedRoleId` and `sharedRoleName`, `agentIds`, `maxOnboardings` (0 = no cap), `welcomeNote`, `orgName`. The proctor page fills the ids from the overview, so nobody types them.
+Config fields: `enabled`, `eventCode`, `groupNameTemplate` (`{name}`, `{email}`, `{company}`), `ownRoleId` and `ownRoleName`, `sharedAid` and `sharedAccountGroupName`, `sharedRoleId` and `sharedRoleName`, `agentIds`, `maxOnboardings` (0 = no cap), `welcomeNote`, `orgName`, `eventEndsAt` (ISO 8601 with offset, for the page countdown; blank hides it). The proctor page fills the ids from the overview, so nobody types them.
 
 Where things live:
 

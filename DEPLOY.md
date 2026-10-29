@@ -22,7 +22,7 @@ One key per checkpoint id in `api/checkpoints.json`; every listed variant is acc
 ## 1. Quick path (CloudFront domain, no custom DNS)
 
 ```bash
-AWS_REGION=ap-southeast-2 EVENT_NAME="AI Builders" EVENT_DATE="" EVENT_CITY="" scripts/deploy.sh
+AWS_REGION=ap-southeast-2 EVENT_NAME="AI Builders" EVENT_DATE="" EVENT_CITY="" EVENT_ENDS_AT="2026-11-10T16:30:00+10:00" scripts/deploy.sh
 scripts/smoke.sh
 ```
 
@@ -69,7 +69,7 @@ Then, before the doors open, on the deployed site:
 
 1. Open `$SITE_URL/#proctor` and sign in with the key (it stays in that browser tab only).
 2. **Credential**: in ThousandEyes, as an **Organization Admin** of the lab organisation (the one the attendees should land in), go to Manage > Account Settings > Users and Roles > Profile > User API Tokens and copy the OAuth bearer token (https://developer.cisco.com/docs/thousandeyes/authentication). Paste it into "Test and save". The page lists the organisation's account groups, roles and Enterprise Agents if the token works, or tells you why not (a 403 means the user is not an Organization Admin: creating account groups needs "Edit all account groups"). The token is stored as an AWS SSM SecureString, never shown again, and deleted by `make destroy`.
-3. **Settings**: tick "Open self-service sign-up", set an event code if you want one (attendees type it; it is shown on the screen in the room), the cap, the account group name template, the attendee's role in their own group (Account Admin is right for Labs 1 and 6), the shared demo account group with live tests (Labs 2 to 5) and the role in it (Regular User), the Enterprise Agents to share into each new group, and an optional welcome note. Save.
+3. **Settings**: tick "Open self-service sign-up", set an event code if you want one (attendees type it; it is shown on the screen in the room), the cap, the account group name template, the attendee's role in their own group (Account Admin is right for Labs 1 and 6), the shared demo account group with live tests (Labs 2 to 5) and the role in it (Regular User), the Enterprise Agents to share into each new group, an optional welcome note, and the time the event ends (drives the "Event ends in" countdown in the top bar; it overrides `EVENT_ENDS_AT`, blank hides it). Save.
 4. Watch "Who has signed up" during the event. Failed rows show ThousandEyes' own error and have a Retry; "Onboard by hand" adds a walk-up without the code or the cap. Remove deletes only the lab's record.
 
 `curl $API_URL/health` shows `"proctor": true` and `"onboarding": "ready"` once this is done; `scripts/smoke.sh` checks both. Clean-up after the event is done in ThousandEyes (delete the per-attendee account groups and users); `make wipe-onboarding` clears only the lab's list.
@@ -94,6 +94,8 @@ aws cloudformation describe-stacks --region ap-southeast-2 --stack-name te-lab-a
 - **Change the event text or API URL**: edit `site/config.js`, then `make site` (sync + invalidate) or re-run the deploy script with the env vars.
 - **Change a question or hint**: edit `api/checkpoints.json`; **change an accepted answer**: edit `api/answers.json`. Either way run `make build` (refreshes the hashes in the page), then `make deploy`.
 - **Change the page**: edit `src/shell.html`, `make build`, `make deploy`.
+- **Swap the logo**: replace `src/brand/ai-builders.png` (transparent PNG, about 200 px tall; it shows at 40 px in the top bar), then `make build` and `make deploy`. Optional: put the official Cisco logo SVG from the brand portal at `src/brand/cisco.svg` and the build shows it before the AI Builders mark.
+- **Scoreboard on the room screen**: open `#standings` full screen on the projector. Elevation is points x 10 ft (the summit, 10,000 ft, is every checkpoint banked); it refreshes every 20 seconds and highlights whoever is checked in on that browser, so use a browser with no handle for the room display. "Export standings" downloads a CSV of the board.
 - **Clear the leaderboard** before the event or after testing: `make wipe`. **Clear the onboarding list**: `make wipe-onboarding` (ThousandEyes itself is untouched).
 - **Close or reopen sign-up** during the event: the "Open self-service sign-up" tick box on `#proctor`, no deploy needed. **Rotate the proctor key**: re-run the deploy script with a new `PROCTOR_KEY`.
 - **Run it all locally** while editing: `make dev` serves the site in API mode on http://127.0.0.1:8787 with a fake ThousandEyes and no AWS (proctor key `proctor-secret-123`, token `good-token`).

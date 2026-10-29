@@ -57,10 +57,11 @@ DEFAULT_CONFIG = {
     "maxOnboardings": 60,
     "welcomeNote": "",
     "orgName": "",
+    "eventEndsAt": "",
     "updatedAt": 0,
 }
 EDITABLE = ("enabled", "eventCode", "groupNameTemplate", "ownRoleId", "ownRoleName", "sharedAid", "sharedAccountGroupName",
-            "sharedRoleId", "sharedRoleName", "agentIds", "maxOnboardings", "welcomeNote", "orgName")
+            "sharedRoleId", "sharedRoleName", "agentIds", "maxOnboardings", "welcomeNote", "orgName", "eventEndsAt")
 
 
 # ── small helpers ────────────────────────────────────────────────────────
@@ -135,6 +136,10 @@ def save_config(patch: dict) -> dict:
                 val = max(0, min(5000, int(val or 0)))
             except (TypeError, ValueError):
                 raise ValueError("maxOnboardings must be a whole number (0 means no cap)") from None
+        elif key == "eventEndsAt":
+            val = str(val or "").strip()
+            if val and not re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:\d{2})$", val):
+                raise ValueError("eventEndsAt must be an ISO 8601 time with offset, e.g. 2026-11-10T16:30:00+10:00, or blank")
         elif key == "groupNameTemplate":
             val = str(val or "").strip() or DEFAULT_CONFIG["groupNameTemplate"]
             try:
@@ -368,10 +373,11 @@ def proctor_ok(headers: dict) -> bool:
 
 def health_fields() -> dict:
     """What the page needs to decide whether to show the sign-up form: no secrets, no config values."""
-    needs_code = False
+    needs_code, ends_at = False, ""
     try:
         cfg = get_config()
         needs_code = bool(cfg["eventCode"])
+        ends_at = str(cfg.get("eventEndsAt") or "")
         if not cfg["enabled"]:
             state = "off"
         elif not cfg["ownRoleId"] or not token_get():
@@ -380,7 +386,7 @@ def health_fields() -> dict:
             state = "ready"
     except Exception:  # noqa: BLE001
         state = "error"
-    return {"onboarding": state, "onboardingNeedsCode": needs_code, "proctor": bool(PROCTOR_KEY)}
+    return {"onboarding": state, "onboardingNeedsCode": needs_code, "proctor": bool(PROCTOR_KEY), "eventEndsAt": ends_at}
 
 
 def handle(method: str, path: str, body: dict, qs: dict, headers: dict):

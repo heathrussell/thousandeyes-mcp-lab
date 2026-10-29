@@ -67,7 +67,7 @@ class Dev(BaseHTTPRequestHandler):
         if path in ("/", ""):
             path = "/index.html"
         if path == "/config.js":
-            raw = ("window.TE_LAB_CONFIG = " + json.dumps({"apiBase": f"http://127.0.0.1:{PORT}/api", "event": {"name": "AI Builders (dev)", "date": "", "city": "Localhost"}}) + ";\n").encode()
+            raw = ("window.TE_LAB_CONFIG = " + json.dumps({"apiBase": f"http://127.0.0.1:{PORT}/api", "event": {"name": "AI Builders (dev)", "date": "", "city": "Localhost", "endsAt": os.environ.get("EVENT_ENDS_AT", "")}}) + ";\n").encode()
             ctype = "application/javascript"
         else:
             full = os.path.normpath(os.path.join(SITE, path.lstrip("/")))

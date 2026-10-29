@@ -13,6 +13,8 @@
 #   PROCTOR_KEY         optional; the shared secret for the proctor page (#proctor) and attendee onboarding into
 #                       ThousandEyes. Pass the same value on every deploy (blank switches both off). Never commit it.
 #   EVENT_NAME, EVENT_DATE, EVENT_CITY   shown on the site hero (defaults: "AI Builders", blank, blank)
+#   EVENT_ENDS_AT       optional ISO 8601 time with offset (2026-11-10T16:30:00+10:00) for the "event ends in" countdown;
+#                       the proctor page can set or override it without a deploy
 #   ALLOWED_ORIGIN      CORS origin for the API; defaults to the site URL once hosting exists
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -22,7 +24,7 @@ cd "$(dirname "$0")/.."
 : "${SITE_STACK:=te-lab-site}"
 DOMAIN="${DOMAIN:-}"; CERT_ARN="${CERT_ARN:-}"; HOSTED_ZONE_ID="${HOSTED_ZONE_ID:-}"
 ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"; PROCTOR_KEY="${PROCTOR_KEY:-}"
-EVENT_NAME="${EVENT_NAME:-AI Builders}"; EVENT_DATE="${EVENT_DATE:-}"; EVENT_CITY="${EVENT_CITY:-}"
+EVENT_NAME="${EVENT_NAME:-AI Builders}"; EVENT_DATE="${EVENT_DATE:-}"; EVENT_CITY="${EVENT_CITY:-}"; EVENT_ENDS_AT="${EVENT_ENDS_AT:-}"
 
 for tool in aws sam python3; do command -v "$tool" >/dev/null || { echo "missing: $tool (see DEPLOY.md, prerequisites)"; exit 1; }; done
 if [ -n "$DOMAIN" ] && [ -z "$CERT_ARN" ]; then echo "DOMAIN is set but CERT_ARN is empty. Deploy infra/certificate.yaml in us-east-1 first (DEPLOY.md, step 2)."; exit 1; fi
@@ -52,10 +54,10 @@ echo "== 2/5 API stack ($API_STACK), CORS origin $ORIGIN"
 API_URL=$(out "$API_STACK" ApiUrl)
 
 echo "== 3/5 site/config.js -> $API_URL"
-python3 - "$API_URL" "$EVENT_NAME" "$EVENT_DATE" "$EVENT_CITY" <<'PY'
+python3 - "$API_URL" "$EVENT_NAME" "$EVENT_DATE" "$EVENT_CITY" "$EVENT_ENDS_AT" <<'PY'
 import json, sys
-api, name, date, city = sys.argv[1:5]
-cfg = {"apiBase": api.rstrip("/"), "event": {"name": name, "date": date, "city": city}}
+api, name, date, city, ends = sys.argv[1:6]
+cfg = {"apiBase": api.rstrip("/"), "event": {"name": name, "date": date, "city": city, "endsAt": ends}}
 open("site/config.js", "w", encoding="utf-8").write(
     "// ThousandEyes MCP Lab: site configuration (written by scripts/deploy.sh; edit and re-run `make site` to change)\n"
     "window.TE_LAB_CONFIG = " + json.dumps(cfg, indent=2, ensure_ascii=False) + ";\n")
