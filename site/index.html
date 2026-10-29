@@ -186,7 +186,7 @@
   .board .pt { font-family: var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
   .board .pt small { color: var(--dim); margin-left: 8px; font-size: 10px; letter-spacing: .1em; }
   .board li.me .nm { color: var(--fg); font-weight: 700; }
-  .summit-dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 330px; border: var(--line) solid var(--rule); border-radius: 18px; overflow: hidden; margin-bottom: 22px; min-height: 640px; }
+  .summit-dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 330px; border: var(--line) solid var(--rule); border-radius: 18px; overflow: hidden; margin-bottom: 22px; min-height: 720px; }
   .summit-main { min-width: 0; padding: 24px 0 0; position: relative; overflow: hidden; }
   .summit-main::before { content: ""; position: absolute; inset: 20px 24px auto auto; width: 4px; height: 4px; border-radius: 50%; background: var(--cisco-blue); box-shadow: -47px 23px 0 var(--magenta), -106px -3px 0 var(--orange), -168px 31px 0 var(--medium-blue), -228px 9px 0 var(--cisco-blue); opacity: .75; }
   .summit-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding: 0 26px; position: relative; z-index: 3; }
@@ -204,19 +204,21 @@
   .summit-place:nth-child(2) .place-rank { border-bottom-color: var(--magenta); }
   .summit-place b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
   .summit-place small { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
-  .climb-field { height: 482px; position: relative; margin-top: -4px; }
+  .climb-field { height: 510px; position: relative; margin-top: -2px; }
   .mountain-line { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   .mountain-line .ridge { fill: none; stroke: var(--medium-blue); stroke-width: 1.35; vector-effect: non-scaling-stroke; }
-  .mountain-line .mesh { fill: none; stroke: rgba(2,200,255,.3); stroke-width: .7; vector-effect: non-scaling-stroke; }
-  .mountain-line .contour { fill: none; stroke: rgba(82,94,108,.65); stroke-width: .7; stroke-dasharray: 2 7; vector-effect: non-scaling-stroke; }
+  .mountain-line .mesh { fill: none; stroke: rgba(2,200,255,.34); stroke-width: .7; vector-effect: non-scaling-stroke; }
+  .mountain-line .mesh-bright { fill: none; stroke: rgba(255,255,255,.5); stroke-width: .65; vector-effect: non-scaling-stroke; }
+  .mountain-line .range { fill: none; stroke: rgba(82,94,108,.42); stroke-width: .8; vector-effect: non-scaling-stroke; }
+  .mountain-line .contour { fill: none; stroke: rgba(82,94,108,.58); stroke-width: .7; stroke-dasharray: 2 7; vector-effect: non-scaling-stroke; }
   .mountain-line .trail { fill: none; stroke: var(--cisco-blue); stroke-width: 2.6; vector-effect: non-scaling-stroke; }
   .mountain-line .trail-echo { fill: none; stroke: rgba(2,200,255,.25); stroke-width: 8; vector-effect: non-scaling-stroke; }
   .mountain-line .node { fill: var(--midnight); stroke: var(--cisco-blue); stroke-width: 2; vector-effect: non-scaling-stroke; }
   .base-label, .peak-label { position: absolute; z-index: 2; font-family: var(--mono); font-size: 8px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
-  .base-label { left: 8%; bottom: 6%; }
-  .peak-label { left: 57%; top: 7%; color: var(--fg); padding: 7px 9px; border: 1px solid var(--orange); border-radius: 5px; max-width: 145px; line-height: 1.35; }
+  .base-label { left: 10%; bottom: 6%; }
+  .peak-label { left: 57%; top: 4%; color: var(--fg); padding: 7px 9px; border: 1px solid var(--orange); border-radius: 5px; max-width: 150px; line-height: 1.35; }
   .peak-label::before { content: ""; position: absolute; width: 1px; height: 39px; background: var(--orange); left: -11px; bottom: -20px; transform: rotate(-17deg); transform-origin: bottom; }
-  .summit-stats { position: absolute; left: 24px; bottom: 20px; z-index: 3; display: flex; gap: 10px; }
+  .summit-stats { display: flex; gap: 10px; padding: 0 26px 20px; position: relative; z-index: 3; }
   .summit-stat { border: var(--line) solid var(--rule); border-radius: 8px; padding: 9px 11px; min-width: 98px; font-family: var(--mono); color: var(--dim); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
   .summit-stat b { display: block; color: var(--fg); font-size: 18px; letter-spacing: -.02em; margin-bottom: 2px; }
   .climber { --climber: var(--cisco-blue); position: absolute; left: var(--x); bottom: var(--y); transform: translate(-50%, 50%); z-index: 4; max-width: 128px; animation: climb-in .65s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--rank) * 55ms); }
@@ -241,7 +243,7 @@
   @media (max-width: 980px) {
     .summit-dashboard { grid-template-columns: 1fr; }
     .expedition-panel { border-left: none; border-top: var(--line) solid var(--rule); }
-    .climb-field { height: 450px; }
+    .climb-field { height: 500px; }
   }
   @media (max-width: 620px) {
     .summit-main { padding-top: 18px; }
@@ -249,10 +251,10 @@
     .summit-top3 { margin-inline: 16px; }
     .summit-place { padding: 8px; grid-template-columns: 1fr; gap: 2px; }
     .summit-place .place-rank { font-size: 16px; }
-    .climb-field { height: 360px; }
+    .climb-field { height: 390px; }
     .climber { max-width: 82px; }
     .climber-tag { font-size: 7px; padding: 4px; }
-    .summit-stats { left: 14px; bottom: 10px; }
+    .summit-stats { padding-inline: 14px; }
     .summit-stat { min-width: 0; }
     .peak-label { left: auto; right: 2%; top: 8%; max-width: 112px; }
   }
@@ -1767,32 +1769,34 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       <div class="summit-dashboard">
         <div class="summit-main">
           <div class="summit-head">
-            <div><p class="summit-kicker">The ThousandEyes ascent</p><h2>Peak of <span>Inflated Expectations</span></h2></div>
+            <div><p class="summit-kicker">The ThousandEyes ascent</p><h2>Mountain of <span>Productivity</span></h2></div>
             <div class="summit-live">Live ascent</div>
           </div>
           <div class="summit-top3" id="summit-top3"></div>
           <div class="climb-field" id="climb-field" aria-label="Score positions on the mountain">
             <svg class="mountain-line" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
-              <path class="contour" d="M0 564 Q178 501 320 536 T596 509 T1000 554 M0 527 Q151 459 307 492 T604 467 T1000 513 M0 490 Q184 421 337 454 T632 427 T1000 472"/>
-              <path class="ridge" d="M0 580 L105 521 L192 536 L283 442 L351 465 L421 338 L467 357 L532 78 L594 265 L651 238 L717 364 L776 333 L848 451 L914 421 L1000 525"/>
-              <path class="mesh" d="M105 521 L532 78 L192 536 M283 442 L532 78 L351 465 M421 338 L532 78 L467 357 M594 265 L532 78 L651 238 M717 364 L532 78 L776 333 M848 451 L532 78 L914 421 M105 521 L283 442 L421 338 L532 78 L594 265 L717 364 L848 451 M192 536 L351 465 L467 357 L532 78 L651 238 L776 333 L914 421 M43 554 L238 489 L386 402 L532 78 L625 301 L747 397 L956 473"/>
-              <path class="trail-echo" d="M121 542 C176 521 221 522 278 493 S389 467 336 421 S431 382 473 349 S398 307 478 269 S431 225 511 184 S486 127 532 82"/>
-              <path class="trail" d="M121 542 C176 521 221 522 278 493 S389 467 336 421 S431 382 473 349 S398 307 478 269 S431 225 511 184 S486 127 532 82"/>
+              <path class="range" d="M0 488 L72 442 L131 468 L212 394 L275 449 L338 382 L408 444 L489 366 L556 432 L630 371 L712 441 L782 389 L857 450 L929 405 L1000 468 M0 530 L91 493 L178 517 L258 462 L347 512 L430 455 L519 507 L612 451 L703 510 L804 463 L901 511 L1000 476"/>
+              <path class="contour" d="M0 564 Q178 501 320 536 T596 509 T1000 554 M0 527 Q151 459 307 492 T604 467 T1000 513 M0 490 Q184 421 337 454 T632 427 T1000 472 M25 449 Q203 386 361 424 T671 394 T980 435"/>
+              <path class="ridge" d="M0 584 L73 545 L142 559 L213 500 L272 521 L337 437 L389 455 L443 345 L478 365 L520 42 L564 245 L607 223 L661 333 L713 305 L777 407 L831 377 L899 486 L947 461 L1000 522"/>
+              <path class="mesh" d="M73 545 L520 42 L142 559 M213 500 L520 42 L272 521 M337 437 L520 42 L389 455 M443 345 L520 42 L478 365 M564 245 L520 42 L607 223 M661 333 L520 42 L713 305 M777 407 L520 42 L831 377 M899 486 L520 42 L947 461 M73 545 L213 500 L337 437 L443 345 L520 42 L564 245 L661 333 L777 407 L899 486 M142 559 L272 521 L389 455 L478 365 L520 42 L607 223 L713 305 L831 377 L947 461 M21 572 L177 529 L303 478 L416 400 L520 42 L587 281 L687 368 L806 438 L981 497"/>
+              <path class="mesh-bright" d="M177 529 L142 559 L213 500 L272 521 L337 437 L389 455 L443 345 L478 365 L520 42 L564 245 L607 223 L661 333 L713 305 L777 407 L831 377 M213 500 L389 455 L337 437 L478 365 L443 345 L564 245 L520 42 M303 478 L443 345 L389 455 M416 400 L478 365 L443 345 M564 245 L661 333 L607 223 M661 333 L777 407 L713 305"/>
+              <path class="mesh" d="M73 545 L177 529 L142 559 M177 529 L213 500 L272 521 M213 500 L303 478 L337 437 M303 478 L389 455 L337 437 M337 437 L416 400 L443 345 M416 400 L478 365 L443 345 M564 245 L587 281 L607 223 M587 281 L661 333 L607 223 M661 333 L687 368 L713 305 M687 368 L777 407 L713 305 M777 407 L806 438 L831 377 M806 438 L899 486 L831 377"/>
+              <path class="trail-echo" d="M160 530 C213 526 232 508 260 498 S346 480 340 456 S404 431 380 402 S500 381 470 344 S562 323 530 288 S612 250 555 215 S596 159 520 48"/>
+              <path class="trail" d="M160 530 C213 526 232 508 260 498 S346 480 340 456 S404 431 380 402 S500 381 470 344 S562 323 530 288 S612 250 555 215 S596 159 520 48"/>
               <g>
-                <circle class="node" cx="121" cy="542" r="5"/><circle class="node" cx="218" cy="510" r="5"/>
-                <circle class="node" cx="336" cy="466" r="5"/><circle class="node" cx="336" cy="421" r="5"/>
-                <circle class="node" cx="428" cy="378" r="5"/><circle class="node" cx="473" cy="349" r="5"/>
-                <circle class="node" cx="438" cy="298" r="5"/><circle class="node" cx="478" cy="269" r="5"/>
-                <circle class="node" cx="473" cy="214" r="5"/><circle class="node" cx="511" cy="184" r="5"/>
+                <circle class="node" cx="160" cy="530" r="5"/><circle class="node" cx="260" cy="498" r="5"/>
+                <circle class="node" cx="340" cy="456" r="5"/><circle class="node" cx="380" cy="402" r="5"/>
+                <circle class="node" cx="470" cy="344" r="5"/><circle class="node" cx="530" cy="288" r="5"/>
+                <circle class="node" cx="555" cy="215" r="5"/><circle class="node" cx="520" cy="48" r="5"/>
               </g>
             </svg>
             <span class="base-label">Base camp · 0 pts</span>
-            <span class="peak-label">1,000 pts<br>Peak of Inflated Expectations</span>
+            <span class="peak-label">1,000 pts<br>Mountain of Productivity</span>
             <div id="climbers"></div>
-            <div class="summit-stats">
-              <div class="summit-stat"><b id="summit-count">0</b>climbers</div>
-              <div class="summit-stat"><b id="summit-bank">0</b>checkpoints banked</div>
-            </div>
+          </div>
+          <div class="summit-stats">
+            <div class="summit-stat"><b id="summit-count">0</b>climbers</div>
+            <div class="summit-stat"><b id="summit-bank">0</b>checkpoints banked</div>
           </div>
         </div>
         <div class="expedition-panel"><div class="panel-head"><p class="eyebrow accent" id="board-title">Full standings</p><span class="eyebrow" id="board-refresh"></span></div><ol class="board expedition" id="board-full"></ol><p class="empty" id="board-full-note"></p></div>
@@ -2175,7 +2179,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       ).join('') : '<p class="empty" style="padding:10px 12px">Waiting for the first climber.</p>';
       if (!field) return;
       const shown = players.slice(0, 12);
-      const route = [[12.1,9.7],[21.8,15],[33.6,22.3],[33.6,29.8],[42.8,37],[47.3,41.8],[43.8,50.3],[47.8,55.2],[47.3,64.3],[51.1,69.3],[53.2,86.3]];
+      const route = [[16,11.7],[26,17],[34,24],[38,33],[47,42.7],[53,52],[55.5,64.2],[55,72],[57,79],[55,86],[52,92]];
       field.innerHTML = shown.map((q, i) => {
         const points = Math.max(0, q.points | 0);
         const progress = Math.min(1, points / maxPoints);
@@ -2229,7 +2233,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
   async function renderScorecard() {
     const el = $('#scorecard'), desc = $('#standings-desc'); if (!el) return;
     const p = Store.player;
-    if (desc) desc.textContent = Store.live ? 'Every checkpoint takes you higher. Live positions refresh every 20 seconds, all the way to the Peak of Inflated Expectations.' : 'Every checkpoint takes you higher. In local mode your climb stays in this browser and the room board is run by the proctors.';
+    if (desc) desc.textContent = Store.live ? 'Every checkpoint takes you higher. Live positions refresh every 20 seconds, all the way to the Mountain of Productivity.' : 'Every checkpoint takes you higher. In local mode your climb stays in this browser and the room board is run by the proctors.';
     if (!p) { el.innerHTML = '<p class="empty">Check in on the <a href="#home" style="color:var(--fg)">Overview</a> to start a scorecard.</p>'; return; }
     const tiles = CP.map(cp => { const s = p.solved && p.solved[cp.id]; const tries = (p.tries && p.tries[cp.id]) || 0; const hint = p.hints && p.hints[cp.id]; return '<a class="score-tile g-' + (cp.route.startsWith('lab') ? 'labs' : cp.route.startsWith('build') ? 'builds' : 'setup') + (s ? ' done' : '') + '" href="#' + cp.route + '" style="text-decoration:none;color:inherit"><div class="st-l">' + esc(cp.label) + '</div><div class="st-t">' + esc(cp.title) + '</div><div class="st-s">' + (s ? 'Banked ' + cp.points + ' · ' + fmtTime(s.at) : (tries ? tries + ' ' + (tries === 1 ? 'try' : 'tries') + ' so far' : 'Open')) + (hint ? ' · hint used' : '') + '</div></a>'; }).join('');
     let code = ''; try { code = await scoreCode(p); } catch (e) { code = ''; }
