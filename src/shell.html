@@ -1070,8 +1070,12 @@
       field.innerHTML = players.slice(0, 12).map((q, i) => {
         const points = Math.max(0, q.points | 0);
         const progress = Math.min(1, points / maxPoints);
-        const x = 4 + progress * 90 + ((i % 3) - 1) * 1.2;
-        const y = 8 + Math.pow(progress, .88) * 82 + ((i % 2) ? 1.5 : -1.5);
+        const shown = players.slice(0, 12);
+        const tiedBefore = shown.slice(0, i).filter(other => (other.points | 0) === points).length;
+        const tiedTotal = shown.filter(other => (other.points | 0) === points).length;
+        const tieOffset = tiedBefore - (tiedTotal - 1) / 2;
+        const x = Math.max(4, Math.min(94, 4 + progress * 90 + tieOffset * 5));
+        const y = Math.max(7, Math.min(91, 8 + Math.pow(progress, .88) * 82 + tieOffset * 7));
         const me = current && q.name === current.name;
         const summit = progress >= 1;
         return '<div class="climber' + (me ? ' me' : '') + '" style="--x:' + x.toFixed(1) + '%;--y:' + y.toFixed(1) + '%;--rank:' + i + '" title="' + esc(q.name) + ': ' + points + ' points">' +
