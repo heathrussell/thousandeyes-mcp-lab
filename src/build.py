@@ -348,7 +348,7 @@ window.TE_LAB_CONFIG = {
 '''
 
 for page in (artifact_page, dist_doc):
-    assert '—' not in page, 'em dash found'
+    assert '\u2014' not in page, 'em dash found'
 
 OUT.mkdir(exist_ok=True)
 SITE_DIR.mkdir(exist_ok=True)
