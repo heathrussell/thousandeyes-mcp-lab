@@ -74,6 +74,22 @@ Then, before the doors open, on the deployed site:
 
 `curl $API_URL/health` shows `"proctor": true` and `"onboarding": "ready"` once this is done; `scripts/smoke.sh` checks both. Clean-up after the event is done in ThousandEyes (delete the per-attendee account groups and users); `make wipe-onboarding` clears only the lab's list.
 
+## 3c. The mountain: camps and peak
+
+The scoreboard summit is the **Peak of Productivity** (10,000 ft, every checkpoint banked). The nine camps on the way up are named for AI pioneers in date order, and hovering a camp shows the fact below. To change one, edit `CAMPS` (or `PEAK_NAME`) in the `Mountain` block of `src/shell.html`, keep the fact checkable against a source, then `make build` and `make deploy`.
+
+| Camp | Pioneer | Year | Fact on the card | Source |
+|---|---|---|---|---|
+| 1 | Ada Lovelace | 1843 | Published what is often called the first computer program, and saw the machine could handle symbols, not just numbers. | [Google, 2012](https://blog.google/inside-google/doodles/honouring-computings-1843-visionary/) |
+| 2 | Alan Turing | 1950 | Asked "Can machines think?" and proposed the imitation game, now known as the Turing test. | [Turing (1950), Computing Machinery and Intelligence](https://web-archive.southampton.ac.uk/cogprints.org/499/) |
+| 3 | John McCarthy | 1956 | With Minsky, Rochester and Shannon, proposed the Dartmouth workshop that coined the term "artificial intelligence". | [Dartmouth Alumni Magazine](https://dartmouthalumnimagazine.com/articles/birth-artificial-intelligence) |
+| 4 | Frank Rosenblatt | 1958 | His perceptron taught itself to tell cards marked on the left from cards marked on the right. | [Cornell](https://nbb.cornell.edu/news/professors-perceptron-paved-way-ai-60-years-too-soon) |
+| 5 | Marvin Minsky | 1959 | Co-founded the MIT Artificial Intelligence Laboratory, after building the first neural network simulator in 1951. | [MIT News](https://news.mit.edu/2016/marvin-minsky-obituary-0125) |
+| 6 | Geoffrey Hinton | 1986 | With Rumelhart and Williams, showed backpropagation lets neural networks discover their own internal representations. | [ACM Turing Award release](https://www.eurekalert.org/news-releases/508417) |
+| 7 | Yann LeCun | 1989 | Trained a convolutional neural network with backpropagation to read handwritten zip codes. | [LeCun et al. (1989), Neural Computation](https://mlanthology.org/neco/1989/lecun1989neco-backpropagation) |
+| 8 | Yoshua Bengio | 2000 | His "A Neural Probabilistic Language Model" introduced word embeddings as a way to represent meaning. | [ACM Turing Award release](https://www.eurekalert.org/news-releases/508417) |
+| 9 | Fei-Fei Li | 2009 | Created ImageNet and the ImageNet Challenge, the benchmark that helped drive the deep learning era. | [Stanford AIMI](https://aimi.stanford.edu/people/fei-fei-li), [CVPR 2009](https://ieeexplore.ieee.org/document/5206848) |
+
 ## 4. What the deploy script does, in order
 
 1. `aws cloudformation deploy infra/hosting.yaml` → bucket, CloudFront distribution, optional DNS.

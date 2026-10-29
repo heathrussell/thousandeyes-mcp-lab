@@ -407,6 +407,10 @@
   .mt-tip .tip-rk { font-family: var(--mono); font-weight: 700; font-size: 14px; color: var(--fg); min-width: 18px; text-align: center; }
   .mt-tip .tip-body b { display: block; font-size: 13px; font-weight: 600; color: var(--fg); line-height: 1.3; }
   .mt-tip .tip-body small { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+  .mt-tip.info { white-space: normal; width: max-content; max-width: min(320px, 86vw); align-items: flex-start; padding: 10px 14px 11px; }
+  .mt-tip .tip-fact { display: block; font-size: 12.5px; line-height: 1.45; color: var(--muted); margin-top: 5px; }
+  .stage .camp-node { transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
+  .stage .camp-node.hot { transform: scale(1.7); }
   .ov { position: absolute; z-index: 2; }
   .ov-head { top: 30px; left: 32px; max-width: 46%; }
   .ov-head h1 { font-size: clamp(30px, 3.4vw, 50px); font-weight: 800; letter-spacing: -.03em; line-height: 1.02; margin: 10px 0 10px; text-wrap: balance; }
@@ -459,7 +463,7 @@
   .stage .summit-ring { animation: ring 2.2s ease-out infinite; transform-origin: center; transform-box: fill-box; }
   @keyframes ring { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2.2); opacity: 0; } }
   .stage .empty-stage { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); z-index: 2; padding: 12px 18px; font-size: 14px; color: var(--muted); text-align: center; border: var(--line) solid var(--rule); border-radius: 12px; background: rgba(7,24,45,.85); max-width: 34ch; }
-  @media (prefers-reduced-motion: reduce) { .stage .climber, .stage .camp-lbl, .stage .mk { transition: none; } .stage .summit-ring, .stage .flow, .stage .tw { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .stage .climber, .stage .camp-lbl, .stage .mk, .stage .camp-node { transition: none; } .stage .summit-ring, .stage .flow, .stage .tw { animation: none; } }
   @media (min-width: 1101px) and (max-width: 1300px) { .ov-legend { display: none; } }
   .standings-panel { padding: 22px 22px 20px; display: flex; flex-direction: column; min-width: 0; }
   .standings-panel .panel-head { flex-wrap: nowrap; }
@@ -1142,6 +1146,20 @@
     const W = 1200, H = 860, PEAK = { x: 700, y: 140 }, BASE_Y = 650;
     const XS = [420, 600, 900, 640, 910, 690, 880, 660, 800, 660, PEAK.x];
     const WAY = XS.map((x, i) => ({ x, y: BASE_Y - (i / 10) * (BASE_Y - PEAK.y) }));
+    /* the camps, in date order up the mountain: one AI pioneer each (facts and sources in DEPLOY.md, "The camps") */
+    const CAMPS = [
+      { name: 'Base camp' },
+      { name: 'Lovelace', who: 'Ada Lovelace', year: 1843, fact: 'Published what is often called the first computer program, and saw the machine could handle symbols, not just numbers.' },
+      { name: 'Turing', who: 'Alan Turing', year: 1950, fact: 'Asked \u201cCan machines think?\u201d and proposed the imitation game, now known as the Turing test.' },
+      { name: 'McCarthy', who: 'John McCarthy', year: 1956, fact: 'With Minsky, Rochester and Shannon, proposed the Dartmouth workshop that coined the term \u201cartificial intelligence\u201d.' },
+      { name: 'Rosenblatt', who: 'Frank Rosenblatt', year: 1958, fact: 'His perceptron taught itself to tell cards marked on the left from cards marked on the right.' },
+      { name: 'Minsky', who: 'Marvin Minsky', year: 1959, fact: 'Co-founded the MIT Artificial Intelligence Laboratory, after building the first neural network simulator in 1951.' },
+      { name: 'Hinton', who: 'Geoffrey Hinton', year: 1986, fact: 'With Rumelhart and Williams, showed backpropagation lets neural networks discover their own internal representations.' },
+      { name: 'LeCun', who: 'Yann LeCun', year: 1989, fact: 'Trained a convolutional neural network with backpropagation to read handwritten zip codes.' },
+      { name: 'Bengio', who: 'Yoshua Bengio', year: 2000, fact: 'His \u201cA Neural Probabilistic Language Model\u201d introduced word embeddings as a way to represent meaning.' },
+      { name: 'Fei-Fei Li', who: 'Fei-Fei Li', year: 2009, fact: 'Created ImageNet and the ImageNet Challenge, the benchmark that helped drive the deep learning era.' },
+    ];
+    const PEAK_NAME = ['Peak of', 'Productivity'];
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const rnd = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
     const NS = 'http://www.w3.org/2000/svg';
@@ -1241,18 +1259,40 @@
     }
     /* pointer: light the mesh, ripple on a press, and show a card for the climber under the pointer */
     function toUser(e) { const r = container.getBoundingClientRect(); return { x: view.vx + (e.clientX - r.left) / view.s, y: view.vy + (e.clientY - r.top) / view.s, px: e.clientX - r.left, py: e.clientY - r.top }; }
-    function hideTip() { if (tip) tip.hidden = true; climbs.forEach(c => c.node.classList.remove('hot')); if (container) container.style.cursor = ''; }
+    function hideTip() { if (tip) tip.hidden = true; climbs.forEach(c => c.node.classList.remove('hot')); camps.forEach(c => c.node && c.node.classList.remove('hot')); FX.hotCamp = null; if (container) container.style.cursor = ''; }
     function hover(p) {
       let best = null, bd = Math.pow(15 * k, 2);
       climbs.forEach(c => { const dx = c.pos.x - p.x, dy = c.pos.y - p.y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = c; } });
       climbs.forEach(c => c.node.classList.toggle('hot', c === best));
-      container.style.cursor = best ? 'pointer' : '';
-      if (!best || best.labelled) { tip.hidden = true; return; }
-      const c = best.c, color = c.rank === 1 ? 'var(--orange)' : c.rank === 2 ? 'var(--magenta)' : c.rank === 3 ? 'var(--medium-blue)' : 'var(--rule)';
-      tip.innerHTML = '<span class="tip-rk">' + c.rank + '</span><span class="tip-body"><b>' + esc(c.name) + '</b><small>' + (c.points | 0) + ' pts · ' + ft(c.points) + ' · ' + (c.solvedCount | 0) + '/' + CP.length + ' banked</small></span>';
-      tip.style.setProperty('--tip', color); tip.hidden = false;
-      const cx = (best.pos.x - view.vx) * view.s, cy = (best.pos.y - view.vy) * view.s, w = tip.offsetWidth, cw = view.r.width;
-      tip.classList.toggle('below', cy < 76);
+      const card = best && !best.labelled ? best : null;   /* a climber with a name card already on screen lets the camp or peak behind it answer */
+      let camp = null, peak = false;
+      if (!card) {
+        camp = camps.find(c => { const q = WAY[c.i], dx = q.x - p.x, dy = q.y - p.y, b = c.cur && c.cur.b; return dx * dx + dy * dy < Math.pow(12 * k, 2) || (b && c.g.style.opacity !== '0' && p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1); }) || null;
+        if (!camp) { const dx = PEAK.x - p.x, dy = PEAK.y - 20 * k - p.y, b = peakCard && peakCard.spot; peak = dx * dx + dy * dy < Math.pow(30 * k, 2) || !!(b && p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1); }
+      }
+      camps.forEach(c => c.node.classList.toggle('hot', c === camp));
+      if (camp !== FX.hotCamp) { FX.hotCamp = camp; if (camp && FX.on) { const q = WAY[camp.i]; FX.ripples.push({ x: q.x, y: q.y, t0: performance.now(), speed: .45, max: 210, a: .8 }); kick(); } }
+      container.style.cursor = (best || camp || peak) ? 'pointer' : '';
+      let at = null;
+      tip.classList.toggle('info', !!(camp || peak));
+      if (card) {
+        const c = card.c, color = c.rank === 1 ? 'var(--orange)' : c.rank === 2 ? 'var(--magenta)' : c.rank === 3 ? 'var(--medium-blue)' : 'var(--rule)';
+        tip.innerHTML = '<span class="tip-rk">' + c.rank + '</span><span class="tip-body"><b>' + esc(c.name) + '</b><small>' + (c.points | 0) + ' pts · ' + ft(c.points) + ' · ' + (c.solvedCount | 0) + '/' + CP.length + ' banked</small></span>';
+        tip.style.setProperty('--tip', color); at = card.pos;
+      } else if (camp) {
+        const n = camp.info, elev = ft(camp.i * 100);
+        tip.innerHTML = '<span class="tip-body"><b>' + esc(camp.i ? 'Camp ' + n.name : 'Base camp') + ' · ' + elev + '</b>' +
+          (camp.i ? '<small>' + esc(n.who) + ' · ' + n.year + '</small><span class="tip-fact">' + esc(n.fact) + '</span>' : '<small>Where every climber starts</small><span class="tip-fact">Each checkpoint you bank is 1,000 ft, one pioneer of AI at a time, up to the ' + esc(PEAK_NAME.join(' ')) + '.</span>') + '</span>';
+        tip.style.setProperty('--tip', 'var(--orange)'); at = WAY[camp.i];
+      } else if (peak) {
+        const up = lastRows.filter(r => (r.points | 0) >= (RULES.total || 1000)).length;
+        tip.innerHTML = '<span class="tip-body"><b>' + esc(PEAK_NAME.join(' ')) + ' · ' + ft(RULES.total || 1000) + '</b><small>' + (up ? up + (up === 1 ? ' climber has' : ' climbers have') + ' summited' : 'Nobody has summited yet') + '</small><span class="tip-fact">Bank all ' + CP.length + ' checkpoints to plant your flag.</span></span>';
+        tip.style.setProperty('--tip', 'var(--orange)'); at = PEAK;
+      }
+      if (!at) { tip.hidden = true; return; }
+      tip.hidden = false;
+      const cx = (at.x - view.vx) * view.s, cy = (at.y - view.vy) * view.s, w = tip.offsetWidth, cw = view.r.width;
+      tip.classList.toggle('below', cy < (camp || peak ? 120 : 76));
       tip.style.left = Math.max(w / 2 + 8, Math.min(cw - w / 2 - 8, cx)) + 'px'; tip.style.top = cy + 'px';
     }
     function wire() {
@@ -1364,9 +1404,12 @@
       const campLayer = el('g');
       WAY.forEach((p, i) => {
         if (i === 10) return;
-        campLayer.appendChild(el('circle', { cx: f2(p.x), cy: f2(p.y), r: f2((i === 0 ? 7 : 5.5) * k), fill: '#07182D', stroke: '#FF9000', 'stroke-width': 1.6 }));
-        if (i === 0) campLayer.appendChild(el('circle', { cx: f2(p.x), cy: f2(p.y), r: f2(2.2 * k), fill: '#FF9000' }));
-        const l1 = i === 0 ? 'Base camp' : 'Camp ' + i, l2 = (i * 1000).toLocaleString('en-AU') + ' ft';
+        const node = el('g', { class: 'camp-node' });
+        node.appendChild(el('circle', { cx: f2(p.x), cy: f2(p.y), r: f2((i === 0 ? 7 : 5.5) * k), fill: '#07182D', stroke: '#FF9000', 'stroke-width': 1.6 }));
+        if (i === 0) node.appendChild(el('circle', { cx: f2(p.x), cy: f2(p.y), r: f2(2.2 * k), fill: '#FF9000' }));
+        campLayer.appendChild(node);
+        const info = CAMPS[i];
+        const l1 = i === 0 ? 'Base camp' : 'Camp ' + info.name, l2 = (i * 1000).toLocaleString('en-AU') + ' ft' + (info.year ? ' · ' + info.year : '');
         const w = Math.max(measure(l1.toUpperCase(), 500, 10, MONO, .14), measure(l2.toUpperCase(), 400, 9, MONO, .14));
         const spot = side => {
           const ax = side === 'below' ? p.x - 8 * k : side === 'left' ? p.x - 14 * k : p.x + 14 * k, ay = side === 'below' ? p.y + 24 * k : p.y - 2 * k;
@@ -1378,7 +1421,7 @@
         const g = el('g', { class: 'camp-lbl' });
         const t1 = el('text', { x: 0, y: 0, class: 'mono camp-l1' }, l1), t2 = el('text', { x: 0, y: 12, class: 'mono camp-l2' }, l2);
         g.appendChild(t1); g.appendChild(t2); campLayer.appendChild(g);
-        const c = { g, spots, place(sp) { g.setAttribute('transform', 'translate(' + f2(sp.ax) + ' ' + f2(sp.ay) + ') scale(' + k + ')'); t1.setAttribute('text-anchor', sp.anchor); t2.setAttribute('text-anchor', sp.anchor); } };
+        const c = { g, spots, i, node, info, cur: null, place(sp) { c.cur = sp; g.setAttribute('transform', 'translate(' + f2(sp.ax) + ' ' + f2(sp.ay) + ') scale(' + k + ')'); t1.setAttribute('text-anchor', sp.anchor); t2.setAttribute('text-anchor', sp.anchor); } };
         c.place(spots[0]); camps.push(c);
       });
       svg.appendChild(campLayer);
@@ -1388,7 +1431,7 @@
       flag.appendChild(el('path', { d: 'M0 -46L34 -36L0 -26Z', fill: 'url(#mt-hatch)', stroke: '#FF9000', 'stroke-width': 1.2 }));
       flag.appendChild(el('circle', { r: 6, fill: '#07182D', stroke: '#FF9000', 'stroke-width': 1.6 }));
       svg.appendChild(flag);
-      const t1 = 'Peak of inflated', t2 = 'expectations', t3 = ft(RULES.total || 1000) + ' · all ' + CP.length + ' banked';
+      const t1 = PEAK_NAME[0], t2 = PEAK_NAME[1], t3 = ft(RULES.total || 1000) + ' · all ' + CP.length + ' banked';
       const pw = Math.ceil(Math.max(measure(t1.toUpperCase(), 600, 10.5, MONO, .2), measure(t2.toUpperCase(), 600, 10.5, MONO, .2), measure(t3.toUpperCase(), 400, 9, MONO, .14)) + 28);
       const card = el('g');
       card.appendChild(el('rect', { x: 0, y: 0, width: pw, height: 56, rx: 6, fill: 'rgba(7,24,45,.88)', stroke: '#FF9000', 'stroke-width': 1.2 }));
@@ -1433,7 +1476,7 @@
       if (peakCard) {
         const { w, h } = peakCard; let spot = null;
         [[PEAK.x + 48 * k, PEAK.y - 62 * k], [PEAK.x - 48 * k - w * k, PEAK.y - 62 * k]].some(([x, y]) => { const b = { x0: x, y0: y, x1: x + w * k, y1: y + h * k }; if (free(b)) { spot = b; return true; } return false; });
-        peakCard.g.style.display = spot ? '' : 'none';
+        peakCard.g.style.display = spot ? '' : 'none'; peakCard.spot = spot;
         if (spot) { peakCard.g.setAttribute('transform', 'translate(' + f2(spot.x0) + ' ' + f2(spot.y0) + ') scale(' + k + ')'); placed.push(spot); }
       }
       placed.push({ x0: PEAK.x - 9 * k, y0: PEAK.y - 50 * k, x1: PEAK.x + 38 * k, y1: PEAK.y + 9 * k });
@@ -1645,7 +1688,7 @@
   async function renderScorecard() {
     const el = $('#scorecard'), desc = $('#standings-desc'); if (!el) return;
     const p = Store.player;
-    if (desc) desc.textContent = Store.live ? 'Every checkpoint takes you higher: 100 points is 1,000 ft. Live positions refresh every 20 seconds, all the way to the Peak of Inflated Expectations.' : 'Every checkpoint takes you higher: 100 points is 1,000 ft. This copy runs in local mode, so only your own climb shows here; the room board is kept by the proctors.';
+    if (desc) desc.textContent = Store.live ? 'Every checkpoint takes you 1,000 ft higher, camp by camp through the history of AI. Live positions refresh every 20 seconds, all the way to the Peak of Productivity.' : 'Every checkpoint takes you 1,000 ft higher, camp by camp through the history of AI, to the Peak of Productivity. This copy runs in local mode, so only your own climb shows here; the room board is kept by the proctors.';
     if (!p) { el.innerHTML = '<p class="empty">Check in on the <a href="#home" style="color:var(--fg)">Overview</a> to start a scorecard.</p>'; return; }
     const tiles = CP.map(cp => { const s = p.solved && p.solved[cp.id]; const tries = (p.tries && p.tries[cp.id]) || 0; const hint = p.hints && p.hints[cp.id]; return '<a class="score-tile g-' + (cp.route.startsWith('lab') ? 'labs' : cp.route.startsWith('build') ? 'builds' : 'setup') + (s ? ' done' : '') + '" href="#' + cp.route + '" style="text-decoration:none;color:inherit"><div class="st-l">' + esc(cp.label) + '</div><div class="st-t">' + esc(cp.title) + '</div><div class="st-s">' + (s ? 'Banked ' + cp.points + ' · ' + fmtTime(s.at) : (tries ? tries + ' ' + (tries === 1 ? 'try' : 'tries') + ' so far' : 'Open')) + (hint ? ' · hint used' : '') + '</div></a>'; }).join('');
     let code = ''; try { code = await scoreCode(p); } catch (e) { code = ''; }
