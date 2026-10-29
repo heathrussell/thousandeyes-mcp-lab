@@ -14,7 +14,7 @@ alwaysApply: true
 - Accepted answers live only in `api/answers.json`, which is git-ignored and must never be committed; the deploy passes them to the Lambda as a NoEcho parameter and the page carries SHA-256 hashes. If the file is missing, ask the owner for it.
 - `canon()` in `api/app.py` and in `src/shell.html` must stay byte-for-byte equivalent in behaviour.
 - `site/index.html` is generated: edit the source and rebuild, commit both.
-- Cisco dark brand: Midnight `#07182D`, white text, Cisco Blue `#02C8FF` headings, Medium Blue `#0A60FF` outlines, Magenta `#FF007F` and Orange `#FF9000` decorative only, outlined containers, no fills. No em dashes in any text. Australian spelling.
+- Cisco dark brand: Midnight `#07182D`, white text, Cisco Blue `#02C8FF` headings, Medium Blue `#0A60FF` outlines, Magenta `#FF007F` and Orange `#FF9000` decorative only (one exception by the owner: the Overview hero headline uses the AI Builders logo spectrum as a text gradient), outlined containers, no fills. No em dashes in any text. Australian spelling.
 - Onboarding writes into the owner's ThousandEyes organisation: keep every gate (sign-up switch, event code, cap, one record per email, proctor key on all `/proctor` routes). Test against `api/tests/fakes.py`, not the real organisation.
 - Ask before: changing the domain, enabling the front desk (`/ask`), changing questions or scoring, deleting stacks.
 

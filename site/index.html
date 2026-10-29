@@ -91,7 +91,10 @@
   .hero-fade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, var(--bg) 0%, rgba(7,24,45,.88) 34%, rgba(7,24,45,.42) 66%, rgba(7,24,45,.22) 100%), linear-gradient(180deg, rgba(7,24,45,.35) 0%, rgba(7,24,45,0) 28%, rgba(7,24,45,.92) 100%); }
   .hero-inner { position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .85fr); gap: 48px; align-items: center; padding-block: 84px 72px; }
   .hero h1 { font-size: clamp(42px, 6.4vw, 84px); font-weight: 800; line-height: .98; letter-spacing: -.03em; margin: 18px 0 22px; text-wrap: balance; max-width: 13ch; }
-  .grad { background: linear-gradient(92deg, #FFFFFF 0%, #02C8FF 42%, #0A60FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+  /* the hero headline runs the AI Builders logo spectrum in reading order: Medium Blue, Cisco Blue, Magenta, Orange.
+     The owner's call and the one place the accents touch text; every point passes WCAG AA for large text on Midnight.
+     The span is inline, so one gradient flows across the line breaks; oklch keeps the blue to magenta stretch vivid. */
+  .grad { background: linear-gradient(90deg, #0A60FF 0%, #02C8FF 30%, #FF007F 68%, #FF9000 100%); background: linear-gradient(90deg in oklch, #0A60FF 0%, #02C8FF 30%, #FF007F 68%, #FF9000 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
   .lede { font-size: 19px; line-height: 1.55; color: var(--muted); max-width: 56ch; margin: 0 0 14px; }
   .lede-b { font-size: 16px; color: var(--muted); margin: 0 0 26px; }
   .lede-b strong, .lede strong { color: var(--fg); }
@@ -622,7 +625,7 @@
         <div class="hero-copy">
           <span class="spine multi" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
           <p class="eyebrow" id="hero-eyebrow">AI Builders · Hands-on lab · 80 min · 1,000 pts</p>
-          <h1>Build an agent that <span class="grad">sees the internet.</span></h1>
+          <h1><span class="grad">Build an agent that sees the internet.</span></h1>
           <p class="lede">Connect the AI client you already build in to live ThousandEyes data, map your own company’s digital landscape, write your triage runbook as a skill, and run it without you in the loop.</p>
           <p class="lede-b"><strong>Bring your laptop</strong> with Claude, Cursor, GitHub Copilot, ChatGPT, Codex, Gemini CLI or Kiro. Nothing to install.</p>
           <div class="cta-row"><a class="textlink" href="#setup">Open the setup guide →</a><a class="textlink" href="#labs">Read the chapters →</a></div>
