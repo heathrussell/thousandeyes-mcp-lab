@@ -315,8 +315,21 @@ def put(name, html):
 
 put('OUTCOMES', str(outcomes))
 put('TIMING', html_of(timing_nodes))
-put('REQS', html_of(reqs_nodes))
-put('PROCTORS', str(proctor_card))
+
+
+def patch(html, old, new):
+    """Copy tweaks for the site only: the guide keeps its wording. Fails loudly if the guide text moved."""
+    assert old in html, old
+    return html.replace(old, new, 1)
+
+
+reqs_html = patch(html_of(reqs_nodes), 'Demo login from a ThousandEyes proctor (Heath, Mohamed, Mike or Kemal), or your own user',
+                  'Your own login for the lab organisation (sign up on the Setup page), a demo login from a ThousandEyes proctor (Heath, Mohamed, Mike or Kemal), or your own user')
+put('REQS', reqs_html)
+proctor_html = patch(str(proctor_card), 'ThousandEyes access for today: see a ThousandEyes proctor', 'ThousandEyes access for today: sign up above, or see a ThousandEyes proctor')
+proctor_html = patch(proctor_html, '<strong>Collect a demo login from one of the ThousandEyes proctors</strong>',
+                     '<strong>Sign up with your work email in the form above while sign-up is open, or collect a demo login from one of the ThousandEyes proctors</strong>')
+put('PROCTORS', proctor_html)
 put('HOW_IT_WORKS', str(how_card))
 put('SETUP_BODY', html_of(setup_body))
 put('TOOL_TIP', str(tool_tip))

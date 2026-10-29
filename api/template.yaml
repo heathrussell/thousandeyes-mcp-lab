@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: ThousandEyes MCP Lab scoreboard API (check-in, answers, hints, live leaderboard)
+Description: ThousandEyes MCP Lab API (check-in, answers, hints, live leaderboard, attendee onboarding into ThousandEyes)
 
 Parameters:
   AllowedOrigin:
@@ -20,6 +20,15 @@ Parameters:
     Default: ''
     NoEcho: true
     Description: base64 of api/answers.json (scripts/deploy.sh fills this in). Blank means every answer is marked wrong.
+  ProctorKey:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Shared secret for the proctor page (/proctor/* routes, X-Proctor-Key header). Blank disables proctor setup and attendee onboarding.
+  TeApiBase:
+    Type: String
+    Default: https://api.thousandeyes.com/v7
+    Description: ThousandEyes API base. Only change it for a regional or test endpoint.
 
 Globals:
   Function:
@@ -39,6 +48,30 @@ Resources:
         - AttributeName: key
           KeyType: HASH
 
+  # Proctor settings for onboarding (everything except the ThousandEyes token, which lives in SSM as a SecureString).
+  Config:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  # One row per attendee who asked for a ThousandEyes login: status, account group, user id, last error.
+  Onboard:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+
   Api:
     Type: AWS::Serverless::HttpApi
     Properties:
@@ -48,9 +81,12 @@ Resources:
         AllowMethods:
           - GET
           - POST
+          - PUT
+          - DELETE
           - OPTIONS
         AllowHeaders:
           - content-type
+          - x-proctor-key
         MaxAge: 600
       DefaultRouteSettings:
         ThrottlingBurstLimit: 50
@@ -64,13 +100,31 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref Players
+          CONFIG_TABLE: !Ref Config
+          ONBOARD_TABLE: !Ref Onboard
           ALLOWED_ORIGIN: !Ref AllowedOrigin
           ANTHROPIC_API_KEY: !Ref AnthropicApiKey
           ANTHROPIC_MODEL: !Ref AnthropicModel
           ANSWERS_B64: !Ref AnswersB64
+          PROCTOR_KEY: !Ref ProctorKey
+          TE_API_BASE: !Ref TeApiBase
+          TE_TOKEN_PARAM: !Sub /te-lab/${AWS::StackName}/te-token
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Players
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Config
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Onboard
+        # The ThousandEyes token is written by the proctor page and read at onboarding time. It is a SecureString under
+        # the default aws/ssm key, which any principal in the account may use through SSM, so no KMS grant is needed.
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:PutParameter
+                - ssm:DeleteParameter
+              Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/te-lab/${AWS::StackName}/*
       Events:
         Any:
           Type: HttpApi
@@ -91,3 +145,10 @@ Outputs:
     Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com
   TableName:
     Value: !Ref Players
+  ConfigTableName:
+    Value: !Ref Config
+  OnboardTableName:
+    Value: !Ref Onboard
+  TeTokenParameter:
+    Description: SSM SecureString holding the ThousandEyes token (created by the proctor page, not by this stack)
+    Value: !Sub /te-lab/${AWS::StackName}/te-token

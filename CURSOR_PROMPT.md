@@ -12,13 +12,14 @@ Deploy this project into my AWS account. Steps:
    - the AWS region (default ap-southeast-2)
    - whether I want a custom domain; if yes, the domain and the Route 53 hosted zone ID
    - whether to enable the front desk (needs an Anthropic API key; it bills that key)
+   - the proctor key for attendee onboarding into ThousandEyes (12+ characters of my choosing; DEPLOY.md section 3b). I will configure the ThousandEyes side on the #proctor page myself after the deploy.
    - the event name, date and city to show on the site
 4. If I gave you a domain: deploy infra/certificate.yaml in us-east-1 as described in DEPLOY.md section 2 and capture the certificate ARN.
-5. Run scripts/deploy.sh with my answers as environment variables (AWS_REGION, DOMAIN, CERT_ARN, HOSTED_ZONE_ID, EVENT_NAME, EVENT_DATE, EVENT_CITY, ANTHROPIC_API_KEY). Pass the API key only as an environment variable for that command; never write it into a file or commit it.
+5. Run scripts/deploy.sh with my answers as environment variables (AWS_REGION, DOMAIN, CERT_ARN, HOSTED_ZONE_ID, EVENT_NAME, EVENT_DATE, EVENT_CITY, ANTHROPIC_API_KEY, PROCTOR_KEY). Pass the keys only as environment variables for that command; never write them into a file or commit them. Every later deploy needs the same PROCTOR_KEY, or onboarding switches off.
 6. If anything fails, fix the cause and re-run the script (it is idempotent). Ask me before deleting any stack.
 7. Run scripts/smoke.sh until it passes (CloudFront can take a few minutes after the first deploy).
 8. Run scripts/wipe-board.sh so the leaderboard starts empty.
-9. Report back: the site URL, the API URL, the scoreboard URL (#standings) and the proctor page (#keymaker), plus anything I should know. Keep the report short.
+9. Report back: the site URL, the API URL, the scoreboard URL (#standings), the keymaker (#keymaker) and the proctor setup page (#proctor), plus anything I should know. Keep the report short.
 ```
 
 If you want Cursor to do a dry run first, add: "Do steps 1 to 3 only, then show me the exact commands you would run and wait."

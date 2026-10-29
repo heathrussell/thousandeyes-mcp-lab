@@ -10,6 +10,8 @@
 #   HOSTED_ZONE_ID      optional Route 53 zone for DOMAIN; the alias records are created for you
 #   ANSWERS_FILE        path to the accepted answers (default api/answers.json; git-ignored, keep it beside the repo)
 #   ANTHROPIC_API_KEY   optional; switches on the front desk (/ask). Never commit it.
+#   PROCTOR_KEY         optional; the shared secret for the proctor page (#proctor) and attendee onboarding into
+#                       ThousandEyes. Pass the same value on every deploy (blank switches both off). Never commit it.
 #   EVENT_NAME, EVENT_DATE, EVENT_CITY   shown on the site hero (defaults: "AI Builders", blank, blank)
 #   ALLOWED_ORIGIN      CORS origin for the API; defaults to the site URL once hosting exists
 set -euo pipefail
@@ -19,11 +21,13 @@ cd "$(dirname "$0")/.."
 : "${API_STACK:=te-lab-api}"
 : "${SITE_STACK:=te-lab-site}"
 DOMAIN="${DOMAIN:-}"; CERT_ARN="${CERT_ARN:-}"; HOSTED_ZONE_ID="${HOSTED_ZONE_ID:-}"
-ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
+ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"; PROCTOR_KEY="${PROCTOR_KEY:-}"
 EVENT_NAME="${EVENT_NAME:-AI Builders}"; EVENT_DATE="${EVENT_DATE:-}"; EVENT_CITY="${EVENT_CITY:-}"
 
 for tool in aws sam python3; do command -v "$tool" >/dev/null || { echo "missing: $tool (see DEPLOY.md, prerequisites)"; exit 1; }; done
 if [ -n "$DOMAIN" ] && [ -z "$CERT_ARN" ]; then echo "DOMAIN is set but CERT_ARN is empty. Deploy infra/certificate.yaml in us-east-1 first (DEPLOY.md, step 2)."; exit 1; fi
+if [ -z "$PROCTOR_KEY" ]; then echo "note: PROCTOR_KEY is empty, so the proctor page and attendee onboarding will be off (DEPLOY.md, step 3b)."; fi
+if [ -n "$PROCTOR_KEY" ] && [ "${#PROCTOR_KEY}" -lt 12 ]; then echo "PROCTOR_KEY must be at least 12 characters."; exit 1; fi
 ANSWERS_FILE="${ANSWERS_FILE:-api/answers.json}"
 if [ ! -s "$ANSWERS_FILE" ]; then echo "missing $ANSWERS_FILE: the accepted answers are kept out of git on purpose. Put the file in place (format in DEPLOY.md) and re-run."; exit 1; fi
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); assert isinstance(d, dict) and all(isinstance(v, list) and v for v in d.values()), 'answers.json must map checkpoint ids to non-empty lists'; print(f'== answers: {len(d)} checkpoints from {sys.argv[1]}')" "$ANSWERS_FILE"
@@ -44,7 +48,7 @@ ORIGIN="${ALLOWED_ORIGIN:-$SITE_URL}"
 echo "== 2/5 API stack ($API_STACK), CORS origin $ORIGIN"
 ( cd api && sam build >/dev/null && sam deploy --region "$AWS_REGION" --stack-name "$API_STACK" \
     --resolve-s3 --capabilities CAPABILITY_IAM --no-confirm-changeset --no-fail-on-empty-changeset \
-    --parameter-overrides "AllowedOrigin=$ORIGIN" "AnthropicApiKey=$ANTHROPIC_API_KEY" "AnswersB64=$ANSWERS_B64" )
+    --parameter-overrides "AllowedOrigin=$ORIGIN" "AnthropicApiKey=$ANTHROPIC_API_KEY" "AnswersB64=$ANSWERS_B64" "ProctorKey=$PROCTOR_KEY" )
 API_URL=$(out "$API_STACK" ApiUrl)
 
 echo "== 3/5 site/config.js -> $API_URL"
@@ -67,5 +71,6 @@ curl -fsS "$API_URL/health" && echo
 echo
 echo "Site:       $SITE_URL"
 echo "API:        $API_URL"
-echo "Scoreboard: $SITE_URL/#standings    Proctors: $SITE_URL/#keymaker"
+echo "Scoreboard: $SITE_URL/#standings    Keymaker: $SITE_URL/#keymaker"
+if [ -n "$PROCTOR_KEY" ]; then echo "Proctor setup (onboarding into ThousandEyes): $SITE_URL/#proctor  (sign in with PROCTOR_KEY)"; fi
 echo "CloudFront can take a few minutes to serve the first deploy; re-run scripts/smoke.sh until it passes."

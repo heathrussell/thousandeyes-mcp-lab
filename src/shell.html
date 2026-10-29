@@ -323,7 +323,7 @@
   .dir-group { margin: 22px 0; }
   .dir-group h4 { font-family: var(--mono); font-size: 10.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--dim); margin: 0 0 10px; font-weight: 600; }
   .tools { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tool { font-family: var(--mono); font-size: 12.5px; padding: 7px 12px; border-radius: 8px; border: var(--line) solid var(--rule); color: var(--fg); display: inline-flex; align-items: center; gap: 8px; }
+  .tool { font-family: var(--mono); font-size: 12.5px; padding: 7px 12px; border-radius: 8px; border: var(--line) solid var(--rule); color: var(--fg); display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-width: 0; overflow-wrap: anywhere; }
   .tool::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dim); flex-shrink: 0; }
   .tool.r::before { background: var(--green); } .tool.w::before { background: var(--red); } .tool.u::before { background: var(--orange); }
   .tool.r { border-color: rgba(69,153,31,.7); } .tool.w { border-color: rgba(235,70,81,.7); } .tool.u { border-color: var(--orange); }
@@ -363,6 +363,50 @@
   .bank-list li { padding: 10px 0; border-bottom: 1px solid rgba(82,94,108,.5); font-size: 14.5px; color: var(--muted); }
   .bank-list li b { color: var(--fg); display: block; }
   .bank-list li span { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+
+  /* ── ONBOARDING (attendee sign-up) and PROCTOR SETUP ── */
+  .onboard { border: var(--line) solid var(--medium-blue); border-top: 3px solid var(--medium-blue); border-radius: 16px; padding: 26px 28px; margin: 0 0 28px; position: relative; }
+  .onboard .eyebrow { margin-bottom: 10px; }
+  .onboard h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.01em; }
+  .onboard > p { margin: 0 0 16px; color: var(--muted); font-size: 15px; max-width: 70ch; }
+  .onboard > p strong { color: var(--fg); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-grid label.lbl { margin-bottom: 6px; }
+  .form-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+  .form-actions .msg { margin: 0; }
+  textarea.input { resize: vertical; min-height: 72px; line-height: 1.5; }
+  select.input { appearance: auto; -webkit-appearance: auto; padding-block: 11px; }
+  select.input option { background: var(--midnight); color: var(--fg); }
+  .note-box { border: var(--line) solid var(--rule); border-left: 3px solid var(--green); border-radius: 12px; padding: 16px 18px; margin-top: 16px; font-size: 15px; }
+  .note-box.bad { border-left-color: var(--red); }
+  .note-box.wait { border-left-color: var(--orange); }
+  .note-box b { color: var(--fg); }
+  .note-box p { margin: 0 0 8px; color: var(--muted); }
+  .note-box p:last-child { margin-bottom: 0; }
+  .note-box code { font-family: var(--mono); font-size: 13.5px; color: var(--fg); }
+  .check { display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--fg); cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--cisco-blue); margin: 0; }
+  .agent-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .agent-list .check { border: var(--line) solid var(--rule); border-radius: 100px; padding: 6px 12px 6px 10px; font-family: var(--mono); font-size: 12px; }
+  .agent-list .check:has(input:checked) { border-color: var(--orange); }
+  .pstack { display: grid; gap: 20px; }
+  .pstack .panel { position: relative; }
+  .pstack .panel > .spine { position: absolute; top: -3px; left: 28px; margin: 0; height: 3px; border-radius: 0 0 2px 2px; }
+  .ptable { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+  .ptable th { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); font-weight: 600; }
+  .ptable td { padding: 10px 10px 10px 0; border-bottom: 1px solid rgba(82,94,108,.5); vertical-align: top; color: var(--muted); }
+  .ptable td b { color: var(--fg); display: block; }
+  .ptable td small { font-family: var(--mono); font-size: 11px; color: var(--dim); display: block; margin-top: 2px; }
+  .ptable .err { color: var(--red); font-size: 13px; }
+  .ptable .acts { white-space: nowrap; text-align: right; }
+  .pill { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; padding: 3px 9px; border-radius: 100px; border: var(--line) solid var(--rule); color: var(--fg); white-space: nowrap; display: inline-block; }
+  .pill.ready { border-color: var(--green); } .pill.failed { border-color: var(--red); } .pill.pending { border-color: var(--orange); } .pill.on { border-color: var(--green); } .pill.off { border-color: var(--rule); color: var(--dim); }
+  .table-scroll { overflow-x: auto; }
+  .kpis { display: flex; gap: 28px; flex-wrap: wrap; margin: 4px 0 14px; }
+  .kpis div b { display: block; font-family: var(--mono); font-size: 24px; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kpis div span { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); }
+  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } .onboard { padding: 22px 20px; } }
 
   /* ── FOOTER, FAB ── */
   .fab { border-color: var(--magenta); }
@@ -479,7 +523,8 @@
       <div class="wrap">
         <span class="spine" aria-hidden="true"></span>
         <p class="eyebrow">ThousandEyes access for today</p>
-        <h2 class="sect">See a <span class="hl">proctor</span> before you start</h2>
+        <h2 class="sect">Get your <span class="hl">ThousandEyes login</span> before you start</h2>
+        <div id="onboard-home" data-onboard></div>
         <div class="content" style="max-width:none">
           <!--@PROCTORS@-->
         </div>
@@ -497,6 +542,7 @@
         <p class="desc">ThousandEyes publishes one hosted MCP server at <code>https://api.thousandeyes.com/mcp</code>. Any client that speaks MCP over HTTP can use it. Pick the one you build in, follow its panel, run the verify prompt, and you’re ready for the labs.</p>
         <div class="meta-row"><div data-os-switch></div></div>
       </div>
+      <div id="onboard-setup" data-onboard></div>
       <div class="content">
         <!--@HOW_IT_WORKS@-->
         <!--@PROCTORS@-->
@@ -602,7 +648,7 @@
         <span class="spine" aria-hidden="true"></span>
         <p class="eyebrow">// Proctors only</p>
         <h1>Key<span class="hl">maker</span></h1>
-        <p class="desc">Two tools for the people running the room. Nothing here changes anyone’s score.</p>
+        <p class="desc">Two tools for the people running the room. Nothing here changes anyone’s score. ThousandEyes onboarding for attendees is on the <a href="#proctor" style="color:var(--fg)">proctor setup</a> page.</p>
       </div>
       <div class="two-up">
         <div class="panel">
@@ -623,12 +669,25 @@
       </div>
     </div>
   </section>
+
+  <!-- ═══ PROCTOR SETUP (ThousandEyes onboarding) ═══ -->
+  <section class="view" id="view-proctor" data-group="setup" hidden>
+    <div class="wrap page">
+      <div class="page-head">
+        <span class="spine multi" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <p class="eyebrow">// Proctors only</p>
+        <h1>Proctor <span class="hl">setup</span></h1>
+        <p class="desc">Attendee onboarding into ThousandEyes. Every sign-up on the Setup page becomes an account group of its own under the lab organisation, plus a user invited by email with a role in that group and, if you choose, in the shared demo group. Configure it here before the doors open.</p>
+      </div>
+      <div id="proctor-root"></div>
+    </div>
+  </section>
 </main>
 
 <footer class="site-foot">
   <div class="colorbar" aria-hidden="true" style="margin-bottom:32px"><i></i><i></i><i></i><i></i></div>
   THOUSANDEYES MCP LAB · AI BUILDERS EDITION · v1.0 · OCTOBER 2026<br>
-  <a href="#keymaker">Proctors</a> · <a href="#ask">Ask the guide</a> · <a href="#standings">Scoreboard</a><br>
+  <a href="#keymaker">Keymaker</a> · <a href="#proctor">Proctor setup</a> · <a href="#ask">Ask the guide</a> · <a href="#standings">Scoreboard</a><br>
   ThousandEyes is a trademark of Cisco Systems, Inc. · Claude is a trademark of Anthropic, PBC. · Routines and the routine API trigger are in research preview; check the linked docs for current limits.
 </footer>
 
@@ -664,7 +723,7 @@
     { route: 'build-3', num: '06 · Build 3', tag: 'Headless', tagc: 'blue', title: 'Headless for CI and cron', sub: 'claude -p, JSON out, deny by default. The same agent as a command.', time: '15 min', cp: 'cp9', group: 'builds' },
     { route: 'field',   num: '07 to 09', tag: 'Reference', tagc: 'pink', title: 'Field guide', sub: 'API v7 and SDKs, ten production rules, six agents worth building, troubleshooting.', time: 'read', cp: null, group: 'field' },
   ];
-  const TITLES = { home: '', setup: 'Setup', labs: 'Labs', builds: 'Builds', field: 'Field guide', standings: 'Scoreboard', ask: 'Ask the guide', keymaker: 'Keymaker' };
+  const TITLES = { home: '', setup: 'Setup', labs: 'Labs', builds: 'Builds', field: 'Field guide', standings: 'Scoreboard', ask: 'Ask the guide', keymaker: 'Keymaker', proctor: 'Proctor setup' };
   CHAPTERS.forEach(c => { TITLES[c.route] = c.title; });
 
   /* ── utilities ── */
@@ -689,12 +748,15 @@
     const listeners = new Set();
     const emit = () => listeners.forEach(fn => { try { fn(player); } catch (e) { console.error(e); } });
     const save = () => { if (player) ls.set(KEY, JSON.stringify(player)); emit(); };
-    const api = CONFIG.apiBase ? async (path, body) => {
-      const r = await fetch(CONFIG.apiBase + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : { method: 'GET' });
+    const api = CONFIG.apiBase ? async (path, body, method, headers) => {
+      const opts = { method: method || (body ? 'POST' : 'GET'), headers: Object.assign({}, headers || {}) };
+      if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+      const r = await fetch(CONFIG.apiBase + path, opts);
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) { const e = new Error(j.error || ('The lab API answered ' + r.status + '.')); e.status = r.status; throw e; }
+      if (!r.ok) { const e = new Error(j.error || ('The lab API answered ' + r.status + '.')); e.status = r.status; e.body = j; throw e; }
       return j;
     } : null;
+    let healthCache = null;
     const fresh = name => ({ name, points: 0, solved: {}, tries: {}, hints: {}, createdAt: Date.now() });
     async function verifyLocal(cp, text) {
       const h = await sha256(canon(text) + '|' + SALT);
@@ -738,6 +800,13 @@
       },
       async leaderboard() { if (!api) return null; const j = await api('/leaderboard'); return j.players || []; },
       async ask(question, snippets) { if (!api) return null; try { const j = await api('/ask', { question, snippets }); return j.answer || null; } catch (e) { return null; } },
+      /* onboarding into ThousandEyes (API mode only) */
+      async health(force) { if (!api) return null; if (healthCache && !force) return healthCache; try { healthCache = await api('/health'); } catch (e) { healthCache = null; } return healthCache; },
+      async onboard(payload) { if (!api) throw new Error('local'); return api('/onboard', payload); },
+      async onboardStatus(email) { if (!api) return null; return api('/onboard?email=' + encodeURIComponent(email)); },
+      proctor: {
+        call(method, path, body, key) { if (!api) return Promise.reject(new Error('local')); return api(path, body, method, { 'X-Proctor-Key': key }); },
+      },
     };
   })();
 
@@ -771,6 +840,8 @@
     if (view === 'standings') Board.start(); else Board.stop();
     if (view === 'home' && changed) Board.refresh();
     if (view === 'ask') setTimeout(() => { const q = $('#ask-q'); if (q && changed) q.focus(); }, 50);
+    if (view === 'proctor') Proctor.start(); else Proctor.stop();
+    if ((view === 'setup' || view === 'home') && changed) Onboard.recheck();
   }
   window.addEventListener('hashchange', render);
 
@@ -1014,6 +1085,257 @@
     bank.innerHTML = CP.map(cp => '<li><b>' + esc(cp.label) + ' · ' + esc(cp.title) + ' · ' + cp.points + ' pts</b>' + esc(cp.question) + '<br><span>Hint: ' + esc(cp.hint) + '</span></li>').join('');
   }
 
+  /* ── attendee onboarding into ThousandEyes (API mode; local mode points at the proctors) ── */
+  const Onboard = (() => {
+    const EMAIL_KEY = 'te-lab-onboard-email';
+    const emailOk = e => /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(e);
+    let last = null, health = null, loaded = false, busy = false;
+    function noteHtml(kind, j) {
+      const r = (j && j.record) || {};
+      if (kind === 'ready' || kind === 'already') {
+        return '<div class="note-box"><p><b>' + (kind === 'already' ? 'Already set up for ' + esc(r.email) + (r.readyAt ? ' at ' + fmtTime(r.readyAt) : '') + '.' : 'Done. ThousandEyes is emailing ' + esc(r.email) + '.') + '</b></p>' +
+          '<p>' + (r.userStatus === 'added-to-existing' ? 'You already had a ThousandEyes user in this organisation, so the lab access was added to it. Sign in as usual.' : 'Open the activation email, set a password and sign in; the link is valid for 72 hours. Give it a few minutes and check the spam folder before asking a proctor.') + '</p>' +
+          '<p>Your own sandbox account group: <code>' + esc(r.accountGroupName || '') + '</code>.' + (j.sharedAccountGroupName ? ' You can also switch to <code>' + esc(j.sharedAccountGroupName) + '</code>, the shared demo group with live tests and alert history.' : '') + '</p>' +
+          (j.welcomeNote ? '<p>' + esc(j.welcomeNote) + '</p>' : '') +
+          '<p>Then connect your AI client below and sign in to ThousandEyes with this email when it asks.</p></div>';
+      }
+      if (kind === 'pending') return '<div class="note-box wait"><p><b>Being set up right now.</b></p><p>Give it a minute, then check again with the same email.</p></div>';
+      if (kind === 'failed') return '<div class="note-box bad"><p><b>ThousandEyes did not accept that.</b></p><p>' + esc(j.detail || (j.record && j.record.error) || j.error || '') + '</p><p>A proctor can retry it from the proctor page, or hand you a demo login.</p></div>';
+      return '<div class="note-box bad"><p><b>' + esc((j && j.error) || 'That did not work.') + '</b></p></div>';
+    }
+    function fallbackHtml(why) {
+      return '<div class="onboard"><p class="eyebrow accent">ThousandEyes login</p><h3>Collect a login from a proctor</h3><p>' +
+        (why === 'local' ? 'This copy of the lab runs without the lab API, so self-service sign-up is off. ' : 'Self-service sign-up is not open at this event. ') +
+        'The ThousandEyes proctors (named below) hand out logins; everyone works in the shared demo organisation with live tests and alert history.</p></div>';
+    }
+    function formHtml(id) {
+      const needsCode = !!(health && health.onboardingNeedsCode);
+      const saved = ls.get(EMAIL_KEY) || '';
+      return '<div class="onboard"><p class="eyebrow accent">ThousandEyes login · self-service</p><h3>Get your own ThousandEyes sandbox</h3>' +
+        '<p>Enter your <strong>work email</strong>. In about ten seconds you get an account group of your own under the lab organisation and an invitation email from ThousandEyes. ' +
+        'The same login works for every AI client in the setup guide, and the shared demo group with live data is in the account group switcher.</p>' +
+        '<form class="form-grid" data-onboard-form>' +
+        '<div><label class="lbl" for="' + id + '-name">Your name</label><input class="input" id="' + id + '-name" name="name" autocomplete="name" maxlength="60" required placeholder="As it should appear in ThousandEyes"></div>' +
+        '<div><label class="lbl" for="' + id + '-email">Work email</label><input class="input" id="' + id + '-email" name="email" type="email" autocomplete="email" maxlength="120" required placeholder="you@company.com" value="' + esc(saved) + '"></div>' +
+        '<div><label class="lbl" for="' + id + '-company">Company <span style="letter-spacing:0;text-transform:none">(optional)</span></label><input class="input" id="' + id + '-company" name="company" autocomplete="organization" maxlength="80"></div>' +
+        (needsCode ? '<div><label class="lbl" for="' + id + '-code">Event code</label><input class="input" id="' + id + '-code" name="eventCode" autocomplete="off" maxlength="40" required placeholder="On the screen at the front"></div>' : '<div></div>') +
+        '<div class="full form-actions"><button class="btn" type="submit">Create my ThousandEyes login</button><button class="btn ghost" type="button" data-onboard-check>Already signed up? Check status</button><p class="msg"></p></div>' +
+        '</form><div data-onboard-out>' + (last ? noteHtml(last.kind, last.body) : '') + '</div></div>';
+    }
+    function draw() {
+      $$('[data-onboard]').forEach(el => {
+        if (!Store.live) { el.innerHTML = fallbackHtml('local'); return; }
+        if (!loaded) { el.innerHTML = ''; return; }
+        el.innerHTML = (health && health.onboarding === 'ready') ? formHtml(el.id) : fallbackHtml('closed');
+      });
+    }
+    function say(text, bad) { $$('[data-onboard-form] .msg').forEach(m => { m.className = 'msg' + (bad ? ' bad' : ''); m.textContent = text; }); }
+    function show(kind, body) { last = { kind, body }; $$('[data-onboard-out]').forEach(o => { o.innerHTML = noteHtml(kind, body); }); }
+    async function submit(form) {
+      if (busy) return; const fd = new FormData(form);
+      const payload = { name: String(fd.get('name') || '').trim(), email: String(fd.get('email') || '').trim().toLowerCase(), company: String(fd.get('company') || '').trim(), eventCode: String(fd.get('eventCode') || '').trim() };
+      if (payload.name.length < 2 || !emailOk(payload.email)) { say('A name and a valid work email, please.', true); return; }
+      busy = true; $$('[data-onboard-form] button').forEach(b => { b.disabled = true; }); say('Creating your account group and user in ThousandEyes…');
+      try {
+        const j = await Store.onboard(payload); ls.set(EMAIL_KEY, payload.email); say(''); show(j.status === 'already' ? 'already' : 'ready', j);
+      } catch (e) {
+        say(''); const b = e.body || {};
+        show(e.status === 502 ? 'failed' : e.status === 409 ? 'pending' : 'error', Object.assign({ error: e.message }, b));
+      } finally { busy = false; $$('[data-onboard-form] button').forEach(b => { b.disabled = false; }); }
+    }
+    async function status(form) {
+      const email = String(new FormData(form).get('email') || '').trim().toLowerCase();
+      if (!emailOk(email)) { say('Type the email you signed up with first.', true); return; }
+      say('Checking…');
+      try { const j = await Store.onboardStatus(email); ls.set(EMAIL_KEY, email); say(''); show(j.status === 'ready' ? 'already' : j.status === 'pending' ? 'pending' : 'failed', j); }
+      catch (e) { say(''); show('error', { error: e.status === 404 ? 'No sign-up found for ' + email + '. Fill in the form to create one.' : e.message }); }
+    }
+    document.addEventListener('submit', ev => { const f = ev.target.closest && ev.target.closest('[data-onboard-form]'); if (f) { ev.preventDefault(); submit(f); } });
+    document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-onboard-check]'); if (b) status(b.closest('form')); });
+    let lastCheck = 0;
+    return {
+      async init() {
+        if (!Store.live) { draw(); return; }
+        health = await Store.health(); loaded = true; lastCheck = Date.now();
+        const saved = ls.get(EMAIL_KEY);
+        if (health && health.onboarding === 'ready' && saved) { try { const j = await Store.onboardStatus(saved); if (j && j.status === 'ready') last = { kind: 'already', body: j }; } catch (e) { /* no record yet */ } }
+        draw();
+      },
+      /* the proctor may open sign-up after attendees loaded the page: re-check cheaply when they come back to Setup or Overview */
+      async recheck(force) {
+        if (!Store.live || !loaded) return;
+        if (!force && ((health && health.onboarding === 'ready') || Date.now() - lastCheck < 30000)) return;
+        health = await Store.health(true); lastCheck = Date.now(); draw();
+      },
+    };
+  })();
+
+  /* ── proctor setup: configure onboarding, watch who has signed up ── */
+  const Proctor = (() => {
+    const KEY = 'te-lab-proctor-key';
+    const ss = { get() { try { return sessionStorage.getItem(KEY) || ''; } catch (e) { return ''; } }, set(v) { try { sessionStorage.setItem(KEY, v); } catch (e) {} }, del() { try { sessionStorage.removeItem(KEY); } catch (e) {} } };
+    let key = ss.get(), health = null, cfg = null, tokenSet = false, overview = null, overviewErr = null, records = [], timer = 0, signinErr = '', armed = '';
+    const P = (m, p, b) => Store.proctor.call(m, p, b, key);
+    const root = () => $('#proctor-root');
+    const panel = (title, inner, color) => '<div class="panel"><span class="spine" style="--spine:' + (color || 'var(--cisco-blue)') + '" aria-hidden="true"></span><p class="eyebrow accent">' + title + '</p>' + inner + '</div>';
+    const note = (text, cls) => '<div class="note-box ' + (cls || '') + '">' + text + '</div>';
+
+    async function load() {
+      const c = await P('GET', '/proctor/config'); cfg = c.config; tokenSet = c.tokenSet;
+      records = (await P('GET', '/proctor/onboarded')).records || [];
+      if (tokenSet && !overview) { try { overview = await P('GET', '/proctor/te'); overviewErr = null; } catch (e) { overview = null; overviewErr = e; } }
+    }
+    function signinHtml() {
+      return '<div class="pstack">' + panel('Sign in', '<p class="empty">The proctor key is the <code>PROCTOR_KEY</code> the lab was deployed with. It stays in this tab only.</p>' +
+        '<form class="kv" data-pform="signin" style="margin-top:12px"><input class="input" type="password" name="key" placeholder="Proctor key" autocomplete="off" required><div class="form-actions"><button class="btn" type="submit">Open proctor setup</button><p class="msg' + (signinErr ? ' bad' : '') + '">' + esc(signinErr) + '</p></div></form>') + '</div>';
+    }
+    function overviewHtml() {
+      if (overview) {
+        return note('<p><b>Token works.</b> Organisation: <b>' + esc(overview.orgName || 'unknown') + '</b>. ' + overview.accountGroups.length + ' account groups, ' + overview.roles.length + ' roles and ' + overview.agents.length + ' Enterprise Agents visible.' +
+          (overview.agentsError ? ' Agents could not be listed: ' + esc(overview.agentsError) : '') + '</p>');
+      }
+      if (overviewErr) { const b = overviewErr.body || {}; return note('<p><b>' + esc(b.error || overviewErr.message) + '</b></p>' + (b.hint ? '<p>' + esc(b.hint) + '</p>' : ''), 'bad'); }
+      return tokenSet ? note('<p>A token is saved. Test it to load account groups, roles and agents for the settings below.</p>', 'wait') : note('<p><b>No token saved yet.</b> Onboarding stays closed until there is one.</p>', 'bad');
+    }
+    function tokenPanel() {
+      return panel('1 · ThousandEyes credential',
+        '<p class="empty">Paste a <b>User API Token</b> (OAuth bearer) belonging to an <b>Organization Admin</b> of the lab organisation: creating account groups needs “Edit all account groups”, and inviting attendees needs user management rights. It is stored encrypted in AWS Systems Manager and never shown again.</p>' +
+        '<form class="kv" data-pform="token" style="margin-top:12px"><input class="input" type="password" name="teToken" placeholder="Paste the token" autocomplete="off">' +
+        '<div class="form-actions"><button class="btn" type="submit">Test and save</button><button class="btn ghost" type="button" data-pact="test-saved"' + (tokenSet ? '' : ' disabled') + '>Test saved token</button><button class="btn ghost" type="button" data-pact="clear-token"' + (tokenSet ? '' : ' disabled') + '>Clear token</button><p class="msg"></p></div></form>' +
+        '<div data-pout="token">' + overviewHtml() + '</div>', 'var(--magenta)');
+    }
+    function opt(list, value, labelFn, blank) {
+      const opts = (blank ? ['<option value="">' + blank + '</option>'] : []).concat(list.map(x => '<option value="' + esc(x.value) + '"' + (String(x.value) === String(value) ? ' selected' : '') + '>' + esc(labelFn(x)) + '</option>'));
+      if (value && !list.some(x => String(x.value) === String(value))) opts.push('<option value="' + esc(value) + '" selected>' + esc(value) + ' (not in the current list)</option>');
+      return opts.join('');
+    }
+    function settingsPanel() {
+      const roles = overview ? overview.roles.map(r => ({ value: r.roleId, name: r.name })) : [];
+      const groups = overview ? overview.accountGroups.map(g => ({ value: g.aid, name: g.name })) : [];
+      const agents = overview ? overview.agents : [];
+      const sel = (name, list, value, blank) => list.length ? '<select class="input" name="' + name + '">' + opt(list, value, x => x.name, blank) + '</select>' : '<input class="input" name="' + name + '" value="' + esc(value || '') + '" placeholder="Test the token to pick from a list, or type an id">';
+      const defaultOwn = cfg.ownRoleId || (roles.find(r => r.name === 'Account Admin') || {}).value || '';
+      const defaultShared = cfg.sharedRoleId || (roles.find(r => r.name === 'Regular User') || {}).value || '';
+      return panel('2 · Onboarding settings',
+        '<form data-pform="config">' +
+        '<label class="check" style="margin-bottom:16px"><input type="checkbox" name="enabled"' + (cfg.enabled ? ' checked' : '') + '> Open self-service sign-up on the Setup page</label>' +
+        '<div class="form-grid">' +
+        '<div><label class="lbl">Event code attendees must type (blank for none)</label><input class="input" name="eventCode" value="' + esc(cfg.eventCode) + '" autocomplete="off" placeholder="e.g. BUILD-MEL"></div>' +
+        '<div><label class="lbl">Cap on sign-ups (0 for no cap)</label><input class="input" name="maxOnboardings" type="number" min="0" max="5000" value="' + esc(cfg.maxOnboardings) + '"></div>' +
+        '<div class="full"><label class="lbl">Account group name for each attendee</label><input class="input" name="groupNameTemplate" value="' + esc(cfg.groupNameTemplate) + '" placeholder="{name} ({email})"><p class="empty">Placeholders: {name}, {email}, {company}. Default: {name} ({email}).</p></div>' +
+        '<div><label class="lbl">Attendee role in their own group</label>' + sel('ownRoleId', roles, defaultOwn, '') + '<p class="empty">Account Admin lets them create tests, alert rules and dashboards (Labs 1 and 6). Every built-in role includes API access.</p></div>' +
+        '<div><label class="lbl">Shared demo account group (live tests and alerts)</label>' + sel('sharedAid', groups, cfg.sharedAid, 'None: own sandbox only') + '<p class="empty">Membership gives them Labs 2 to 5 data. Pick a group that already has tests.</p></div>' +
+        '<div><label class="lbl">Attendee role in the shared group</label>' + sel('sharedRoleId', roles, defaultShared, '') + '<p class="empty">Regular User keeps the shared group tidy; they can read everything and run instant tests.</p></div>' +
+        '<div><label class="lbl">Welcome note shown after sign-up (optional)</label><textarea class="input" name="welcomeNote" maxlength="400" placeholder="e.g. Wi-Fi: AIBuilders / password on the screen">' + esc(cfg.welcomeNote) + '</textarea></div>' +
+        '<div class="full"><label class="lbl">Enterprise Agents shared into each new group</label>' +
+        (agents.length ? '<div class="agent-list">' + agents.map(a => '<label class="check"><input type="checkbox" name="agentIds" value="' + esc(a.agentId) + '"' + (cfg.agentIds.includes(String(a.agentId)) ? ' checked' : '') + '> ' + esc(a.name) + (a.location ? ' <span style="color:var(--dim)">· ' + esc(a.location) + '</span>' : '') + '</label>').join('') + '</div>'
+          : '<input class="input" name="agentIdsText" value="' + esc(cfg.agentIds.join(', ')) + '" placeholder="Agent ids, comma separated (test the token to pick from a list)">') +
+        '<p class="empty">Cloud Agents are available in every account group anyway; this shares your Enterprise Agents so Lab 1 tests can run from the room.</p></div>' +
+        '</div><div class="form-actions"><button class="btn" type="submit">Save settings</button><p class="msg"></p></div></form>', 'var(--orange)');
+    }
+    function statusPills() {
+      const open = cfg.enabled && tokenSet && cfg.ownRoleId;
+      return '<div class="kpis"><div><b>' + records.filter(r => r.status === 'ready').length + '</b><span>Onboarded</span></div><div><b>' + records.filter(r => r.status === 'failed').length + '</b><span>Failed</span></div><div><b>' + (cfg.maxOnboardings || '∞') + '</b><span>Cap</span></div>' +
+        '<div><b style="font-size:14px;line-height:2"><span class="pill ' + (open ? 'on' : 'off') + '">' + (open ? 'Sign-up open' : cfg.enabled ? 'Enabled, not ready' : 'Sign-up closed') + '</span> <span class="pill ' + (tokenSet ? 'on' : 'off') + '">' + (tokenSet ? 'Token saved' : 'No token') + '</span></b><span>Status</span></div></div>';
+    }
+    function tableHtml() {
+      if (!records.length) return '<p class="empty">Nobody has signed up yet. The form sits at the top of the Setup page and on the Overview.</p>';
+      return '<div class="table-scroll"><table class="ptable"><thead><tr><th>Attendee</th><th>Status</th><th>Account group</th><th>When</th><th></th></tr></thead><tbody>' + records.map(r => {
+        const stale = r.status === 'pending' && Date.now() - (r.updatedAt || r.createdAt || 0) > 60000;
+        return '<tr><td><b>' + esc(r.name) + '</b>' + esc(r.email) + (r.company ? '<small>' + esc(r.company) + '</small>' : '') + '</td>' +
+          '<td><span class="pill ' + esc(r.status) + '">' + esc(r.status) + '</span>' + (r.userStatus ? '<small>' + (r.userStatus === 'added-to-existing' ? 'existing user, roles added' : 'user invited') + '</small>' : '') + (r.error ? '<div class="err">' + esc(r.error) + '</div>' : '') + '</td>' +
+          '<td>' + (r.accountGroupName ? '<b style="font-weight:500">' + esc(r.accountGroupName) + '</b><small>aid ' + esc(r.aid) + (r.uid ? ' · uid ' + esc(r.uid) : '') + '</small>' : '<span class="empty">not created</span>') + '</td>' +
+          '<td><small style="margin:0">' + fmtTime(r.readyAt || r.createdAt) + (r.attempts > 1 ? ' · ' + r.attempts + ' attempts' : '') + '</small></td>' +
+          '<td class="acts">' + ((r.status === 'failed' || stale) ? '<button class="linkbtn" type="button" data-pact="retry" data-email="' + esc(r.email) + '">Retry</button> · ' : '') +
+          '<button class="linkbtn" type="button" data-pact="remove" data-email="' + esc(r.email) + '">' + (armed === r.email ? 'Click again to remove' : 'Remove') + '</button></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    }
+    function attendeesPanel() {
+      return panel('3 · Who has signed up', '<div data-pout="table">' + tableHtml() + '</div>' +
+        '<p class="empty" style="margin-top:14px">Remove only deletes the lab’s record; the ThousandEyes account group and user stay until you delete them in ThousandEyes. Add someone by hand below (ignores the event code and the cap).</p>' +
+        '<form class="form-grid" data-pform="manual" style="margin-top:10px"><div><input class="input" name="name" placeholder="Name" required maxlength="60"></div><div><input class="input" name="email" type="email" placeholder="Work email" required maxlength="120"></div><div><input class="input" name="company" placeholder="Company (optional)" maxlength="80"></div><div class="form-actions" style="margin:0"><button class="btn ghost" type="submit">Onboard by hand</button><button class="btn ghost" type="button" data-pact="refresh">Refresh list</button></div><p class="msg full"></p></form>', 'var(--green)');
+    }
+    function draw() {
+      const el = root(); if (!el) return;
+      if (!Store.live) { el.innerHTML = note('<p><b>Local mode.</b> This copy runs without the lab API, so there is nothing to configure here. Deploy with <code>scripts/deploy.sh</code> and a <code>PROCTOR_KEY</code> to switch onboarding on.</p>', 'wait'); return; }
+      if (health && health.proctor === false) { el.innerHTML = note('<p><b>The API was deployed without a proctor key.</b> Re-run <code>scripts/deploy.sh</code> with <code>PROCTOR_KEY</code> set, then come back.</p>', 'bad'); return; }
+      if (!key || !cfg) { el.innerHTML = signinHtml(); return; }
+      el.innerHTML = statusPills() + '<div class="pstack">' + tokenPanel() + settingsPanel() + attendeesPanel() + '</div>' +
+        '<p class="empty" style="margin-top:18px"><button class="linkbtn" type="button" data-pact="signout">Sign out of proctor setup</button> · Scores and score codes are on the <a href="#keymaker" style="color:var(--fg)">keymaker</a> page.</p>';
+    }
+    const msgIn = (form, text, bad) => { const m = $('.msg', form); if (m) { m.className = 'msg' + (bad ? ' bad' : text && !bad ? ' ok' : ''); m.textContent = text; } };
+    async function withBusy(form, fn) { $$('button', form).forEach(b => { b.disabled = true; }); try { await fn(); } finally { $$('button', form).forEach(b => { b.disabled = false; }); } }
+    async function refreshRecords() { try { records = (await P('GET', '/proctor/onboarded')).records || []; const t = $('[data-pout="table"]'); if (t) t.innerHTML = tableHtml(); } catch (e) { /* keep the last list */ } }
+
+    async function onSubmit(form) {
+      const kind = form.dataset.pform, fd = new FormData(form);
+      if (kind === 'signin') {
+        key = String(fd.get('key') || '').trim(); signinErr = '';
+        await withBusy(form, async () => { try { await load(); ss.set(key); } catch (e) { key = ''; signinErr = e.status === 401 ? 'That key was not accepted.' : e.message; } });
+        draw(); return;
+      }
+      if (kind === 'token') {
+        const tok = String(fd.get('teToken') || '').trim(); if (!tok) { msgIn(form, 'Paste a token first.', true); return; }
+        let saved = false;
+        await withBusy(form, async () => {
+          msgIn(form, 'Testing against ThousandEyes…');
+          try { overview = await P('POST', '/proctor/te', { teToken: tok }); overviewErr = null; }
+          catch (e) { overview = null; overviewErr = e; msgIn(form, 'Not saved.', true); $('[data-pout="token"]').innerHTML = overviewHtml(); return; }
+          try { const c = await P('PUT', '/proctor/config', { teToken: tok, orgName: overview.orgName || '' }); cfg = c.config; tokenSet = c.tokenSet; saved = true; }
+          catch (e) { msgIn(form, 'The token works but could not be saved: ' + e.message, true); }
+        });
+        if (saved) draw();
+        return;
+      }
+      if (kind === 'config') {
+        const agentIds = fd.getAll('agentIds').map(String); if (fd.has('agentIdsText')) String(fd.get('agentIdsText') || '').split(/[,\s]+/).filter(Boolean).forEach(a => agentIds.push(a));
+        const pick = (name, list, k) => { const v = String(fd.get(name) || ''); const hit = (list || []).find(x => String(x[k]) === v); return { id: v, name: hit ? hit.name : '' }; };
+        const own = pick('ownRoleId', overview && overview.roles, 'roleId'), shared = pick('sharedRoleId', overview && overview.roles, 'roleId'), grp = pick('sharedAid', overview && overview.accountGroups, 'aid');
+        const patch = { enabled: fd.get('enabled') === 'on', eventCode: String(fd.get('eventCode') || '').trim(), maxOnboardings: Number(fd.get('maxOnboardings') || 0), groupNameTemplate: String(fd.get('groupNameTemplate') || '').trim(),
+          ownRoleId: own.id, ownRoleName: own.name || (own.id === cfg.ownRoleId ? cfg.ownRoleName : ''), sharedAid: grp.id, sharedAccountGroupName: grp.name || (grp.id === cfg.sharedAid ? cfg.sharedAccountGroupName : ''),
+          sharedRoleId: grp.id ? shared.id : '', sharedRoleName: grp.id ? (shared.name || (shared.id === cfg.sharedRoleId ? cfg.sharedRoleName : '')) : '', agentIds, welcomeNote: String(fd.get('welcomeNote') || '').trim(), orgName: (overview && overview.orgName) || cfg.orgName || '' };
+        if (patch.enabled && !patch.ownRoleId) { msgIn(form, 'Pick the attendee role in their own group before opening sign-up.', true); return; }
+        if (patch.enabled && !tokenSet) { msgIn(form, 'Save a working ThousandEyes token first; sign-up cannot open without one.', true); return; }
+        await withBusy(form, async () => { try { const c = await P('PUT', '/proctor/config', patch); cfg = c.config; tokenSet = c.tokenSet; msgIn(form, 'Saved.'); } catch (e) { msgIn(form, e.message, true); } });
+        const k = $('.kpis'); if (k) k.outerHTML = statusPills();
+        Onboard.recheck(true);
+        return;
+      }
+      if (kind === 'manual') {
+        await withBusy(form, async () => {
+          msgIn(form, 'Creating the account group and user…');
+          try { const j = await P('POST', '/proctor/onboard', { name: fd.get('name'), email: fd.get('email'), company: fd.get('company') }); msgIn(form, (j.record.name || '') + ' onboarded: ' + j.record.accountGroupName); form.reset(); }
+          catch (e) { const b = e.body || {}; msgIn(form, b.detail || e.message, true); }
+        });
+        await refreshRecords(); return;
+      }
+    }
+    async function onAction(btn) {
+      const act = btn.dataset.pact, email = btn.dataset.email;
+      if (act === 'signout') { key = ''; cfg = null; overview = null; ss.del(); draw(); return; }
+      if (act === 'refresh') { await refreshRecords(); return; }
+      if (act === 'test-saved') { btn.disabled = true; try { overview = await P('GET', '/proctor/te'); overviewErr = null; } catch (e) { overview = null; overviewErr = e; } draw(); return; }
+      if (act === 'clear-token') { btn.disabled = true; try { const c = await P('PUT', '/proctor/config', { clearToken: true }); cfg = c.config; tokenSet = c.tokenSet; overview = null; overviewErr = null; } catch (e) { /* shown on reload */ } draw(); return; }
+      if (act === 'retry') { btn.disabled = true; btn.textContent = 'Retrying…'; try { await P('POST', '/proctor/retry', { email }); } catch (e) { /* the row shows the new error */ } await refreshRecords(); return; }
+      if (act === 'remove') {
+        if (armed !== email) { armed = email; const t = $('[data-pout="table"]'); if (t) t.innerHTML = tableHtml(); setTimeout(() => { if (armed === email) { armed = ''; const t2 = $('[data-pout="table"]'); if (t2) t2.innerHTML = tableHtml(); } }, 4000); return; }
+        armed = ''; try { await P('DELETE', '/proctor/onboarded?email=' + encodeURIComponent(email)); } catch (e) { /* refresh shows the truth */ } await refreshRecords(); return;
+      }
+    }
+    document.addEventListener('submit', ev => { const f = ev.target.closest && ev.target.closest('[data-pform]'); if (f) { ev.preventDefault(); onSubmit(f); } });
+    document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-pact]'); if (b && root() && root().contains(b)) onAction(b); });
+    return {
+      async start() {
+        if (!Store.live) { draw(); return; }
+        if (!health) health = await Store.health();
+        if (key && !cfg) { try { await load(); } catch (e) { key = ''; ss.del(); signinErr = e.status === 401 ? 'The saved key was not accepted. Sign in again.' : ''; } }
+        draw();
+        clearInterval(timer); timer = setInterval(() => { if (key && cfg) refreshRecords(); }, 30000);
+      },
+      stop() { clearInterval(timer); timer = 0; },
+    };
+  })();
+
   /* ── copy buttons, OS tabs, client chooser ── */
   function copyText(text, btn) {
     const done = () => { if (btn) { const old = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done'); setTimeout(() => { btn.textContent = old; btn.classList.remove('done'); }, 1600); } };
@@ -1068,5 +1390,6 @@
   renderAll();
   render();
   Store.init();
+  Onboard.init();
 })();
 </script>

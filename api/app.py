@@ -7,6 +7,8 @@ One Lambda behind an HTTP API. Routes:
   GET  /player?name= -> {player}
   GET  /leaderboard  -> {players: [{name, points, solvedCount, updatedAt}]}
   POST /ask          {question, snippets}         -> {answer}   (only when ANTHROPIC_API_KEY is set)
+  POST /onboard, GET /onboard, and the X-Proctor-Key gated /proctor/* routes live in onboarding.py
+  (ThousandEyes account group + user creation for attendees).
 
 Scoring mirrors the page exactly: 100 points a checkpoint, three free tries, then -10 a wrong answer,
 hints -25 (never charged twice, never charged after a solve), total never below 0.
@@ -24,6 +26,8 @@ import urllib.request
 from decimal import Decimal
 
 import boto3
+
+import onboarding
 
 TABLE = os.environ.get("TABLE_NAME", "")
 ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
@@ -89,8 +93,8 @@ def respond(status, body):
         "headers": {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": ORIGIN,
-            "Access-Control-Allow-Headers": "content-type",
-            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+            "Access-Control-Allow-Headers": "content-type,x-proctor-key",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
             "Cache-Control": "no-store",
         },
         "body": json.dumps(plain(body), ensure_ascii=False),
@@ -235,10 +239,13 @@ def handler(event, _context):
     if method == "OPTIONS":
         return respond(204, {})
     try:
-        body = json.loads(event.get("body") or "{}") if method == "POST" else {}
+        body = json.loads(event.get("body") or "{}") if method in ("POST", "PUT") else {}
+        if not isinstance(body, dict):
+            raise json.JSONDecodeError("object expected", "", 0)
     except json.JSONDecodeError:
-        return respond(400, {"error": "Body must be JSON."})
+        return respond(400, {"error": "Body must be a JSON object."})
     qs = event.get("queryStringParameters") or {}
+    headers = {str(k).lower(): v for k, v in (event.get("headers") or {}).items()}
     try:
         if method == "POST" and path == "/checkin":
             return r_checkin(body)
@@ -253,7 +260,12 @@ def handler(event, _context):
         if method == "GET" and path == "/leaderboard":
             return r_leaderboard()
         if method == "GET" and path in ("/", "/health"):
-            return respond(200, {"status": "ready", "checkpoints": len(CP), "answers": len(ANSWERS) == len(CP), "ask": bool(ANTHROPIC_API_KEY)})
+            health = {"status": "ready", "checkpoints": len(CP), "answers": len(ANSWERS) == len(CP), "ask": bool(ANTHROPIC_API_KEY)}
+            health.update(onboarding.health_fields())
+            return respond(200, health)
+        handled = onboarding.handle(method, path, body, qs, headers)
+        if handled is not None:
+            return handled
     except Exception as exc:  # noqa: BLE001
         print("error", repr(exc))
         return respond(500, {"error": "Something broke on our side. Try again."})
