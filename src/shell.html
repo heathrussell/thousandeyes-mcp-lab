@@ -1122,8 +1122,8 @@
         const tiedBefore = shown.slice(0, i).filter(other => (other.points | 0) === points).length;
         const tiedTotal = shown.filter(other => (other.points | 0) === points).length;
         const tieOffset = tiedBefore - (tiedTotal - 1) / 2;
-        const x = Math.max(5, Math.min(94, route[segment][0] + (route[segment + 1][0] - route[segment][0]) * along + tieOffset * 3.8));
-        const y = Math.max(6, Math.min(91, route[segment][1] + (route[segment + 1][1] - route[segment][1]) * along + tieOffset * 2.5));
+        const x = Math.max(5, Math.min(94, route[segment][0] + (route[segment + 1][0] - route[segment][0]) * along + tieOffset * 9));
+        const y = Math.max(6, Math.min(91, route[segment][1] + (route[segment + 1][1] - route[segment][1]) * along + tieOffset * 7));
         const me = current && q.name === current.name;
         const summit = progress >= 1;
         return '<div class="climber' + (me ? ' me' : '') + (summit ? ' summited' : '') + '" style="--x:' + x.toFixed(1) + '%;--y:' + y.toFixed(1) + '%;--rank:' + i + '" title="' + esc(q.name) + ': ' + points + ' points">' +
