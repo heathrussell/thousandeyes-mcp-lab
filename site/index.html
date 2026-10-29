@@ -2505,7 +2505,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       peakCard = { g: card, w: pw, h: 56 };
       L.markers = el('g'); L.labels = el('g');
       svg.appendChild(L.markers); svg.appendChild(L.labels);
-      if (!observer && 'ResizeObserver' in window) { observer = new ResizeObserver(onResize); observer.observe(container); }
+      if (!observer && 'ResizeObserver' in window) { observer = new ResizeObserver(onResize); observer.observe(container); $$('.ov', container.parentElement).forEach(o => observer.observe(o)); }
       wire();
     }
 
@@ -2547,13 +2547,14 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       labels.forEach(lb => {
         const { w, h, pos: p } = lb;
         const A = [-w / 2, -h - 16], E = [-w / 2, -2 * h - 24], F = [-w / 2, -3 * h - 32], B = [18, -h / 2], C = [-w - 18, -h / 2], D = [-w / 2, 16];
-        const far = lb.me ? [[-w / 2, -h - 70], [70, -h / 2], [-w - 70, -h / 2], [-w / 2, 70], [40, -h - 40], [-w - 40, -h - 40], [40, 40], [-w - 40, 40]] : [];
+        const far = lb.me || lb.rank === 1 ? [[-w / 2, -h - 70], [70, -h / 2], [-w - 70, -h / 2], [-w / 2, 70], [40, -h - 40], [-w - 40, -h - 40], [40, 40], [-w - 40, 40]] : [];
         const order = (p.y < PEAK.y + 60 ? [C, D, B, E] : [A, E, B, C, D, F]).concat(far);
         const box = ([dx, dy]) => ({ dx, dy, b: { x0: p.x + dx * k, y0: p.y + dy * k, x1: p.x + (dx + w) * k, y1: p.y + (dy + h) * k } });
         const found = order.map(box).find(o => free(o.b));
         if (!found && lb.rank > 1 && !lb.me) { lb.inner.style.display = 'none'; return; }
         lb.inner.style.display = '';
-        const best = found || box(order[0]);
+        const cover = b => obs.reduce((sum, o) => sum + Math.max(0, Math.min(b.x1, o.x1) - Math.max(b.x0, o.x0)) * Math.max(0, Math.min(b.y1, o.y1) - Math.max(b.y0, o.y0)), 0);
+        const best = found || order.map(box).filter(o => inView(o.b)).sort((a, z) => cover(a.b) - cover(z.b))[0] || box(order[0]);
         lb.inner.setAttribute('transform', 'translate(' + f2(best.dx * k) + ' ' + f2(best.dy * k) + ') scale(' + k + ')');
         const ln = lb.inner.querySelector('.lead'), mx = -best.dx, my = -best.dy;
         const cx = Math.max(0, Math.min(w, mx)), cy = Math.max(0, Math.min(h, my)), dist = Math.hypot(mx - cx, my - cy);
