@@ -24,7 +24,7 @@ This repo is a hands-on lab portal for AI builders (a Cisco ThousandEyes event) 
 | `src/build.py` | Ports the lab guide HTML into the shell, parses the tool catalogue, builds the search index, hashes answers, writes `site/index.html` and `src/out/index.html`. | Yes. |
 | `src/assets/mountain.webp` | Scoreboard artwork, embedded into the page as a data URI by the build. | Yes, then rebuild. |
 | `src/guide/*.html` | The verified lab guide content the site is built from. | Only for content corrections. |
-| `src/brand/` | `ai-builders.png`, the Cisco AI Builders mark in the top bar, and `ai-builder-badge.webp`, the Enterprise AI Builder (Cisco Live) badge on the hero check-in card, cut from the official dark badge as a transparent circle (both inlined by the build). Optional `cisco.svg`, the official Cisco logo, shown before the mark if present. | Replace files, then rebuild. Never redraw a logo or the badge by hand. |
+| `src/brand/` | `thousandeyes.png`, the official Cisco ThousandEyes logo (white and orange, for dark backgrounds) in the top bar, and `ai-builder-badge.webp`, the Enterprise AI Builder (Cisco Live) badge on the hero check-in card, cut from the official dark badge as a transparent circle. Both are inlined by the build. | Replace files, then rebuild. Never redraw or recolour a logo or the badge. |
 
 ## How the pieces fit
 

@@ -339,26 +339,18 @@ put('BUILD_PAGES', '\n'.join(build_pages))
 put('FIELD_BODY', html_of(field_nodes))
 
 # ── brand marks (inlined so the page stays a single file) ─────────────────
-# src/brand/ai-builders.png: the AI Builders mark shown top-left (transparent PNG; replace the file and rebuild to swap it).
-# src/brand/cisco.svg (optional): the official Cisco logo SVG from the brand portal, shown before the mark if present.
+# src/brand/thousandeyes.png: the official Cisco ThousandEyes logo (white and orange, for dark backgrounds) shown top-left.
+#   Trimmed and sized to 132 px tall; it shows at 34 px (26 px on phones). The lockup carries the Cisco wordmark itself.
 # src/brand/ai-builder-badge.webp: the Enterprise AI Builder (Cisco Live) badge on the hero check-in card, cut from the
 #   dark version of the official badge as a transparent circle (480 px; it shows at 152 px, 100 px on phones).
 import base64
 BRAND = SRC / 'brand'
-logo_png = BRAND / 'ai-builders.png'
+logo_png = BRAND / 'thousandeyes.png'
 assert logo_png.exists(), f'missing {logo_png}'
 shell = shell.replace('@LOGO_SRC@', 'data:image/png;base64,' + base64.b64encode(logo_png.read_bytes()).decode('ascii'), 1)
 badge_webp = BRAND / 'ai-builder-badge.webp'
 assert badge_webp.exists(), f'missing {badge_webp}'
 shell = shell.replace('@BADGE_SRC@', 'data:image/webp;base64,' + base64.b64encode(badge_webp.read_bytes()).decode('ascii'), 1)
-cisco_svg = BRAND / 'cisco.svg'
-cisco_mark = ''
-if cisco_svg.exists():
-    svg_text = cisco_svg.read_text(encoding='utf-8')
-    svg_text = re.sub(r'<\?xml[^>]*\?>|<!DOCTYPE[^>]*>', '', svg_text).strip()
-    assert '<script' not in svg_text.lower(), 'cisco.svg must not contain scripts'
-    cisco_mark = '<span class="cisco-mark" aria-label="Cisco">' + svg_text + '</span>'
-put('CISCO_MARK', cisco_mark)
 
 
 def js(obj):

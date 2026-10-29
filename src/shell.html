@@ -48,9 +48,8 @@
   .topbar .colorbar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
   .topbar-in { height: 100%; display: flex; align-items: center; gap: 18px; max-width: 1280px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
   .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
-  .ai-mark { height: 40px; width: auto; display: block; flex-shrink: 0; }
-  .cisco-mark { display: block; height: 22px; width: auto; color: var(--fg); flex-shrink: 0; margin-right: 2px; }
-  .cisco-mark svg { height: 100%; width: auto; display: block; }
+  .te-mark { height: 34px; width: auto; display: block; flex-shrink: 0; }
+  .brand-text { border-left: var(--line) solid var(--rule); padding-left: 13px; }
   .live-tag { display: inline-block; margin-left: 7px; font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--green); vertical-align: 1px; }
   .live-tag::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 5px; vertical-align: 1px; box-shadow: 0 0 0 3px rgba(69,153,31,.22); }
   .countdown { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; line-height: 1; margin-left: 4px; }
@@ -64,7 +63,9 @@
   @media (max-width: 1060px) { .countdown { display: none; } }
   .brand-name { font-weight: 700; font-size: 15px; line-height: 1.1; }
   .brand-sub { font-family: var(--mono); font-size: 9.5px; letter-spacing: .26em; color: var(--dim); text-transform: uppercase; margin-top: 3px; }
-  .nav { display: flex; gap: 2px; flex: 1; justify-content: center; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+  .nav { display: flex; gap: 2px; flex: 1; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+  /* centred with auto margins rather than justify-content, so a nav that overflows still scrolls to its first item */
+  .nav > a:first-child { margin-left: auto; } .nav > a:last-child { margin-right: auto; }
   .nav::-webkit-scrollbar { display: none; }
   .nav a { flex-shrink: 0; font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 7px 12px; border-radius: 100px; border: var(--line) solid transparent; transition: color .15s, border-color .15s; }
   .nav a:hover { color: var(--fg); }
@@ -72,7 +73,10 @@
   .nav a.active[data-nav="setup"] { border-color: var(--c-setup); } .nav a.active[data-nav="labs"] { border-color: var(--c-labs); } .nav a.active[data-nav="builds"] { border-color: var(--c-builds); } .nav a.active[data-nav="field"] { border-color: var(--c-field); } .nav a.active[data-nav="standings"] { border-color: var(--c-score); } .nav a.active[data-nav="home"] { border-color: var(--cisco-blue); }
   .pass { flex-shrink: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; padding: 8px 14px; border-radius: 100px; border: var(--line) solid var(--accent); color: var(--fg); text-decoration: none; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
   .pass b { color: var(--accent); font-weight: 700; }
-  @media (max-width: 900px) { .brand-text { display: none; } .nav { justify-content: flex-start; } .pass { max-width: 150px; } .ai-mark { height: 34px; } .cisco-mark { display: none; } }
+  /* the lab name sits beside the logo only where the whole bar fits; below that the logo stands alone */
+  @media (max-width: 1250px) { .brand-text { display: none; } }
+  @media (max-width: 900px) { .nav > a:first-child { margin-left: 0; } .pass { max-width: 150px; } .te-mark { height: 26px; } }
+  @media (max-width: 560px) { .topbar-in { gap: 10px; padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); } .te-mark { height: 20px; } }
 
   /* ── VIEWS ── */
   .view { animation: fade .35s ease; }
@@ -606,8 +610,8 @@
   <div class="colorbar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="topbar-in">
     <a class="brand" href="#home" aria-label="ThousandEyes MCP Lab home">
-      <!--@CISCO_MARK@--><img class="ai-mark" src="@LOGO_SRC@" alt="Cisco AI Builders" width="47" height="48">
-      <span class="brand-text"><span class="brand-name">ThousandEyes MCP Lab</span><br><span class="brand-sub">Cisco AI Builders · Hands-on</span></span>
+      <img class="te-mark" src="@LOGO_SRC@" alt="Cisco ThousandEyes" width="641" height="132">
+      <span class="brand-text"><span class="brand-name">MCP Lab</span><br><span class="brand-sub">Cisco AI Builders · Hands-on</span></span>
     </a>
     <nav class="nav" id="nav" aria-label="Site">
       <a href="#home" data-nav="home">Overview</a>
