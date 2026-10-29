@@ -139,7 +139,7 @@ def save_config(patch: dict) -> dict:
         elif key == "eventEndsAt":
             val = str(val or "").strip()
             if val and not re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:\d{2})$", val):
-                raise ValueError("eventEndsAt must be an ISO 8601 time with offset, e.g. 2026-11-10T16:30:00+10:00, or blank")
+                raise ValueError("eventEndsAt must be an ISO 8601 time with offset, e.g. 2026-11-11T16:30:00+11:00, or blank")
         elif key == "groupNameTemplate":
             val = str(val or "").strip() or DEFAULT_CONFIG["groupNameTemplate"]
             try:

@@ -3363,6 +3363,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
     const root = () => $('#proctor-root');
     const pad2 = n => String(n).padStart(2, '0');
     const localDT = iso => { const t = iso ? new Date(iso) : null; if (!t || isNaN(t)) return ''; return t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate()) + 'T' + pad2(t.getHours()) + ':' + pad2(t.getMinutes()); };
+    const tzLabel = () => { const off = -new Date().getTimezoneOffset(); return (off >= 0 ? '+' : '-') + pad2(Math.floor(Math.abs(off) / 60)) + ':' + pad2(Math.abs(off) % 60); };
     const isoFromLocal = v => { if (!v) return ''; const t = new Date(v); if (isNaN(t)) return ''; const off = -t.getTimezoneOffset(); const sign = off >= 0 ? '+' : '-'; return v.slice(0, 16) + ':00' + sign + pad2(Math.floor(Math.abs(off) / 60)) + ':' + pad2(Math.abs(off) % 60); };
     const panel = (title, inner, color) => '<div class="panel"><span class="spine" style="--spine:' + (color || 'var(--cisco-blue)') + '" aria-hidden="true"></span><p class="eyebrow accent">' + title + '</p>' + inner + '</div>';
     const note = (text, cls) => '<div class="note-box ' + (cls || '') + '">' + text + '</div>';
@@ -3414,7 +3415,7 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
         '<div><label class="lbl">Shared demo account group (live tests and alerts)</label>' + sel('sharedAid', groups, cfg.sharedAid, 'None: own sandbox only') + '<p class="empty">Membership gives them Labs 2 to 5 data. Pick a group that already has tests.</p></div>' +
         '<div><label class="lbl">Attendee role in the shared group</label>' + sel('sharedRoleId', roles, defaultShared, '') + '<p class="empty">Regular User keeps the shared group tidy; they can read everything and run instant tests.</p></div>' +
         '<div><label class="lbl">Welcome note shown after sign-up (optional)</label><textarea class="input" name="welcomeNote" maxlength="400" placeholder="e.g. Wi-Fi: AIBuilders / password on the screen">' + esc(cfg.welcomeNote) + '</textarea></div>' +
-        '<div><label class="lbl">Event ends at (drives the countdown in the top bar)</label><input class="input" name="eventEndsAt" type="datetime-local" value="' + esc(localDT(cfg.eventEndsAt)) + '"><p class="empty">Your local time. Blank hides the countdown.</p></div>' +
+        '<div><label class="lbl">Event ends at (drives the countdown in the top bar)</label><input class="input" name="eventEndsAt" type="datetime-local" value="' + esc(localDT(cfg.eventEndsAt)) + '"><p class="empty">Read in this laptop’s time zone (UTC' + tzLabel() + '). Blank hides the countdown.</p></div>' +
         '<div class="full"><label class="lbl">Enterprise Agents shared into each new group</label>' +
         (agents.length ? '<div class="agent-list">' + agents.map(a => '<label class="check"><input type="checkbox" name="agentIds" value="' + esc(a.agentId) + '"' + (cfg.agentIds.includes(String(a.agentId)) ? ' checked' : '') + '> ' + esc(a.name) + (a.location ? ' <span style="color:var(--dim)">· ' + esc(a.location) + '</span>' : '') + '</label>').join('') + '</div>'
           : '<input class="input" name="agentIdsText" value="' + esc(cfg.agentIds.join(', ')) + '" placeholder="Agent ids, comma separated (test the token to pick from a list)">') +

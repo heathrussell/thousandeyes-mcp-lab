@@ -22,11 +22,11 @@ One key per checkpoint id in `api/checkpoints.json`; every listed variant is acc
 ## 1. Quick path (CloudFront domain, no custom DNS)
 
 ```bash
-AWS_REGION=ap-southeast-2 EVENT_NAME="AI Builders" EVENT_DATE="" EVENT_CITY="" EVENT_ENDS_AT="2026-11-10T16:30:00+10:00" scripts/deploy.sh
+AWS_REGION=ap-southeast-2 EVENT_NAME="Enterprise AI Builders" EVENT_DATE="11 Nov 2026" EVENT_CITY="Melbourne" EVENT_ENDS_AT="2026-11-11T16:30:00+11:00" scripts/deploy.sh
 scripts/smoke.sh
 ```
 
-The script prints the site URL (`https://dxxxx.cloudfront.net`), the API URL, and the scoreboard and proctor pages. First-time CloudFront creation takes 5 to 10 minutes; the script waits.
+`EVENT_DATE` is free text shown in the hero; `EVENT_ENDS_AT` drives the countdown (16:30 is an example: use the real end time, and note Melbourne is on daylight time, UTC+11:00, in November). The script prints the site URL (`https://dxxxx.cloudfront.net`), the API URL, and the scoreboard and proctor pages. First-time CloudFront creation takes 5 to 10 minutes; the script waits.
 
 ## 2. Custom domain (optional)
 

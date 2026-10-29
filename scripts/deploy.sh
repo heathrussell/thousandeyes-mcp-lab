@@ -13,7 +13,7 @@
 #   PROCTOR_KEY         optional; the shared secret for the proctor page (#proctor) and attendee onboarding into
 #                       ThousandEyes. Pass the same value on every deploy (blank switches both off). Never commit it.
 #   EVENT_NAME, EVENT_DATE, EVENT_CITY   shown on the site hero (defaults: "AI Builders", blank, blank)
-#   EVENT_ENDS_AT       optional ISO 8601 time with offset (2026-11-10T16:30:00+10:00) for the "event ends in" countdown;
+#   EVENT_ENDS_AT       optional ISO 8601 time with offset (2026-11-11T16:30:00+11:00, Melbourne daylight time) for the "event ends in" countdown;
 #                       the proctor page can set or override it without a deploy
 #   ALLOWED_ORIGIN      CORS origin for the API; defaults to the site URL once hosting exists
 set -euo pipefail
