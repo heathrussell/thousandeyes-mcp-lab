@@ -6,6 +6,7 @@ Open this folder in Cursor, start an Agent chat, and paste the block below. The 
 Deploy this project into my AWS account. Steps:
 
 1. Read AGENTS.md and DEPLOY.md first. Do not edit site/index.html by hand; it is generated.
+   The accepted answers are not in the repo: I will give you api/answers.json separately. Put it at api/answers.json and never commit it (it is git-ignored).
 2. Confirm the tooling: `aws sts get-caller-identity`, `sam --version`, `python3 --version`. If anything is missing, tell me how to install it and stop.
 3. Ask me, in one message, for:
    - the AWS region (default ap-southeast-2)

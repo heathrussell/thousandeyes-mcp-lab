@@ -16,6 +16,7 @@ SRC = pathlib.Path(__file__).resolve().parent
 ROOT = SRC.parent
 GUIDE = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else SRC / 'guide' / 'thousandeyes-mcp-lab-ai-builders-v1.html'
 BANK_PATH = ROOT / 'api' / 'checkpoints.json'
+ANSWERS_PATH = ROOT / 'api' / 'answers.json'   # git-ignored: {checkpoint id: [accepted answers]}
 SITE_DIR = ROOT / 'site'
 OUT = SRC / 'out'
 SALT = 'te-lab-2026'
@@ -289,10 +290,15 @@ for sec, route in (('sec-07', 'field-07'), ('sec-08', 'field-08'), ('sec-09', 'f
 
 # ── checkpoint bank ───────────────────────────────────────────────────────
 bank = json.loads(BANK_PATH.read_text(encoding='utf-8'))
+if not ANSWERS_PATH.exists():
+    sys.exit(f'missing {ANSWERS_PATH}: the accepted answers are kept out of git. Put the file in place (format in DEPLOY.md) and rebuild.')
+answers = json.loads(ANSWERS_PATH.read_text(encoding='utf-8'))
+missing = [cp['id'] for cp in bank['checkpoints'] if not answers.get(cp['id'])]
+assert not missing, f'answers.json has no answers for {missing}'
 public = {'rules': bank['rules'], 'checkpoints': []}
 for cp in bank['checkpoints']:
     pub = {k: v for k, v in cp.items() if k != 'answers'}
-    pub['hashes'] = sorted({h(canon(a) + '|' + SALT) for a in cp['answers']})
+    pub['hashes'] = sorted({h(canon(str(a)) + '|' + SALT) for a in answers[cp['id']]})
     public['checkpoints'].append(pub)
 assert sum(c['points'] for c in bank['checkpoints']) == bank['rules']['total']
 

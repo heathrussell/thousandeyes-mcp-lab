@@ -9,6 +9,16 @@ Three AWS pieces, all created by CloudFormation: a hosting stack (S3 + CloudFron
 - Python 3.11+ (`python3 --version`). For rebuilding the site: `pip install beautifulsoup4 lxml`. For wiping the board: `pip install boto3`.
 - Region: the discovery API used by Lab 1 lives in us-east-1, but the lab stacks can go anywhere. Default is `ap-southeast-2` (Sydney).
 
+## 0b. The answers file
+
+The accepted answers are kept out of git. Before any build or deploy, put `api/answers.json` in place (git-ignored). Format:
+
+```json
+{"cp0": ["api access", "the api access permission"], "cp1": ["5", "five"], "cp2": ["hasMore", "has more", "has_more"]}
+```
+
+One key per checkpoint id in `api/checkpoints.json`; every listed variant is accepted after normalisation (case, spaces, underscores, hyphens, quotes and trailing punctuation are ignored). The deploy script refuses to run without the file, and `/health` on a deployed API says `"answers": true` when the Lambda has them. Keep a copy somewhere safe (password manager, private drive).
+
 ## 1. Quick path (CloudFront domain, no custom DNS)
 
 ```bash
@@ -64,7 +74,7 @@ aws cloudformation describe-stacks --region ap-southeast-2 --stack-name te-lab-a
 ## 5. Day-to-day
 
 - **Change the event text or API URL**: edit `site/config.js`, then `make site` (sync + invalidate) or re-run the deploy script with the env vars.
-- **Change a question, answer or hint**: edit `api/checkpoints.json`, run `make build` (refreshes the hashes in the page), then `make deploy`.
+- **Change a question or hint**: edit `api/checkpoints.json`; **change an accepted answer**: edit `api/answers.json`. Either way run `make build` (refreshes the hashes in the page), then `make deploy`.
 - **Change the page**: edit `src/shell.html`, `make build`, `make deploy`.
 - **Clear the leaderboard** before the event or after testing: `make wipe`.
 - **Tighten CORS** if you ever deployed with `ALLOWED_ORIGIN=*`: re-run the deploy script without it.
@@ -85,7 +95,8 @@ class Stub:
     def get_item(s, Key): i = s.items.get(Key['key']); return {'Item': json.loads(json.dumps(i))} if i else {}
     def put_item(s, Item): s.items[Item['key']] = json.loads(json.dumps(Item))
     def scan(s, **kw): return {'Items': list(s.items.values())}
-import os; os.environ.setdefault('TABLE_NAME', 'stub'); os.environ.setdefault('AWS_DEFAULT_REGION', 'ap-southeast-2')
+import os, base64; os.environ.setdefault('TABLE_NAME', 'stub'); os.environ.setdefault('AWS_DEFAULT_REGION', 'ap-southeast-2')
+os.environ['ANSWERS_B64'] = base64.b64encode(open('api/answers.json', 'rb').read()).decode()
 import app; app._table = Stub()
 def call(m, p, body=None, qs=None):
     r = app.handler({'requestContext': {'http': {'method': m}}, 'rawPath': p, 'body': json.dumps(body) if body else None, 'queryStringParameters': qs}, None)
@@ -104,11 +115,11 @@ Normaliser parity (the page and the API must agree on every accepted answer):
 ```bash
 node -e '
 const canon=s=>String(s||"").toLowerCase().normalize("NFKC").replace(/[`"\x27“”‘’]/g,"").trim().replace(/[.!?]+$/,"").replace(/[\s_-]+/g,"");
-const bank=require("./api/checkpoints.json"); const v=bank.checkpoints.flatMap(c=>c.answers);
+const bank=require("./api/checkpoints.json"); const ans=require("./api/answers.json"); const v=bank.checkpoints.flatMap(c=>ans[c.id]);
 require("fs").writeFileSync("/tmp/js-canon.json", JSON.stringify(v.map(canon)));'
 python3 -c '
 import json, sys; sys.path.insert(0, "api"); import os; os.environ.setdefault("TABLE_NAME","stub"); os.environ.setdefault("AWS_DEFAULT_REGION","ap-southeast-2")
-import app; v=[a for c in app.BANK["checkpoints"] for a in c["answers"]]
+import app; ans=json.load(open("api/answers.json")); v=[a for c in app.BANK["checkpoints"] for a in ans[c["id"]]]
 print("canon parity:", json.load(open("/tmp/js-canon.json")) == [app.canon(a) for a in v])'
 ```
 

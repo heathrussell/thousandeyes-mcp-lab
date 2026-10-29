@@ -15,6 +15,11 @@ Parameters:
   AnthropicModel:
     Type: String
     Default: claude-haiku-5-5
+  AnswersB64:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: base64 of api/answers.json (scripts/deploy.sh fills this in). Blank means every answer is marked wrong.
 
 Globals:
   Function:
@@ -62,6 +67,7 @@ Resources:
           ALLOWED_ORIGIN: !Ref AllowedOrigin
           ANTHROPIC_API_KEY: !Ref AnthropicApiKey
           ANTHROPIC_MODEL: !Ref AnthropicModel
+          ANSWERS_B64: !Ref AnswersB64
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Players

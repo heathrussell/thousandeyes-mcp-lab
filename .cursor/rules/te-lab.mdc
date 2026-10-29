@@ -11,7 +11,7 @@ alwaysApply: true
 ## Hard rules
 
 - Never commit secrets. `ANTHROPIC_API_KEY` goes in as an env var to `scripts/deploy.sh`; `samconfig.toml` stays git-ignored.
-- Answers live only in `api/checkpoints.json` and in DynamoDB-side checks; the page carries SHA-256 hashes. Never copy answers into `site/` or `src/shell.html`.
+- Accepted answers live only in `api/answers.json`, which is git-ignored and must never be committed; the deploy passes them to the Lambda as a NoEcho parameter and the page carries SHA-256 hashes. If the file is missing, ask the owner for it.
 - `canon()` in `api/app.py` and in `src/shell.html` must stay byte-for-byte equivalent in behaviour.
 - `site/index.html` is generated: edit the source and rebuild, commit both.
 - Cisco dark brand: Midnight `#07182D`, white text, Cisco Blue `#02C8FF` headings, Medium Blue `#0A60FF` outlines, Magenta `#FF007F` and Orange `#FF9000` decorative only, outlined containers, no fills. No em dashes in any text. Australian spelling.
@@ -19,4 +19,4 @@ alwaysApply: true
 
 ## Deploy in one line
 
-`AWS_REGION=ap-southeast-2 scripts/deploy.sh` (add `DOMAIN`, `CERT_ARN`, `HOSTED_ZONE_ID`, `EVENT_NAME`, `EVENT_DATE`, `EVENT_CITY`, `ANTHROPIC_API_KEY` as needed), then `scripts/smoke.sh`.
+`AWS_REGION=ap-southeast-2 scripts/deploy.sh` with `api/answers.json` in place (add `DOMAIN`, `CERT_ARN`, `HOSTED_ZONE_ID`, `EVENT_NAME`, `EVENT_DATE`, `EVENT_CITY`, `ANTHROPIC_API_KEY` as needed), then `scripts/smoke.sh`. Use the script, never `sam deploy --guided`.

@@ -10,7 +10,8 @@ This repo is a hands-on lab portal for AI builders (a Cisco ThousandEyes event) 
 | `site/config.js` | Runtime config: `apiBase` (the API URL) and the event name/date/city. Written by `scripts/deploy.sh`. | Yes, or via env vars to the deploy script. |
 | `api/app.py` | One Lambda (Python 3.12, boto3 only): `/checkin`, `/answer`, `/hint`, `/player`, `/leaderboard`, `/health`, optional `/ask`. | Yes, carefully (see rules). |
 | `api/template.yaml` | AWS SAM: HTTP API + Lambda + DynamoDB table. Parameters: `AllowedOrigin`, `AnthropicApiKey`, `AnthropicModel`. | Yes. |
-| `api/checkpoints.json` | The 10 checkpoint questions, accepted answers, hints, scoring rules. Single source of truth for both the API (plaintext) and the page (SHA-256 hashes, via the build). | Yes, then rebuild. |
+| `api/checkpoints.json` | The 10 checkpoint questions, hints, points and scoring rules. No answers. | Yes, then rebuild. |
+| `api/answers.json` | **Not in git.** `{checkpoint id: [accepted answers]}`. The deploy script passes it to the Lambda as a NoEcho parameter; the build hashes it into the page. Keep a copy somewhere safe; without it `make build` and `make deploy` refuse to run. | Yes, then rebuild and deploy. |
 | `infra/hosting.yaml` | CloudFormation: private S3 bucket + CloudFront with origin access control, optional custom domain and Route 53 records. | Yes. |
 | `infra/certificate.yaml` | CloudFormation: ACM certificate with Route 53 DNS validation. Deploy in **us-east-1** only. | Yes. |
 | `scripts/deploy.sh` | One-shot, idempotent deploy: hosting stack, API stack, config.js, S3 sync, CloudFront invalidation, health check. | Yes. |
@@ -22,9 +23,10 @@ This repo is a hands-on lab portal for AI builders (a Cisco ThousandEyes event) 
 
 ## How the pieces fit
 
-- The browser never sees an answer. In **local mode** (`apiBase: ""`) the page checks answers against SHA-256 hashes and keeps scores in `localStorage`. In **API mode** the page posts to the API, which checks answers from `api/checkpoints.json` and keeps the shared leaderboard in DynamoDB.
+- The browser never sees an answer, and neither does the repo. In **local mode** (`apiBase: ""`) the page checks answers against SHA-256 hashes and keeps scores in `localStorage`. In **API mode** the page posts to the API, which checks answers it received at deploy time (`ANSWERS_B64` environment variable, base64 of `api/answers.json`) and keeps the shared leaderboard in DynamoDB. `/health` reports `"answers": true` when the Lambda has them.
 - Answer matching uses the same normaliser in both places: lower-case, NFKC, strip quotes, trim, strip trailing `.!?`, remove spaces, underscores and hyphens. `canon()` in `src/shell.html` and `canon()` in `api/app.py` must stay identical. There is a parity test in `DEPLOY.md`.
 - Scoring (both places): 100 points per checkpoint, three free tries then −10 per wrong answer, hints −25 (never twice, never after a solve), total never below 0. Change `api/checkpoints.json` `rules` and rebuild; never change one side only.
+- Format of `api/answers.json`: `{"cp0": ["api access", "the api access permission"], "cp1": ["5", "five"], ...}`. One key per checkpoint id in `checkpoints.json`; any listed variant is accepted after normalisation.
 - Routes are hash fragments only (`#setup`, `#lab-1` … `#lab-6`, `#build-0` … `#build-3`, `#field`, `#standings`, `#ask`, `#keymaker`). No server-side routing is needed; the site is plain static files.
 - CORS: the API's `AllowedOrigin` must equal the site origin (`https://host`, no path). `scripts/deploy.sh` sets it from the hosting stack's output.
 
@@ -42,13 +44,14 @@ Python 3.11+ with `beautifulsoup4` and `lxml` is needed for `make build`; `boto3
 
 ## Rules
 
-1. Never put answers, API keys or tokens into `site/`, `src/shell.html` or git. The Anthropic key is a stack parameter passed on the command line (`ANTHROPIC_API_KEY` env var); `samconfig.toml` is git-ignored because `sam deploy --guided` writes parameter values into it.
+1. Never put answers, API keys or tokens into `site/`, `src/shell.html` or git. `api/answers.json` is git-ignored and stays that way. The Anthropic key and the answers are NoEcho stack parameters passed on the command line by `scripts/deploy.sh`; `samconfig.toml` is git-ignored because `sam deploy --guided` writes parameter values into it. Deploy with the script, not with `sam deploy --guided`.
 2. Keep `canon()` identical in `api/app.py` and `src/shell.html`.
 3. Brand: Cisco dark template. Background `#07182D`, text white, headings may use Cisco Blue `#02C8FF`, outlines may use Medium Blue `#0A60FF`. Magenta `#FF007F` and Orange `#FF9000` are decorative only (stripes, dots, bars, outlines), never text. Containers are outlined, never filled. Keep it that way.
 4. Copy style: no em dashes anywhere (code, docs, UI copy), plain sentences, Australian spelling (organisation, colour).
 5. `site/index.html` is generated. Edit `src/shell.html` or `api/checkpoints.json`, then `make build`, and commit both the source and the generated file.
 6. Don't add a framework, a bundler or a backend beyond the Lambda. The page must stay a single self-contained HTML file that works with `apiBase: ""`.
 7. Ask the owner before: choosing or changing the custom domain, enabling the front desk (it bills their Anthropic key), changing scoring or questions, or deleting stacks.
+8. If `api/answers.json` is missing, ask the owner for it. Do not invent answers and do not reconstruct them from git history.
 
 ## Verifying your work
 

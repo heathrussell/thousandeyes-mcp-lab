@@ -10,8 +10,11 @@ One Lambda behind an HTTP API. Routes:
 
 Scoring mirrors the page exactly: 100 points a checkpoint, three free tries, then -10 a wrong answer,
 hints -25 (never charged twice, never charged after a solve), total never below 0.
-Answers live in checkpoints.json next to this file and never reach the browser.
+Accepted answers are NOT in the repo. They arrive as the base64-encoded JSON of api/answers.json through the
+ANSWERS_B64 environment variable (a NoEcho stack parameter set by scripts/deploy.sh), or from an answers.json
+file beside this one for local testing. Without them every answer is marked wrong and /health says "answers": false.
 """
+import base64
 import json
 import os
 import re
@@ -31,6 +34,20 @@ with open(os.path.join(os.path.dirname(__file__), "checkpoints.json"), encoding=
     BANK = json.load(fh)
 RULES = BANK["rules"]
 CP = {c["id"]: c for c in BANK["checkpoints"]}
+
+
+def _load_answers():
+    raw = os.environ.get("ANSWERS_B64", "").strip()
+    if raw:
+        return json.loads(base64.b64decode(raw).decode("utf-8"))
+    local = os.path.join(os.path.dirname(__file__), "answers.json")
+    if os.path.exists(local):
+        with open(local, encoding="utf-8") as fh:
+            return json.load(fh)
+    return {}
+
+
+ANSWERS = {k: [str(a) for a in v] for k, v in _load_answers().items()}
 
 _ddb = boto3.resource("dynamodb")
 _table = _ddb.Table(TABLE) if TABLE else None
@@ -138,7 +155,7 @@ def r_answer(body):
     if cid in (item.get("solved") or {}):
         return respond(200, {"correct": True, "already": True, "player": public(item)})
     given = canon(body.get("answer", ""))
-    correct = bool(given) and any(given == canon(a) for a in cp["answers"])
+    correct = bool(given) and any(given == canon(a) for a in ANSWERS.get(cid, []))
     tries = item.setdefault("tries", {})
     tries[cid] = int(tries.get(cid, 0)) + 1
     if correct:
@@ -236,7 +253,7 @@ def handler(event, _context):
         if method == "GET" and path == "/leaderboard":
             return r_leaderboard()
         if method == "GET" and path in ("/", "/health"):
-            return respond(200, {"status": "ready", "checkpoints": len(CP), "ask": bool(ANTHROPIC_API_KEY)})
+            return respond(200, {"status": "ready", "checkpoints": len(CP), "answers": len(ANSWERS) == len(CP), "ask": bool(ANTHROPIC_API_KEY)})
     except Exception as exc:  # noqa: BLE001
         print("error", repr(exc))
         return respond(500, {"error": "Something broke on our side. Try again."})

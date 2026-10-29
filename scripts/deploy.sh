@@ -8,6 +8,7 @@
 #   DOMAIN              optional custom domain, e.g. lab.example.com (needs CERT_ARN)
 #   CERT_ARN            ACM certificate ARN in us-east-1 for DOMAIN (see infra/certificate.yaml)
 #   HOSTED_ZONE_ID      optional Route 53 zone for DOMAIN; the alias records are created for you
+#   ANSWERS_FILE        path to the accepted answers (default api/answers.json; git-ignored, keep it beside the repo)
 #   ANTHROPIC_API_KEY   optional; switches on the front desk (/ask). Never commit it.
 #   EVENT_NAME, EVENT_DATE, EVENT_CITY   shown on the site hero (defaults: "AI Builders", blank, blank)
 #   ALLOWED_ORIGIN      CORS origin for the API; defaults to the site URL once hosting exists
@@ -23,6 +24,10 @@ EVENT_NAME="${EVENT_NAME:-AI Builders}"; EVENT_DATE="${EVENT_DATE:-}"; EVENT_CIT
 
 for tool in aws sam python3; do command -v "$tool" >/dev/null || { echo "missing: $tool (see DEPLOY.md, prerequisites)"; exit 1; }; done
 if [ -n "$DOMAIN" ] && [ -z "$CERT_ARN" ]; then echo "DOMAIN is set but CERT_ARN is empty. Deploy infra/certificate.yaml in us-east-1 first (DEPLOY.md, step 2)."; exit 1; fi
+ANSWERS_FILE="${ANSWERS_FILE:-api/answers.json}"
+if [ ! -s "$ANSWERS_FILE" ]; then echo "missing $ANSWERS_FILE: the accepted answers are kept out of git on purpose. Put the file in place (format in DEPLOY.md) and re-run."; exit 1; fi
+python3 -c "import json,sys; d=json.load(open(sys.argv[1])); assert isinstance(d, dict) and all(isinstance(v, list) and v for v in d.values()), 'answers.json must map checkpoint ids to non-empty lists'; print(f'== answers: {len(d)} checkpoints from {sys.argv[1]}')" "$ANSWERS_FILE"
+ANSWERS_B64=$(base64 < "$ANSWERS_FILE" | tr -d '\n')
 
 echo "== account: $(aws sts get-caller-identity --query Account --output text) · region: $AWS_REGION"
 
@@ -39,7 +44,7 @@ ORIGIN="${ALLOWED_ORIGIN:-$SITE_URL}"
 echo "== 2/5 API stack ($API_STACK), CORS origin $ORIGIN"
 ( cd api && sam build >/dev/null && sam deploy --region "$AWS_REGION" --stack-name "$API_STACK" \
     --resolve-s3 --capabilities CAPABILITY_IAM --no-confirm-changeset --no-fail-on-empty-changeset \
-    --parameter-overrides "AllowedOrigin=$ORIGIN" "AnthropicApiKey=$ANTHROPIC_API_KEY" )
+    --parameter-overrides "AllowedOrigin=$ORIGIN" "AnthropicApiKey=$ANTHROPIC_API_KEY" "AnswersB64=$ANSWERS_B64" )
 API_URL=$(out "$API_STACK" ApiUrl)
 
 echo "== 3/5 site/config.js -> $API_URL"

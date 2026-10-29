@@ -15,5 +15,6 @@ check curl -fsS -o /dev/null "$SITE_URL/"
 check curl -fsS "$SITE_URL/config.js" -o /tmp/te-lab-config.js
 grep -q "$API_URL" /tmp/te-lab-config.js && echo "ok   config.js points at the API" || { echo "FAIL config.js does not point at $API_URL"; fail=1; }
 check curl -fsS -o /dev/null -X OPTIONS -H "Origin: $SITE_URL" -H "Access-Control-Request-Method: POST" "$API_URL/checkin"
-echo; echo "API health: $(curl -fsS "$API_URL/health")"
+H=$(curl -fsS "$API_URL/health"); echo; echo "API health: $H"
+echo "$H" | grep -q '"answers": true' && echo "ok   the Lambda has the accepted answers" || { echo "FAIL the Lambda has no answers (deploy ran without api/answers.json)"; fail=1; }
 [ "$fail" -eq 0 ] && echo "All good. Open $SITE_URL and check in with a test handle." || { echo "Something failed; see above."; exit 1; }
