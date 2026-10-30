@@ -93,7 +93,7 @@
       "label": "Build 2",
       "title": "Schedule it",
       "points": 100,
-      "question": "What must the routine's prompt explicitly reference, or the routine ignores the alert that fired it?",
+      "question": "What must the cloud task's prompt explicitly reference, or the run ignores the alert that fired it?",
       "placeholder": "the block's name",
       "hint": "Option C, step 2. The troubleshooting table at the back of the Field guide has the same answer."
     },

@@ -774,7 +774,7 @@
         <span class="spine" aria-hidden="true"></span>
         <p class="eyebrow">// 03 to 06 · Core, then extension · 300 pts</p>
         <h1>An agent that only runs when you type <span class="hl">is a chat.</span></h1>
-        <p class="desc">Three builds turn the Lab 3 conversation into a skill, a schedule and a headless command. They are written for Claude Code because its skills, scheduled tasks and routines give the shortest path from runbook to running agent; the equivalents for Cursor, Copilot, Codex and Gemini CLI are mapped at the end of Section 03.</p>
+        <p class="desc">Three builds turn the Lab 3 conversation into a skill, a schedule and a headless command. They are written for Claude Code because its skills and scheduled tasks (local and cloud) give the shortest path from runbook to running agent; the equivalents for Cursor, Copilot, Codex and Gemini CLI are mapped at the end of Section 03.</p>
       </div>
       <div class="chapters" id="chapters-builds"></div>
     </div>
@@ -890,7 +890,7 @@
   <div class="colorbar" aria-hidden="true" style="margin-bottom:32px"><i></i><i></i><i></i><i></i></div>
   THOUSANDEYES MCP LAB · AI BUILDERS EDITION · v1.0 · OCTOBER 2026<br>
   <a href="#keymaker">Keymaker</a> · <a href="#proctor">Proctor setup</a> · <a href="#ask">Ask the guide</a> · <a href="#standings">Scoreboard</a><br>
-  ThousandEyes is a trademark of Cisco Systems, Inc. · Claude is a trademark of Anthropic, PBC. · Routines and the routine API trigger are in research preview; check the linked docs for current limits.
+  ThousandEyes is a trademark of Cisco Systems, Inc. · Claude is a trademark of Anthropic, PBC. · Cloud scheduled tasks (formerly routines) and their API trigger are in research preview; check the linked docs for current limits.
 </footer>
 
 <a class="fab" href="#ask" id="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Ask the guide</span></a>
@@ -921,7 +921,7 @@
     { route: 'lab-6',   num: 'Lab 06', tag: 'Writes', tagc: 'red', title: 'Ship the alerting, then clean up', sub: 'Alert rule and dashboard for your Lab 1 tests, then delete everything you created.', time: '', cp: 'cp6', group: 'labs' },
     { route: 'build-0', num: '03 · Claude Code', tag: 'Connect', tagc: 'blue', title: 'Connect Claude Code', sub: 'Two paths in, and the permission rules you’ll use all day.', time: '10 min', cp: null, group: 'builds' },
     { route: 'build-1', num: '04 · Build 1', tag: 'Skill', tagc: 'blue', title: 'The te-triage skill', sub: 'Lab 3 written down as a runbook that runs the same way every time, for everyone on your team.', time: '20 min', cp: 'cp7', group: 'builds' },
-    { route: 'build-2', num: '05 · Build 2', tag: 'Schedule', tagc: 'blue', title: 'Schedule it', sub: 'A local scheduled task today; a cloud routine fired by a ThousandEyes alert as the stretch goal.', time: '15 + 20 min', cp: 'cp8', group: 'builds' },
+    { route: 'build-2', num: '05 · Build 2', tag: 'Schedule', tagc: 'blue', title: 'Schedule it', sub: 'A local scheduled task today; a cloud scheduled task fired by a ThousandEyes alert as the stretch goal.', time: '15 + 20 min', cp: 'cp8', group: 'builds' },
     { route: 'build-3', num: '06 · Build 3', tag: 'Headless', tagc: 'blue', title: 'Headless for CI and cron', sub: 'claude -p, JSON out, deny by default. The same agent as a command.', time: '15 min', cp: 'cp9', group: 'builds' },
     { route: 'field',   num: '07 to 09', tag: 'Reference', tagc: 'pink', title: 'Field guide', sub: 'API v7 and SDKs, ten production rules, six agents worth building, troubleshooting.', time: 'read', cp: null, group: 'field' },
   ];
