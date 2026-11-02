@@ -94,6 +94,9 @@ def clean(nodes):
         for el in n.find_all(True):
             if el.has_attr('style') and el.get('id') == 'sec-00':
                 del el['style']
+        for el in n.select('.os-tab, .os-badge'):
+            for s in el.find_all(string=True):
+                s.replace_with(s.replace('WINDOWS', 'Windows').replace('MACOS', 'macOS'))
     return nodes
 
 
@@ -156,9 +159,18 @@ usecases = [n for n in s2 if 'usecase' in (n.get('class') or [])]
 assert len(usecases) == 6
 
 
+PROPER = {'aiops': 'AIOps', 'internet insights': 'Internet Insights'}
+
+
 def tag_text(uc):
-    t = uc.select_one('.usecase-tag').get_text(' ', strip=True)
-    return re.sub(r'^[★\s]+', '', t)
+    """The guide sets its lab tags in capitals; the site sets labels in sentence case, keeping product names."""
+    t = re.sub(r'^[★\s]+', '', uc.select_one('.usecase-tag').get_text(' ', strip=True))
+    if not t.isupper():
+        return t
+    t = t.lower()
+    for k, v in PROPER.items():
+        t = t.replace(k, v)
+    return t[:1].upper() + t[1:]
 
 
 LAB_META = []
