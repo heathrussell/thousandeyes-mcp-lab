@@ -358,9 +358,28 @@ def js(obj):
     return json.dumps(obj, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
 
 
+# ── take-home skills: one zip per take-home/te-* folder, inlined for the Download buttons ──
+# Fixed timestamps and order keep the zips (and so site/index.html) identical from build to build.
+import io, zipfile
+
+def skill_zip(folder):
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, 'w') as z:
+        for f in sorted(p for p in folder.rglob('*') if p.is_file()):
+            info = zipfile.ZipInfo(f.relative_to(folder.parent).as_posix(), date_time=(2026, 1, 1, 0, 0, 0))
+            info.compress_type, info.external_attr = zipfile.ZIP_DEFLATED, 0o644 << 16
+            z.writestr(info, f.read_bytes(), compresslevel=9)
+    return buf.getvalue()
+
+SKILLS = [{'name': d.name, 'zip': base64.b64encode(skill_zip(d)).decode('ascii')}
+          for d in sorted((ROOT / 'take-home').glob('te-*')) if (d / 'SKILL.md').exists()]
+assert SKILLS, 'no take-home skills found under take-home/te-*/SKILL.md'
+
+
 shell = shell.replace('/*@BANK@*/null', js(public), 1)
 shell = shell.replace('/*@TOOLS@*/[]', js(TOOLS), 1)
 shell = shell.replace('/*@SEARCH@*/[]', js(SEARCH), 1)
+shell = shell.replace('/*@SKILLS@*/[]', js(SKILLS), 1)
 if '/*@MOUNTAIN@*/' in shell:  # the artwork scoreboard on release uses src/assets/mountain.webp; this one draws its own
     shell = shell.replace('/*@MOUNTAIN@*/', 'data:image/webp;base64,' + base64.b64encode((SRC / 'assets' / 'mountain.webp').read_bytes()).decode('ascii'), 1)
 assert re.findall(r'<!--@(\w+)@-->', shell) == ['CONFIG_SCRIPT'] and '/*@' not in shell and '@LOGO_SRC@' not in shell and '@BADGE_SRC@' not in shell, re.findall(r'<!--@(\w+)@-->', shell)

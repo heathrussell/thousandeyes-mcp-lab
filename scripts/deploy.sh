@@ -65,6 +65,7 @@ PY
 
 echo "== 4/5 upload site to s3://$BUCKET and invalidate CloudFront"
 aws s3 sync site/ "s3://$BUCKET/" --delete --region "$AWS_REGION" --only-show-errors
+aws s3 cp site/index.html "s3://$BUCKET/index.html" --region "$AWS_REGION" --cache-control "no-cache" --content-type "text/html; charset=utf-8" --only-show-errors
 aws s3 cp site/config.js "s3://$BUCKET/config.js" --region "$AWS_REGION" --cache-control "no-cache" --content-type "application/javascript" --only-show-errors
 aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*" --query 'Invalidation.Id' --output text >/dev/null
 
