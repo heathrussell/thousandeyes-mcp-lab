@@ -5,11 +5,13 @@ A hands-on lab portal for AI builders: connect an AI client to the hosted Thousa
 - **Deploying with Cursor**: open this folder in Cursor, then follow `CURSOR_PROMPT.md`.
 - **Deploying by hand**: `DEPLOY.md`.
 - **How it is put together and the rules for changing it**: `AGENTS.md`.
+- **The four ThousandEyes skills attendees take home**: `take-home/README.md`.
 
 ```
 site/     the website (generated; edit src/ instead)      api/      scoreboard + onboarding API (AWS SAM), offline tests
 infra/    hosting + certificate stacks (CloudFormation)   scripts/  deploy, smoke test, wipe board / onboarding list
 src/      page source, build script, the lab guide        Makefile  build · test · dev · deploy · site · smoke · wipe · destroy
+take-home/  four ThousandEyes Agent Skills for attendees to take home
 ```
 
 Quick start, no custom domain:

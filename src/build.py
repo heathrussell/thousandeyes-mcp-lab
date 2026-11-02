@@ -23,6 +23,7 @@ SALT = 'te-lab-2026'
 
 ROUTE = {'sec-00': 'setup', 'sec-01': 'setup', 'sec-02': 'labs', 'sec-03': 'build-0', 'sec-04': 'build-1',
          'sec-05': 'build-2', 'sec-06': 'build-3', 'sec-07': 'field-07', 'sec-08': 'field-08', 'sec-09': 'field-09', 'top': 'home'}
+KEEP = {'take-home'}   # anchors the shell routes itself: see resolve() in src/shell.html
 
 
 def canon(s: str) -> str:
@@ -79,7 +80,7 @@ def clean(nodes):
             t = href[1:]
             if t in ROUTE:
                 a['href'] = '#' + ROUTE[t]
-            elif re.fullmatch(r'lab-[1-6]', t):
+            elif re.fullmatch(r'lab-[1-6]', t) or t in KEEP:
                 pass
             elif t in id_route:
                 a['href'] = '#' + id_route[t]

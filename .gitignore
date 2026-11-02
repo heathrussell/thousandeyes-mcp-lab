@@ -10,3 +10,5 @@ samconfig.toml
 *.key
 # the accepted answers never go in git; keep api/answers.json beside the repo and pass it at deploy time
 api/answers.json
+# zipped take-home skills (see take-home/README.md)
+take-home/dist/

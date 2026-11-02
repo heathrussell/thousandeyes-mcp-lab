@@ -413,7 +413,7 @@
   <div class="card accent-te">
     <h3><span class="icon icon-te">🎟️</span> ThousandEyes access for today: see a ThousandEyes proctor</h3>
     <p>Everyone in this lab works against a shared ThousandEyes demo organisation with Cloud and Enterprise Agents, live tests and real alert history. <strong>Collect a demo login from one of the ThousandEyes proctors</strong> before you start <a class="xref" href="#sec-01">Section 01</a>: <strong>Heath Russell, Mohamed Abdelrazek, Mike Hicks</strong> or <strong>Kemal Sanjta</strong>. They are also your first call for anything in this guide that does not behave as described. The demo user already has the <strong>API access</strong> permission the MCP server needs. If you have your own ThousandEyes org and would rather use that, you can, as long as your user has API access.</p>
-    <p style="margin:0">Everything you build today is yours to take home. Point it at your own ThousandEyes org afterwards by signing the connector in with your own login.</p>
+    <p style="margin:0">Everything you build today is yours to take home. Point it at your own ThousandEyes org afterwards by signing the connector in with your own login. Four ready-made ThousandEyes skills come with it: see <a class="xref" href="#take-home">Take it home</a>.</p>
   </div>
 
   <h2 id="timing-core-track-and-extensions">Timing: core track and extensions<a class="anchor" href="#timing-core-track-and-extensions" aria-label="Link to this heading">#</a></h2>
@@ -1461,6 +1461,28 @@ config = Configuration(host=<span class="str">"https://api.thousandeyes.com/v7"<
       <tr><td><strong>Alert-to-brief</strong></td><td>ThousandEyes webhook → cloud scheduled task</td><td>The te-triage skill</td><td>An incident brief in the repo before the pager finishes buzzing</td></tr>
     </tbody>
   </table>
+
+  <h2 id="take-home">Take it home: four ThousandEyes skills<a class="anchor" href="#take-home" aria-label="Link to this heading">#</a></h2>
+  <p>Your <code>te-triage</code> skill is one runbook. These four Agent Skills use the same format for the rest of running a network: in the NOC, around every change, when something new is commissioned, and when the network is tuned. They run on the same ThousandEyes MCP server you used today, in Claude Code and the Claude apps, and they're yours to keep: <a class="ref" href="https://github.com/heathrussell/thousandeyes-mcp-lab/tree/main/take-home" target="_blank" rel="noopener">github.com/heathrussell/thousandeyes-mcp-lab/tree/main/take-home</a>.</p>
+
+  <div class="card accent-te">
+    <h3>If it matters to the business, it has a ThousandEyes test</h3>
+    <p>Most network changes still end in limbo: someone checks by hand, then everyone waits for the phones. These skills take an evidence-based approach instead. Write down what has to work in a network map (your sites, circuits and the services the business depends on, each with a target), give each one a test, and let the measurements decide. Before a change, <code>te-change-assurance</code> records the current state; after it, the same tests from the same agents give GO, ROLL BACK or WATCH, with the evidence. The change owner decides.</p>
+    <p style="margin:0"><strong>No test, no claim.</strong> Every finding cites the test, agent, alert or event IDs and the UTC window behind it.</p>
+  </div>
+
+  <table class="comp-table">
+    <thead><tr><th>Skill</th><th>For</th><th>What ThousandEyes proves</th><th>Try</th></tr></thead>
+    <tbody>
+      <tr><td><code>te-noc-assurance</code></td><td>NOC and assurance</td><td>Whether the network is delivering, by site, circuit, provider, prefix and service; where a fault is; circuit SLAs; blind spots in coverage</td><td>"Where are our blind spots?"</td></tr>
+      <tr><td><code>te-change-assurance</code></td><td>Change and configuration</td><td>That a change did what it should and nothing else: plan, baseline, watch, verify, drift</td><td>"Baseline before the change." · "The change is finished: go or roll back?"</td></tr>
+      <tr><td><code>te-service-fulfillment</code></td><td>Service fulfilment</td><td>That a new site, circuit, peering or interconnect meets its SLA before the NOC accepts it</td><td>"Accept circuit &lt;circuit ID&gt; against its SLA."</td></tr>
+      <tr><td><code>te-performance-optimization</code></td><td>Performance and optimisation</td><td>Where the network costs latency, loss and jitter, and which option is better, by experiment</td><td>"Why is Perth slower than Sydney to Microsoft 365?"</td></tr>
+    </tbody>
+  </table>
+
+  <p>Two of the six agents above have a head start here: <code>te-change-assurance</code> covers the pre-change check, and <code>te-noc-assurance</code>'s noise review covers the alert noise auditor.</p>
+  <p><strong>Claude Code:</strong> keep the server name <code>thousandeyes</code> from <a class="xref" href="#sec-03">Section 03</a>, because each skill pre-approves its read tools as <code>mcp__thousandeyes__*</code>, then copy the four folders into <code>~/.claude/skills/</code>. <strong>Claude apps:</strong> zip each folder and upload it under <strong>Customize → Skills</strong>, as in <a class="xref" href="#sec-04">Section 04</a>. Either way, fill in each skill's Local context and your network map first. The skills read before they act: every write and every instant test waits for your approval, and none of them change device configuration. The <a class="ref" href="https://github.com/heathrussell/thousandeyes-mcp-lab/blob/main/take-home/README.md" target="_blank" rel="noopener">take-home README</a> has the install steps, permissions and example prompts.</p>
 
   <h2 id="troubleshooting">Troubleshooting<a class="anchor" href="#troubleshooting" aria-label="Link to this heading">#</a></h2>
   <table class="comp-table">

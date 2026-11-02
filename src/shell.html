@@ -789,8 +789,8 @@
         <span class="spine" aria-hidden="true"></span>
         <p class="eyebrow">// 07 to 09 · Field guide</p>
         <h1>Beyond MCP, guardrails, <span class="hl">capstone</span></h1>
-        <p class="desc">Where the MCP server’s edges are, ten rules that come from the labs rather than a policy template, six agents worth building, and the troubleshooting table for when something doesn’t behave as described.</p>
-        <div class="meta-row"><a class="chip" href="#field-07">07 · Beyond MCP</a><a class="chip" href="#field-08">08 · Guardrails</a><a class="chip" href="#field-09">09 · Capstone</a></div>
+        <p class="desc">Where the MCP server’s edges are, ten rules that come from the labs rather than a policy template, six agents worth building, four skills to take home, and the troubleshooting table for when something doesn’t behave as described.</p>
+        <div class="meta-row"><a class="chip" href="#field-07">07 · Beyond MCP</a><a class="chip" href="#field-08">08 · Guardrails</a><a class="chip" href="#field-09">09 · Capstone</a><a class="chip" href="#take-home">Take home</a></div>
       </div>
       <div class="content">
         <!--@FIELD_BODY@-->
@@ -923,7 +923,7 @@
     { route: 'build-1', num: '04 · Build 1', tag: 'Skill', tagc: 'blue', title: 'The te-triage skill', sub: 'Lab 3 written down as a runbook that runs the same way every time, for everyone on your team.', time: '20 min', cp: 'cp7', group: 'builds' },
     { route: 'build-2', num: '05 · Build 2', tag: 'Schedule', tagc: 'blue', title: 'Schedule it', sub: 'A local scheduled task today; a cloud scheduled task fired by a ThousandEyes alert as the stretch goal.', time: '15 + 20 min', cp: 'cp8', group: 'builds' },
     { route: 'build-3', num: '06 · Build 3', tag: 'Headless', tagc: 'blue', title: 'Headless for CI and cron', sub: 'claude -p, JSON out, deny by default. The same agent as a command.', time: '15 min', cp: 'cp9', group: 'builds' },
-    { route: 'field',   num: '07 to 09', tag: 'Reference', tagc: 'pink', title: 'Field guide', sub: 'API v7 and SDKs, ten production rules, six agents worth building, troubleshooting.', time: 'read', cp: null, group: 'field' },
+    { route: 'field',   num: '07 to 09', tag: 'Reference', tagc: 'pink', title: 'Field guide', sub: 'API v7 and SDKs, ten production rules, six agents worth building, four take-home skills, troubleshooting.', time: 'read', cp: null, group: 'field' },
   ];
   const TITLES = { home: '', setup: 'Setup', labs: 'Labs', builds: 'Builds', field: 'Field guide', standings: 'Scoreboard', ask: 'Ask the guide', keymaker: 'Keymaker', proctor: 'Proctor setup' };
   CHAPTERS.forEach(c => { TITLES[c.route] = c.title; });
@@ -1024,6 +1024,7 @@
   function resolve(hash) {
     let h = String(hash || '').replace(/^#/, ''), scroll = null;
     if (/^field-0[789]$/.test(h)) { scroll = 'sec-' + h.slice(6); h = 'field'; }
+    if (h === 'take-home') { scroll = 'take-home'; h = 'field'; }
     if (h === 'hunt' || h === 'leaderboard') h = 'standings';
     if (!VIEWS[h]) h = 'home';
     return { view: h, scroll };
