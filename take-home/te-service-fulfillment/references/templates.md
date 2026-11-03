@@ -10,8 +10,8 @@ Spec: <file>   Defaults used: <list>
 Readiness: Enterprise Agent at the site: <name (ID), online> | none (deploy one first, or accept outside-in only)
 
 Acceptance checks
-| # | Element | Check | Test (instant or scheduled, type) | From -> to | Pass when | Exists? |
-|---|---------|-------|-----------------------------------|------------|-----------|---------|
+| # | Element or service | Check | Test (instant or scheduled, type) | From -> to | Pass when | Provable or monitored (data needed) | Exists? |
+|---|--------------------|-------|-----------------------------------|------------|-----------|-------------------------------------|---------|
 
 Ongoing assurance to activate after acceptance
 | # | Test name | Type | Agents (IDs) | Interval | Options (DSCP, MTU, bandwidth) | Template |
@@ -31,10 +31,12 @@ Run the acceptance tests? (consumes units)
 ```text
 ACCEPTANCE  <what is commissioned>  run <time> UTC
 
-| # | Element | Check | Test (ID) | Agents | Result (values, rounds) | Pass when | Verdict | Evidence |
-|---|---------|-------|-----------|--------|-------------------------|-----------|---------|----------|
+| # | Element or service | Check | Test (ID) | Agents | Result (values, rounds, packets) | Pass when | Verdict | Evidence |
+|---|--------------------|-------|-----------|--------|----------------------------------|-----------|---------|----------|
 
-Verdict per check: PASS, FAIL, or NOT RUN (why).
+Day-1 user check: <service: journey completes yes | no, time vs target, failing step and domain if any>
+Verdict per check: PASS, FAIL, INCONCLUSIVE (not enough data), or NOT RUN (why).
+Circuit verdicts are end to end; the provider SLA covers its segment only.
 OVERALL: ACCEPT | ACCEPT WITH EXCEPTIONS (<list>) | REJECT
 Provider evidence for each FAIL: <hop and network where loss or latency starts, UTC window, test IDs>
 
@@ -46,8 +48,10 @@ Activate ongoing assurance? (creates <n> tests, <n> rules, <n> tags, <dashboard>
 ```text
 BURN-IN  <what is commissioned>  <start> to <end> UTC (<hours> h)
 
-| SLA item | Target | Measured | Rounds | Tests (IDs) | Verdict |
-|----------|--------|----------|--------|-------------|---------|
+| SLA item or service journey | Target | Measured | Rounds (interval) | Allowance in rounds | Tests (IDs) | Verdict |
+|-----------------------------|--------|----------|-------------------|---------------------|-------------|---------|
+
+Verdict: PASS, FAIL, or CANNOT VERIFY (the allowance is under one round: failed rounds and minutes reported as observed).
 
 Alerts during burn-in: <IDs, or none>
 OVERALL: READY FOR HANDOVER | EXTEND BURN-IN | NOT ACCEPTED

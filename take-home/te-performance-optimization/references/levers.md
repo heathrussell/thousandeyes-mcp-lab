@@ -1,6 +1,7 @@
-# Network optimization levers: te-performance-optimization
+# Optimization levers: te-performance-optimization
 
-Match the evidence to a lever, confirm it with a second signal, then prove the
+The biggest win for users is often outside the network. Match the evidence to
+a lever and its owner, confirm it with a second signal, then prove the
 fix with an experiment (Mode 2) before anyone changes the network.
 
 ## Where latency accrues on the path
@@ -43,6 +44,20 @@ stays high to the target.
 | Internet egress differs from the network map | Policy or routing not as designed | Fix the policy; verify with te-change-assurance |
 | Frequent path changes | Unstable routing in a provider | Provider escalation with the path history |
 
+## Application, dependencies and third parties
+
+From `get_detailed_test_results` (page requests for page-load and
+web-transactions tests, request steps for api tests) and the journey metrics.
+
+| Signal | Usually means | Owner | Typical actions |
+|---|---|---|---|
+| One transaction step or api request dominates the journey time | That step's backend or API | Application team | Hand over the step, its timing split and the rounds; prove the fix with the same journey test |
+| Identity redirects (sign-in domains) take a large share of the time | The identity provider, its region, or conditional access checks | Identity team or provider | A closer tenant region or endpoint; review the sign-in flow's redirects |
+| Third-party scripts, tags or fonts on the critical path | Content the page waits for, owned by someone else | Application or web team | Defer or remove them; self-host critical assets |
+| CDN domains slow from some regions only | The CDN's point of presence or routing for those users | Web team, CDN provider | Check the edges serving those regions; compare CDNs (Mode 2) |
+| Many objects, or large ones, on the page (`WEB_PAGE_COMPONENT_COUNT`) | Page weight | Web team | Fewer and smaller objects, caching |
+| Real-user page load (Endpoint) much worse than synthetic from the same location | The user side, or content the synthetic test does not load | Service desk, web team | Compare Endpoint gateway and Wi-Fi metrics; align the test with what users open |
+
 ## HTTP split (separating network from application)
 
 | Signal | Usually means | Typical actions |
@@ -62,7 +77,7 @@ stays high to the target.
 
 ## Projections
 
-- Use weekly medians and at least 4 weeks of history.
+- Use weekly medians and at least 8 weeks of history.
 - Fit a straight line; report the slope per week and how well it fits (for
   example R squared). A poor fit means "no clear trend".
 - Time to threshold = (threshold - latest weekly median) / slope, only when the

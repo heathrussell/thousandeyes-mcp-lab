@@ -53,8 +53,10 @@ prefixes:                       # public prefixes this commissioning announces
   - {prefix: "203.0.113.0/24", origin_asn: 64496, expected_upstreams: [64500]}
 
 destinations:                   # what the site must reach
-  - {name: "Microsoft 365", kind: "saas", url: "https://outlook.office365.com"}
-  - {name: "Intranet", kind: "app", url: "https://intranet.example.com"}
+  - {name: "Microsoft 365", kind: "saas", url: "https://outlook.office365.com",
+     journey: "sign in and open the inbox", target_s: 4}   # the Day-1 user check
+  - {name: "Intranet", kind: "app", url: "https://intranet.example.com",
+     journey: "open the home page", target_s: 2}
 
 dns_servers: ["192.0.2.53"]     # the site's resolvers
 
@@ -75,7 +77,7 @@ dashboard: true
 
 | Kind | Required fields | What acceptance proves |
 |---|---|---|
-| `site` | `site`, `circuits`, `expected`, `destinations` | The site reaches its hubs, the internet and its services as designed, within the SLA |
+| `site` | `site`, `circuits`, `expected`, `destinations` | The site reaches its hubs and the internet as designed, within the SLA items acceptance can prove, and its users can complete each destination's journey |
 | `circuit` | `site`, one entry in `circuits` | The circuit meets its SLA and carries the traffic it should |
 | `sdwan-edge` | `site`, `circuits`, `expected.hubs` | Overlay to the hubs and underlay to the internet both work |
 | `interconnect` | `site` (the on-premises end), `destinations` (private cloud or data center targets) | The private path crosses the interconnect and meets its latency target |

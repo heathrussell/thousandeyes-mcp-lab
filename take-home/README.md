@@ -50,10 +50,10 @@ or rule IDs and the UTC window behind it.
 
 | Domain | Skill | What ThousandEyes proves | Modes | Writes to ThousandEyes? |
 |---|---|---|---|---|
-| NOC and assurance | [`te-noc-assurance`](te-noc-assurance/SKILL.md) | Whether the network is delivering, by site, circuit, provider, prefix and service; where a fault is; circuit SLAs; blind spots in coverage | Network health, Fault isolation, Noise review, Service levels, Assurance coverage | Only when you ask for a change, such as an alert rule tuning, and approve it |
-| Change and configuration | [`te-change-assurance`](te-change-assurance/SKILL.md) | That a network change did what it should and nothing else; drift from the network's baseline | Plan, Baseline, Watch, Verify, Baseline and drift | Instant tests in the change window and any temporary tests, after approval |
-| Service fulfilment | [`te-service-fulfillment`](te-service-fulfillment/SKILL.md) | That a new site, circuit, SD-WAN edge, peering or interconnect meets its SLA before the NOC accepts it | Intent, Plan, Accept, Verdict, Activate, Burn-in, Record | Yes, behind two approval gates: acceptance tests, then activation (one gate, before activation, on the monitoring-only path) |
-| Performance and optimisation | [`te-performance-optimization`](te-performance-optimization/SKILL.md) | Where the network costs latency, loss and jitter, and which option is better | Network review, Experiment, QoS and path hygiene, Capacity and trend, Decision support | Only experiment tests, after approval |
+| NOC and assurance | [`te-noc-assurance`](te-noc-assurance/SKILL.md) | Whether the services the network delivers are working, for whom, and why not: the fault domain, through to a workaround, an owner and recovery; circuit SLAs and service SLOs; blind spots in coverage, dependencies included | Service and network health, Incident isolation, Noise review, Service levels, Assurance coverage | Only when you ask for a change, such as an alert rule tuning, and approve it |
+| Change and configuration | [`te-change-assurance`](te-change-assurance/SKILL.md) | That a change, network or not, did what it should and the services it touches still work; drift from the baseline | Plan, Baseline, Watch, Verify, Baseline and drift | Instant tests in the change window and any temporary tests, after approval |
+| Service fulfilment | [`te-service-fulfillment`](te-service-fulfillment/SKILL.md) | That a new site, circuit, SD-WAN edge, peering or interconnect meets its SLA, and its users can use their services, before the NOC accepts it | Intent, Plan, Accept, Verdict, Activate, Burn-in, Record | Yes, behind two approval gates: acceptance tests, then activation (one gate, before activation, on the monitoring-only path) |
+| Performance and optimisation | [`te-performance-optimization`](te-performance-optimization/SKILL.md) | Where the time goes for users, in the network or not, and which option is better | Performance review, Experiment, QoS and path hygiene, Capacity and trend, Decision support | Only experiment tests, after approval |
 
 Together they follow the network's life: fulfilment proves a new site or
 circuit and hands it to the NOC with a baseline; NOC assurance watches it;
@@ -248,16 +248,16 @@ take-home/
 ├── README.md                          this file
 ├── te-noc-assurance/
 │   ├── SKILL.md
-│   └── references/                    fault isolation, network map, SLO maths, report templates
+│   └── references/                    fault isolation, network map, SLO maths, API notes, report templates
 ├── te-change-assurance/
 │   ├── SKILL.md
-│   └── references/                    baseline format, checks per change type, network map, templates
+│   └── references/                    baseline format, checks per change type, network map, API notes, templates
 ├── te-service-fulfillment/
 │   ├── SKILL.md
-│   └── references/                    network map, commissioning spec, test design, templates
+│   └── references/                    network map, commissioning spec, test design, API notes, templates
 └── te-performance-optimization/
     ├── SKILL.md
-    └── references/                    optimisation levers, network map, templates
+    └── references/                    optimisation levers, network map, API notes, templates
 ```
 
 ## References

@@ -2,9 +2,10 @@
 
 The baseline records how the network behaves as ThousandEyes measures it, so a
 later check can tell an intended change from drift. Save one for the whole
-network (`te-network-baseline.yaml`) and one per change record (the pre-change
-file). Keep it in Git: sorted, one field per line, no secrets. The IDs below
-are illustrative.
+network (`te-network-baseline.yaml`) in this format. The pre-change baseline
+for a change record (`te-change-<change record>-pre.md`) records the same
+fields in the Markdown layout in templates.md. Keep both in Git: sorted, one
+field per line, no secrets. The IDs below are illustrative.
 
 ## Example
 
@@ -14,7 +15,21 @@ baseline_version: "1"
 account_group: "Production"
 captured_at: "2026-11-02T00:00:00Z"
 reason: "monthly baseline"            # or "CHG0012345 pre-change"
-windows: {long: "24h", short: "1h"}
+windows: {matched: "01:00-04:00 UTC on 7 previous days", short: "1h"}   # same clock hours as the window
+
+journeys:                             # per service journey test and agent
+  - service: "Microsoft 365"
+    test_id: "100010"
+    test: "BNE01 | Microsoft 365 sign-in | web-transactions"
+    agent: "bne01-ea"
+    interval_s: 300
+    completion_pct: 100.0             # MEAN, matched hours
+    time_median_ms: 2400              # MEDIAN, matched hours
+    time_worst_ms: 3900               # MAXIMUM, matched hours
+    steps: {"1 open": 600, "2 sign-in": 1300, "3 inbox": 500}   # ms, from get_detailed_test_results
+    domains: ["login.microsoftonline.com", "outlook.office365.com"]
+    saved_round: 1793577600           # round ID of the saved detailed result
+    rounds: 252
 
 paths:                                # per test, agent and direction
   - test_id: "100002"
@@ -35,10 +50,11 @@ performance:                          # per test, agent and metric
     agent: "bne01-ea"
     metric: "NET_LATENCY"
     aggregation: "MEDIAN"             # MEAN for loss and availability
-    long_value: 12.4
-    long_worst: 18.0                  # MAXIMUM; MINIMUM for availability
+    interval_s: 300
+    matched_value: 12.4               # same clock hours on previous days
+    matched_worst: 18.0               # MAXIMUM; MINIMUM for availability
     short_value: 12.1
-    rounds: 288
+    rounds: 252
 
 routing:                              # per prefix
   - prefix: "203.0.113.0/24"
@@ -66,11 +82,13 @@ the underlay detail on agent-to-server tests like the one above.
 
 | Field | Tool |
 |---|---|
+| `journeys` completion and time | `get_network_app_synthetics_metrics` with `WEB_TRANSACTION_COMPLETION` and `WEB_TRANSACTION_TIME` (or `API_REQUEST_COMPLETION` and `API_TRANSACTION_TIME`), grouped by AGENT, bucketed by clock hour in code |
+| `journeys` steps, domains | `get_detailed_test_results` for one agent and one round |
 | `networks`, `egress_network`, `last_hops`, `server_ip`, `mpls` | `get_full_path_visualization` (hop nodes carry `network` as "Organization (AS n)") |
 | `hops`, `path_mtu` | `get_path_visualization_results` (`numberOfHops`; `pathMtu` where the result includes it) |
 | `dscp_configured` | `get_test`: `dscpId` is the number, `dscp` the label (for example "Best Effort (DSCP 0)") |
-| `performance` | `get_network_app_synthetics_metrics`, grouped by AGENT |
-| `routing` reachability, changes, updates | `get_network_app_synthetics_metrics` with `BGP_REACHABILITY`, `BGP_PATH_CHANGES` and `BGP_UPDATES`. Grouped by TEST, the `n` column is the number of monitors behind each row; use this for long windows. Grouped by MONITOR, each row is one monitor (the `SOURCE` column, names in `names.aggregatesMap`) per BGP round, so keep that to a few minutes: an hour for one prefix runs to thousands of rows |
+| `performance` | `get_network_app_synthetics_metrics`, grouped by AGENT, over `now-7d` (hourly rows; `n` is the rounds behind each); keep the rows in the matched clock hours |
+| `routing` reachability, changes, updates | `get_network_app_synthetics_metrics` with `BGP_REACHABILITY`, `BGP_PATH_CHANGES` and `BGP_UPDATES`. Grouped by TEST (use this for long windows), the `n` column counts the monitor measurements behind each row: the number of monitors at round resolution, more in the bucketed rows of long windows, so read `monitors_total` from a short window. Grouped by MONITOR, each row is one monitor (the `SOURCE` column, names in `names.aggregatesMap`) per BGP round, so keep that to a few minutes: an hour for one prefix runs to thousands of rows |
 | `routing` origin, upstreams, prepending | `get_bgp_route_test_results` for one round: each monitor's `hops` (`asn`, `asName`) is its AS path, origin last; a row without `hops` has no route |
 | `dns` | `get_instant_test_metrics` with result type `dns-server` on the DNS test (it reads scheduled tests too); check that it returns the answers before you rely on them |
 
@@ -78,12 +96,14 @@ the underlay detail on agent-to-server tests like the one above.
 
 | Section | Drift when | Severity |
 |---|---|---|
+| `journeys` | Completion falls from a site or region | HIGH for critical services |
+| `journeys` | Time worse than `time_worst_ms`, a step much slower, or a new domain in the steps | MEDIUM (a release, a dependency or a CDN change) |
 | `paths` | A network is added or removed, or `egress_network` changes | HIGH on a critical path, otherwise MEDIUM |
 | `paths` | `server_ip` changes | MEDIUM (a move, failover or anycast shift) |
 | `paths` | `hops` changes by 3 or more inside the same networks | LOW |
 | `paths` | `path_mtu` falls | MEDIUM (new encapsulation, fragmentation risk) |
 | `paths` | `dscp_configured` changes | MEDIUM (the test no longer measures the class it did) |
-| `performance` | The short-window value is worse than `long_worst` (higher for latency, loss and times, lower for availability), or the regression thresholds in Local context are crossed | MEDIUM |
+| `performance` | The value at the matched hours is worse than `matched_worst` (higher for latency, loss and times, lower for availability), or the regression thresholds in Local context are crossed | MEDIUM |
 | `routing` | `monitors_reaching` falls by more than 10% of `monitors_total` against the baseline (a few public monitors routinely lack a route, so compare with the baseline count, not with 100%) | HIGH |
 | `routing` | `origin_asn` changes, or a second origin appears | HIGH (possible hijack or misconfiguration) |
 | `routing` | A new upstream appears, or the upstream shares move sharply | MEDIUM (possible route leak or policy change); HIGH if traffic now crosses an unexpected network |

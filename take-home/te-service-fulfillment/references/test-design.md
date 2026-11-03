@@ -1,5 +1,22 @@
 # Acceptance and assurance design: te-service-fulfillment
 
+## What acceptance can prove
+
+A short acceptance run proves some SLA items and not others. Mark each item
+before you run anything, and size the provable ones. The rules behind these
+numbers are in [te-api-notes.md](te-api-notes.md).
+
+| SLA item | Provable at acceptance? | How much data |
+|---|---|---|
+| Latency, jitter | Yes | At least 10 rounds per agent, spread over at least 30 minutes; median and worst against the target |
+| Loss | Only with enough packets | Zero loss seen in about 3 / target packets: 300 for 1%, 3,000 for 0.1%. At around 50 packets a round, 0.1% needs about 60 rounds: an hour at 60 seconds, five hours at 300 seconds. With less, INCONCLUSIVE |
+| Availability | No | Watch it through burn-in and in service. At 99.95%, the allowance over a 72-hour burn-in is about 2 minutes: two rounds at 60 seconds, less than one at 300 seconds. Report failed rounds and minutes as observed |
+| Path (egress, circuit, hub reached, inbound provider) | Yes, on a scheduled test | A few rounds showing the intended networks, from each agent |
+| Routing (prefix) | Yes, after convergence | Reachability and AS paths stable over several BGP rounds |
+| Throughput or rate | Indicative | Agent-to-agent throughput in quiet hours; short probes are indicative only |
+| QoS class treatment | Only under load | Marking can be checked now; treatment only at a congested peak |
+| Day-1 user check | Yes | Each journey completes from the site, within target, over several runs |
+
 ## Elements to checks
 
 Instant results carry loss, latency and jitter but no path data, so every path
@@ -10,6 +27,7 @@ scheduled test.
 |---|---|---|---|---|---|
 | Site to hubs | The site reaches each hub over the intended path, in both directions, within the SLA | agent-to-agent, site agent -> hub agent, direction set to both (a UI setting) | For a quick loss, latency and jitter reading (`agent-to-agent`, result type `network`; its direction cannot be set); the both-ways check and the path check need the scheduled test | `ONE_WAY_NET_*` within the SLA both ways; the hub reached over the intended circuit or overlay | Yes |
 | Site to internet and SaaS | Internet breakout as designed | http-server or agent-to-server, site agent -> SaaS and internet targets | For reachability and timing; the egress check needs the scheduled test | Egress network matches `expected.internet_egress`; latency within target; no errors | Yes, for critical SaaS |
+| Site services (Day-1 user check) | The site's users can use each service they depend on | web-transactions or api test (or page-load), site agent -> the service's journey | Yes (`web-transactions`, `api` or `page-load` instant tests); not on Meraki MX-hosted agents | The journey completes within the service's target over several runs; a failure is traced to its step and domain with `get_detailed_test_results` | Yes, for critical services |
 | Site DNS | The resolvers answer correctly and quickly | dns-server, site agent -> the site's resolvers | Yes | Correct answers; `DNS_SERVER_TIME` within target | Yes |
 | Circuit SLA | The circuit meets its SLA | agent-to-server, or agent-to-agent to a hub, over that circuit | For loss, latency and jitter; the path check needs the scheduled test | Within the SLA; the first provider network on the path is the circuit's provider | Yes |
 | Circuit rate | The ordered rate is delivered | agent-to-agent with TCP throughput measurement, from a server or VM agent at the site to one beyond the provider (a UI setting; Enterprise Agents at both ends; not recommended on Meraki-hosted agents) | No | `ONE_WAY_NET_THROUGHPUT_*` close to the ordered rate, in quiet hours. `NET_CAPACITY` and `NET_BANDWIDTH` from short probes are indicative only: a probe can ride a policer's burst allowance, and circuit load lowers both | Optional |
@@ -82,7 +100,8 @@ Where the agent sits decides what it sees:
   ([SD-WAN Manager feature templates](https://docs.thousandeyes.com/product-documentation/global-vantage-points/enterprise-agents/installing/cisco-devices/installation-methods/installing-enterprise-agents-on-cisco-routers-using-sd-wan-manager-feature-templates)),
   and in VPN 0 the router load-balances the probes across all WAN links. From a service VPN the probes follow that VPN's routes: across the
   overlay to the hubs, or out of a local internet breakout if the VPN has one.
-  Application-aware routing does not steer the probes; to test a specific
+  Application-aware routing steers the probes only when a policy sequence
+  matches them (by DSCP, prefix or port, for example); to test a specific
   underlay path, add a policy that directs the probe traffic over it.
 - **Meraki MX.** MX 18.104 or later (MX 26.1 or later on the C8000 G2 MX
   models), in NAT mode, with an SD-WAN+ license (agent and test deployment)
@@ -113,8 +132,10 @@ Where the agent sits decides what it sees:
   and a test in both directions consumes units for both.
 - **One-way latency and jitter** on agent-to-agent tests need clock
   synchronization between the agents. Without it, latency and jitter show no
-  data while loss can remain valid; if a firewall drops the sync exchange
-  entirely, the test reports nothing. Agent-to-agent tests default to TCP port
+  data while loss can remain valid. A firewall that inspects the traffic can
+  break the sync ([Palo Alto App-ID](https://docs.thousandeyes.com/product-documentation/internet-and-wan-monitoring/troubleshooting/palo-alto-firewalls-break-agent-to-agent-clock-synchronization)),
+  and if a firewall drops the sync exchange entirely, the test reports
+  nothing. Agent-to-agent tests default to TCP port
   49153, and firewall rules must allow the test both ways
   ([firewall configuration](https://docs.thousandeyes.com/product-documentation/global-vantage-points/enterprise-agents/configuring/firewall-configuration-for-enterprise-agents)).
 - **Path MTU** depends on ICMP feedback along the path: use it only where the
