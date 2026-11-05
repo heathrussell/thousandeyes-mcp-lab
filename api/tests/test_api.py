@@ -51,7 +51,8 @@ check("health", st == 200 and h["status"] == "ready" and h["onboarding"] == "off
 has_answers = h["answers"]
 check("checkin", call("POST", "/checkin", {"name": "Smoke Test"})[1]["player"]["points"] == 0)
 if has_answers:
-    check("correct answer", call("POST", "/answer", {"name": "smoke test", "checkpoint": "cp1", "answer": "Five."})[1]["correct"] is True)
+    cp1 = json.loads(base64.b64decode(os.environ["ANSWERS_B64"]))["cp1"][0]
+    check("correct answer", call("POST", "/answer", {"name": "smoke test", "checkpoint": "cp1", "answer": cp1.title() + "."})[1]["correct"] is True)
     check("leaderboard", call("GET", "/leaderboard")[1]["players"][0]["points"] == 100)
 else:
     print("skip correct-answer check (no answers.json / ANSWERS_B64)")

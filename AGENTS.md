@@ -68,6 +68,6 @@ Python 3.11+ with `beautifulsoup4` and `lxml` is needed for `make build`; `boto3
 
 ## Verifying your work
 
-- After `make build`: open `site/index.html` in a browser with `config.js` present; the hero, chapters and a lab page should render, and an agent in the hero network should drag and spring back; check in with a handle and answer Lab 1 with `5` (local mode) to see "+100 banked".
+- After `make build`: open `site/index.html` in a browser with `config.js` present; the hero, chapters and a lab page should render, and an agent in the hero network should drag and spring back; check in with a handle and answer Lab 1 with its accepted answer from `api/answers.json` (local mode) to see "+100 banked".
 - After `make deploy`: `make smoke` must pass; then open the site, check in, answer Lab 1, and confirm the handle appears on `#standings` from a second browser.
 - After editing anything in `api/`: `make test` must pass (it stubs DynamoDB and SSM, fakes ThousandEyes and exercises every route), then `make dev` and click through `#setup` and `#proctor` (key `proctor-secret-123`, token `good-token`).
